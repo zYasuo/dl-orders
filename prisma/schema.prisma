@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  description String
+  createdAt   DateTime @default(now())
+}
+
+model Stock {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  price     Float
+  quantity  Int
+  description String?
+  createdAt DateTime @default(now())
+}

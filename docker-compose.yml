@@ -1,0 +1,35 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - dl-orders-network
+
+  postgres:
+    image: postgres:17
+    container_name: dl-orders-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_orders
+    ports:
+      - "5432:5432"
+    volumes:
+      - dl-orders-postgres-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+
+volumes:
+  dl-orders-postgres-data:
+
+networks:
+  dl-orders-network:
+    driver: bridge
