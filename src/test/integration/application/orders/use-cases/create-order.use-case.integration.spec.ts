@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateOrderUseCase } from '../../../../../application/orders/use-cases/create-order.use-case';
-import { OrdersRepositoryPort } from '../../../../../domain/orders/ports/orders-repository.port';
-import { OrderEventsPublisherPort } from '../../../../../domain/orders/ports/order-events-publisher.port';
-import { InMemoryOrdersRepository } from '../../../../../test/doubles/in-memory-orders.repository';
-import { FakeOrderEventsPublisher } from '../../../../../test/doubles/fake-order-events.publisher';
-import { OrderWasCreatedEvent } from '../../../../../domain/orders/events/order-was-created.event';
+import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
+import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { OrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
+import { InMemoryOrdersRepository } from '../../../../doubles/in-memory-orders.repository';
+import { FakeOrderEventsPublisher } from '../../../../doubles/fake-order-events.publisher';
+import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 
 describe('CreateOrderUseCase (integration)', () => {
   let sut: CreateOrderUseCase;

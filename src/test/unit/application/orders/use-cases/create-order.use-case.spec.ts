@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateOrderUseCase } from '../../../../../application/orders/use-cases/create-order.use-case';
-import { OrdersRepositoryPort } from '../../../../../domain/orders/ports/orders-repository.port';
-import { OrderEventsPublisherPort } from '../../../../../domain/orders/ports/order-events-publisher.port';
-import { OrderWasCreatedEvent } from '../../../../../domain/orders/events/order-was-created.event';
-import { Order } from '../../../../../domain/orders/entities/order.entity';
+import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
+import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { OrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
+import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
+import { Order } from '../../../../../orders/domain/entities/order.entity';
 
 describe('CreateOrderUseCase', () => {
   let sut: CreateOrderUseCase;

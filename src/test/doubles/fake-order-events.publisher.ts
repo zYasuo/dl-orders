@@ -1,5 +1,5 @@
-import { OrderEventsPublisherPort } from '../../domain/orders/ports/order-events-publisher.port';
-import { OrderWasCreatedEvent } from '../../domain/orders/events/order-was-created.event';
+import { OrderEventsPublisherPort } from '../../orders/domain/ports/order-events-publisher.port';
+import { OrderWasCreatedEvent } from '../../orders/domain/events/order-was-created.event';
 
 export class FakeOrderEventsPublisher extends OrderEventsPublisherPort {
   readonly published: OrderWasCreatedEvent[] = [];

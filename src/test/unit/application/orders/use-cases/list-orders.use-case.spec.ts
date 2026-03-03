@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ListOrdersUseCase } from '../../../../../application/orders/use-cases/list-orders.use-case';
-import { OrdersRepositoryPort } from '../../../../../domain/orders/ports/orders-repository.port';
-import { Order } from '../../../../../domain/orders/entities/order.entity';
+import { ListOrdersUseCase } from '../../../../../orders/application/use-cases/list-orders.use-case';
+import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { Order } from '../../../../../orders/domain/entities/order.entity';
 
 describe('ListOrdersUseCase', () => {
   let sut: ListOrdersUseCase;

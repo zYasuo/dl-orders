@@ -1,5 +1,5 @@
-import { StockRepositoryPort } from '../../domain/stock/ports/stock-repository.port';
-import { Stock } from '../../domain/stock/entities/stock.entities';
+import { StockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
+import { Stock } from '../../stock/domain/entities/stock.entity';
 
 export class InMemoryStockRepository extends StockRepositoryPort {
   private readonly stocks = new Map<string, Stock>();
