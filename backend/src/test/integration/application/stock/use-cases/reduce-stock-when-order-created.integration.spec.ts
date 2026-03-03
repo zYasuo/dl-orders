@@ -22,6 +22,7 @@ describe('ReduceStockWhenOrderCreatedUseCase (integration)', () => {
         initialQuantity,
         null,
         new Date(),
+        new Date(),
       ),
     );
 

@@ -2,9 +2,9 @@ import { IOrderEventsPublisherPort } from '../../orders/domain/ports/order-event
 import { OrderWasCreatedEvent } from '../../orders/domain/events/order-was-created.event';
 
 export class FakeOrderEventsPublisher extends IOrderEventsPublisherPort {
-  readonly published: OrderWasCreatedEvent[] = [];
+    readonly published: OrderWasCreatedEvent[] = [];
 
-  async publishOrderWasCreated(event: OrderWasCreatedEvent): Promise<void> {
-    this.published.push(event);
-  }
+    async publishOrderWasCreated(event: OrderWasCreatedEvent): Promise<void> {
+        this.published.push(event);
+    }
 }

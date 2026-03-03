@@ -21,6 +21,7 @@ model Stock {
   quantity  Int
   description String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum OrderStatus {

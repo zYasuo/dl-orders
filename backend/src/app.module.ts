@@ -5,6 +5,6 @@ import { OrdersModule } from './orders/application/orders.module';
 import { StockModule } from './stock/application/stock.module';
 
 @Module({
-  imports: [RabbitMQModule, DbModule, OrdersModule, StockModule],
+    imports: [RabbitMQModule, DbModule, OrdersModule, StockModule],
 })
 export class AppModule {}

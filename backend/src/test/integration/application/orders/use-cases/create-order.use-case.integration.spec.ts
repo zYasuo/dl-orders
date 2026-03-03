@@ -7,41 +7,41 @@ import { FakeOrderEventsPublisher } from '../../../../doubles/fake-order-events.
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 
 describe('CreateOrderUseCase (integration)', () => {
-  let sut: CreateOrderUseCase;
-  let ordersRepository: InMemoryOrdersRepository;
-  let orderEventsPublisher: FakeOrderEventsPublisher;
+    let sut: CreateOrderUseCase;
+    let ordersRepository: InMemoryOrdersRepository;
+    let orderEventsPublisher: FakeOrderEventsPublisher;
 
-  beforeEach(async () => {
-    ordersRepository = new InMemoryOrdersRepository();
-    orderEventsPublisher = new FakeOrderEventsPublisher();
+    beforeEach(async () => {
+        ordersRepository = new InMemoryOrdersRepository();
+        orderEventsPublisher = new FakeOrderEventsPublisher();
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CreateOrderUseCase,
-        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-      ],
-    }).compile();
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                CreateOrderUseCase,
+                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+                { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
+            ],
+        }).compile();
 
-    sut = module.get(CreateOrderUseCase);
-  });
-
-  describe('execute', () => {
-    it('persists order and publishes OrderWasCreated', async () => {
-      const input = { description: 'test order' };
-
-      const result = await sut.execute(input);
-
-      const found = await ordersRepository.findById(result.id);
-      expect(found).not.toBeNull();
-      expect(found!.description).toBe(input.description);
-      expect(result).toEqual(found);
-
-      expect(orderEventsPublisher.published).toHaveLength(1);
-      const event = orderEventsPublisher.published[0];
-      expect(event).toBeInstanceOf(OrderWasCreatedEvent);
-      expect(event.order.id).toBe(result.id);
-      expect(event.order.description).toBe(input.description);
+        sut = module.get(CreateOrderUseCase);
     });
-  });
+
+    describe('execute', () => {
+        it('persists order and publishes OrderWasCreated', async () => {
+            const input = { description: 'test order' };
+
+            const result = await sut.execute(input);
+
+            const found = await ordersRepository.findById(result.id);
+            expect(found).not.toBeNull();
+            expect(found!.description).toBe(input.description);
+            expect(result).toEqual(found);
+
+            expect(orderEventsPublisher.published).toHaveLength(1);
+            const event = orderEventsPublisher.published[0];
+            expect(event).toBeInstanceOf(OrderWasCreatedEvent);
+            expect(event.order.id).toBe(result.id);
+            expect(event.order.description).toBe(input.description);
+        });
+    });
 });

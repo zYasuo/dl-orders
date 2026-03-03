@@ -6,14 +6,14 @@ import { OrderWasCreatedConsumer } from '../infrastructure/inbound/messaging/ord
 import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
 
 @Module({
-  imports: [RabbitMQModule],
-  controllers: [OrderWasCreatedConsumer],
-  providers: [
-    ReduceStockWhenOrderCreatedUseCase,
-    {
-      provide: IStockRepositoryPort,
-      useClass: StockRepository,
-    },
-  ],
+    imports: [RabbitMQModule],
+    controllers: [OrderWasCreatedConsumer],
+    providers: [
+        ReduceStockWhenOrderCreatedUseCase,
+        {
+            provide: IStockRepositoryPort,
+            useClass: StockRepository,
+        },
+    ],
 })
 export class StockModule {}

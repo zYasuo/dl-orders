@@ -5,26 +5,28 @@ import { SReduceStock } from '../../../application/dto/reduce-stock-when-order-c
 
 @Controller()
 export class OrderWasCreatedConsumer {
-  private readonly logger = new Logger(OrderWasCreatedConsumer.name);
+    private readonly logger = new Logger(OrderWasCreatedConsumer.name);
 
-  constructor(
-    private readonly reduceStockUseCase: ReduceStockWhenOrderCreatedUseCase,
-  ) {}
+    constructor(private readonly reduceStockUseCase: ReduceStockWhenOrderCreatedUseCase) {}
 
-  @EventPattern('order.was_created')
-  async handle(payload: unknown): Promise<void> {
-    const raw = payload as Record<string, unknown>;
-    const input = {
-      id: raw?.stockId ?? raw?.id,
-      quantity: raw?.quantity,
-    };
-    const parsed = SReduceStock.safeParse(input);
-    if (!parsed.success) {
-      this.logger.warn('Invalid order.was_created payload, skipping', {
-        message: parsed.error.message,
-      });
-      return;
+    @EventPattern('order.was_created')
+    async handle(payload: unknown): Promise<void> {
+        const raw = payload as Record<string, unknown>;
+        const input = {
+            id: raw?.stockId ?? raw?.id,
+            quantity: raw?.quantity,
+        };
+
+        const parsed = SReduceStock.safeParse(input);
+       
+        if (!parsed.success) {
+            this.logger.warn('Invalid order.was_created payload, skipping', {
+                message: parsed.error.message,
+            });
+            return;
+       
+          }
+          
+        await this.reduceStockUseCase.execute(parsed.data);
     }
-    await this.reduceStockUseCase.execute(parsed.data);
-  }
 }
