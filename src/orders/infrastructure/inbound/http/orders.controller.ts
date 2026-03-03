@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UsePipes } from '@nestjs/common';
 import { ZodValidationPipe } from '../../../../common/pipes/zod-validation.pipe';
 import { SCreateOrder, type TCreateOrder } from '../../../application/dto/create-order.dto';
 import { CreateOrderUseCase } from '../../../application/use-cases/create-order.use-case';
-import { ListOrdersUseCase } from '../../../application/use-cases/list-orders.use-case';
+import { FindOrderByIdUseCase } from '../../../application/use-cases/find-order-by-id.use-case';
 
 @Controller('orders')
 export class OrdersController {
   constructor(
     private readonly createOrderUseCase: CreateOrderUseCase,
-    private readonly listOrdersUseCase: ListOrdersUseCase,
+    private readonly findOrderByIdUseCase: FindOrderByIdUseCase,
   ) {}
 
   @Post()
@@ -17,8 +17,8 @@ export class OrdersController {
     return this.createOrderUseCase.execute(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.listOrdersUseCase.execute();
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.findOrderByIdUseCase.execute(id);
   }
 }

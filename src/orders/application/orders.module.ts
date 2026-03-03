@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OrdersController } from '../infrastructure/inbound/http/orders.controller';
 import { CreateOrderUseCase } from './use-cases/create-order.use-case';
-import { ListOrdersUseCase } from './use-cases/list-orders.use-case';
+import { FindOrderByIdUseCase } from './use-cases/find-order-by-id.use-case';
 import { IOrdersRepositoryPort } from '../domain/ports/orders-repository.port';
 import { IOrderEventsPublisherPort } from '../domain/ports/order-events-publisher.port';
 import { OrdersRepository } from '../infrastructure/outbound/persistence/orders.repository';
@@ -13,7 +13,7 @@ import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
   controllers: [OrdersController],
   providers: [
     CreateOrderUseCase,
-    ListOrdersUseCase,
+    FindOrderByIdUseCase,
     {
       provide: IOrdersRepositoryPort,
       useClass: OrdersRepository,

@@ -14,6 +14,7 @@ export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
       id: event.order.id,
       description: event.order.description,
       createdAt: event.order.createdAt.toISOString(),
+      updatedAt: event.order.updatedAt.toISOString(),
     });
   }
 }

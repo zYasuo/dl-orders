@@ -32,10 +32,10 @@ describe('CreateOrderUseCase (integration)', () => {
 
       const result = await sut.execute(input);
 
-      const all = await ordersRepository.findAll();
-      expect(all).toHaveLength(1);
-      expect(all[0].description).toBe(input.description);
-      expect(result).toEqual(all[0]);
+      const found = await ordersRepository.findById(result.id);
+      expect(found).not.toBeNull();
+      expect(found!.description).toBe(input.description);
+      expect(result).toEqual(found);
 
       expect(orderEventsPublisher.published).toHaveLength(1);
       const event = orderEventsPublisher.published[0];

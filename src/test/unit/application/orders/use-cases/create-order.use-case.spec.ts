@@ -3,25 +3,28 @@ import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/
 import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
 import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
-import { Order } from '../../../../../orders/domain/entities/order.entity';
+import { Order, OrderStatus } from '../../../../../orders/domain/entities/order.entity';
 
 describe('CreateOrderUseCase', () => {
   let sut: CreateOrderUseCase;
   let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
   let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
 
-  const fakeOrder = new Order(
-    'id-123',
-    'test order',
-    new Date('2025-01-01T12:00:00Z'),
-  );
+  const createdAt = new Date('2025-01-01T12:00:00Z');
+  const fakeOrder = new Order({
+    id: 'id-123',
+    description: 'test order',
+    status: OrderStatus.PENDING,
+    createdAt,
+    updatedAt: createdAt,
+  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     ordersRepository = {
       create: jest.fn().mockResolvedValue(fakeOrder),
-      findAll: jest.fn(),
+      findById: jest.fn(),
     } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
     orderEventsPublisher = {

@@ -1,7 +1,48 @@
+export enum OrderStatus {
+    PENDING = 'PENDING',
+    CONFIRMED = 'CONFIRMED',
+    CANCELLED = 'CANCELLED',
+}
+
+export type TOrderParams = {
+    readonly id: string;
+    readonly description: string;
+    status: OrderStatus;
+    readonly createdAt: Date;
+    updatedAt: Date;
+};
+
 export class Order {
-  constructor(
-    public readonly id: string,
-    public description: string,
-    public readonly createdAt: Date,
-  ) {}
+    constructor(private params: TOrderParams) {}
+
+    static create(params: { description: string }): Order {
+        const now = new Date();
+        return new Order({
+            id: crypto.randomUUID(),
+            description: params.description,
+            status: OrderStatus.PENDING,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    get id(): string {
+        return this.params.id;
+    }
+
+    get description(): string {
+        return this.params.description;
+    }
+
+    get status(): OrderStatus {
+        return this.params.status;
+    }
+
+    get createdAt(): Date {
+        return this.params.createdAt;
+    }
+
+    get updatedAt(): Date {
+        return this.params.updatedAt;
+    }
 }
