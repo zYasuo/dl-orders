@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { OrderEventsPublisherPort } from '../../../domain/ports/order-events-publisher.port';
+import { IOrderEventsPublisherPort } from '../../../domain/ports/order-events-publisher.port';
 import { OrderWasCreatedEvent } from '../../../domain/events/order-was-created.event';
 
 @Injectable()
-export class OrdersRabbitMqPublisher extends OrderEventsPublisherPort {
+export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
   constructor(@Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy) {
     super();
   }

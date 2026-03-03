@@ -1,6 +1,6 @@
 import { Stock } from '../entities/stock.entity';
 
-export abstract class StockRepositoryPort {
+export abstract class IStockRepositoryPort {
   abstract findById(id: string): Promise<Stock | null>;
   abstract findByName(name: string): Promise<Stock | null>;
   abstract updateQuantity(id: string, quantity: number): Promise<void>;

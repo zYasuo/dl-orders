@@ -1,7 +1,7 @@
-import { OrdersRepositoryPort } from '../../orders/domain/ports/orders-repository.port';
+import { IOrdersRepositoryPort } from '../../orders/domain/ports/orders-repository.port';
 import { Order } from '../../orders/domain/entities/order.entity';
 
-export class InMemoryOrdersRepository extends OrdersRepositoryPort {
+export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
   private readonly orders = new Map<string, Order>();
 
   async create(input: { description: string }): Promise<Order> {

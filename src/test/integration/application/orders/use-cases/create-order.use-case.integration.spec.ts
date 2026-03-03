@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
-import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
-import { OrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
+import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { InMemoryOrdersRepository } from '../../../../doubles/in-memory-orders.repository';
 import { FakeOrderEventsPublisher } from '../../../../doubles/fake-order-events.publisher';
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
@@ -18,8 +18,8 @@ describe('CreateOrderUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
-        { provide: OrdersRepositoryPort, useValue: ordersRepository },
-        { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
       ],
     }).compile();
 

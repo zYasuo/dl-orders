@@ -1,7 +1,7 @@
-import { StockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
+import { IStockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
 import { Stock } from '../../stock/domain/entities/stock.entity';
 
-export class InMemoryStockRepository extends StockRepositoryPort {
+export class InMemoryStockRepository extends IStockRepositoryPort {
   private readonly stocks = new Map<string, Stock>();
 
   async findById(id: string): Promise<Stock | null> {

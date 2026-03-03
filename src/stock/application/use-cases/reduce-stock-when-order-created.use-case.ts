@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { StockRepositoryPort } from '../../domain/ports/stock-repository.port';
+import { IStockRepositoryPort } from '../../domain/ports/stock-repository.port';
 import { TReduceStock } from '../dto/reduce-stock-when-order-created.dto';
 
 @Injectable()
 export class ReduceStockWhenOrderCreatedUseCase {
-  constructor(private readonly stockRepositoryPort: StockRepositoryPort) {}
+  constructor(private readonly stockRepositoryPort: IStockRepositoryPort) {}
 
   async execute(input: TReduceStock): Promise<void> {
     const stock = await this.stockRepositoryPort.findById(input.id);

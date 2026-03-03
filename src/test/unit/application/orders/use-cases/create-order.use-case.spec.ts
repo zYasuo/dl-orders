@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
-import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
-import { OrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
+import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 import { Order } from '../../../../../orders/domain/entities/order.entity';
 
 describe('CreateOrderUseCase', () => {
   let sut: CreateOrderUseCase;
-  let ordersRepository: jest.Mocked<OrdersRepositoryPort>;
-  let orderEventsPublisher: jest.Mocked<OrderEventsPublisherPort>;
+  let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
+  let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
 
   const fakeOrder = new Order(
     'id-123',
@@ -22,17 +22,17 @@ describe('CreateOrderUseCase', () => {
     ordersRepository = {
       create: jest.fn().mockResolvedValue(fakeOrder),
       findAll: jest.fn(),
-    } as unknown as jest.Mocked<OrdersRepositoryPort>;
+    } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
     orderEventsPublisher = {
       publishOrderWasCreated: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<OrderEventsPublisherPort>;
+    } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
-        { provide: OrdersRepositoryPort, useValue: ordersRepository },
-        { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
       ],
     }).compile();
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../../infrastructure/db/db.service';
-import { OrdersRepositoryPort } from '../../../domain/ports/orders-repository.port';
+import { IOrdersRepositoryPort } from '../../../domain/ports/orders-repository.port';
 import { Order } from '../../../domain/entities/order.entity';
 
 @Injectable()
-export class OrdersRepository extends OrdersRepositoryPort {
+export class OrdersRepository extends IOrdersRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

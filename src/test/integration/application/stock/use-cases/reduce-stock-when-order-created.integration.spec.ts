@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ReduceStockWhenOrderCreatedUseCase } from '../../../../../stock/application/use-cases/reduce-stock-when-order-created.use-case';
-import { StockRepositoryPort } from '../../../../../stock/domain/ports/stock-repository.port';
+import { IStockRepositoryPort } from '../../../../../stock/domain/ports/stock-repository.port';
 import { InMemoryStockRepository } from '../../../../doubles/in-memory-stock.repository';
 import { Stock } from '../../../../../stock/domain/entities/stock.entity';
 
@@ -28,7 +28,7 @@ describe('ReduceStockWhenOrderCreatedUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReduceStockWhenOrderCreatedUseCase,
-        { provide: StockRepositoryPort, useValue: repository },
+        { provide: IStockRepositoryPort, useValue: repository },
       ],
     }).compile();
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../../infrastructure/db/db.service';
-import { StockRepositoryPort } from '../../../domain/ports/stock-repository.port';
+import { IStockRepositoryPort } from '../../../domain/ports/stock-repository.port';
 import { Stock } from '../../../domain/entities/stock.entity';
 
 @Injectable()
-export class StockRepository extends StockRepositoryPort {
+export class StockRepository extends IStockRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

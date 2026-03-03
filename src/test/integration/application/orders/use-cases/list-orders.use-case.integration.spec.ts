@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ListOrdersUseCase } from '../../../../../orders/application/use-cases/list-orders.use-case';
-import { OrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
 import { InMemoryOrdersRepository } from '../../../../doubles/in-memory-orders.repository';
 
 describe('ListOrdersUseCase (integration)', () => {
@@ -15,7 +15,7 @@ describe('ListOrdersUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ListOrdersUseCase,
-        { provide: OrdersRepositoryPort, useValue: ordersRepository },
+        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
       ],
     }).compile();
 
