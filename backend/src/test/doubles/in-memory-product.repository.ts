@@ -1,12 +1,14 @@
 import { Product } from '../../product/domain/entities/product.entity';
 import { IProductRepositoryPort } from '../../product/domain/ports/product-repository.ports';
+import { ICreateProduct, IUpdateProduct } from '../../product/domain/types/product-repository.types';
 
 export class InMemoryProductRepository extends IProductRepositoryPort {
     private readonly products = new Map<string, Product>();
 
-    async create(input: { name: string; description: string; price: number }): Promise<Product | null> {
+    async create(params: ICreateProduct): Promise<Product | null> {
+        const { name, description, price } = params;
         const now = new Date();
-        const product = new Product(crypto.randomUUID(), input.name, input.description, input.price, now, now);
+        const product = new Product(crypto.randomUUID(), name, description, price, now, now);
         this.products.set(product.id, product);
         return product;
     }
@@ -19,8 +21,9 @@ export class InMemoryProductRepository extends IProductRepositoryPort {
         return Array.from(this.products.values()).find((p) => p.name === name) ?? null;
     }
 
-    async update(input: { id: string; name: string; description: string; price: number }): Promise<Product | null> {
-        const { id, name, description, price } = input;
+    async update(id: string, data: IUpdateProduct): Promise<Product | null> {
+        const { name, description, price } = data;
+
         const product = this.products.get(id);
         if (!product) return null;
         const updated = new Product(product.id, name, description, price, product.createdAt, new Date());

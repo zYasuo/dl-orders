@@ -1,11 +1,11 @@
-import { TCreateStockWithProductRelation } from 'src/stock/application/dto/create-stock-with-product-relation.schema';
 import { Stock } from '../../stock/domain/entities/stock.entity';
 import { IStockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
+import { ICreateStock } from '../../stock/domain/types/stock-repository.types';
 
 export class InMemoryStockRepository extends IStockRepositoryPort {
     private readonly stocks = new Map<string, Stock>();
 
-    async create(input: TCreateStockWithProductRelation): Promise<Stock | null> {
+    async create(input: ICreateStock): Promise<Stock | null> {
         const { name, quantity, productId } = input;
 
         const existingStock = await this.findByProductId(productId);

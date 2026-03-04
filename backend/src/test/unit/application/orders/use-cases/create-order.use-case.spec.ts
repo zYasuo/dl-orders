@@ -52,6 +52,8 @@ describe('CreateOrderUseCase', () => {
 
             expect(ordersRepository.create).toHaveBeenCalledTimes(1);
             expect(ordersRepository.create).toHaveBeenCalledWith({
+                productId: input.productId,
+                quantity: input.quantity,
                 description: input.description,
             });
 

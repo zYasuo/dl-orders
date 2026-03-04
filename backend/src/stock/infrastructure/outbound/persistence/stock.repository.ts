@@ -1,16 +1,16 @@
 import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { TCreateStockWithProductRelation } from 'src/stock/application/dto/create-stock-with-product-relation.schema';
 import { DbService } from '../../../../infrastructure/db/db.service';
 import { Stock } from '../../../domain/entities/stock.entity';
 import { IStockRepositoryPort } from '../../../domain/ports/stock-repository.port';
+import { ICreateStock } from '../../../domain/types/stock-repository.types';
 
 @Injectable()
 export class StockRepository extends IStockRepositoryPort {
     constructor(private readonly db: DbService) {
         super();
     }
-    async create(input: TCreateStockWithProductRelation): Promise<Stock | null> {
+    async create(input: ICreateStock): Promise<Stock | null> {
         const { name, quantity, productId } = input;
 
         const now = new Date();

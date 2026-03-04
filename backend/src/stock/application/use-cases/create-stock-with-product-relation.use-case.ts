@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { Stock } from 'src/stock/domain/entities/stock.entity';
 import { IProductRepositoryPort } from '../../../product/domain/ports/product-repository.ports';
 import { IStockRepositoryPort } from '../../domain/ports/stock-repository.port';
+import { ICreateStock } from '../../domain/types/stock-repository.types';
 import { TCreateStockWithProductRelation } from '../dto/create-stock-with-product-relation.schema';
 
 @Injectable()
@@ -13,7 +14,6 @@ export class CreateStockWithProductRelationUseCase {
 
     async execute(input: TCreateStockWithProductRelation): Promise<Stock> {
         const { productId, name, quantity } = input;
-
         const product = await this.productRepositoryPort.findById(productId);
 
         if (!product) {
@@ -32,7 +32,12 @@ export class CreateStockWithProductRelationUseCase {
             throw new BadRequestException('A stock with this name already exists');
         }
 
-        const createdStock = await this.stockRepositoryPort.create({ name, quantity, productId });
+        const createInput: ICreateStock = {
+            productId,
+            name,
+            quantity,
+        };
+        const createdStock = await this.stockRepositoryPort.create(createInput);
 
         if (!createdStock) {
             throw new InternalServerErrorException('Failed to create stock');

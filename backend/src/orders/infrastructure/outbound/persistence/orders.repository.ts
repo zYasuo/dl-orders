@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../../infrastructure/db/db.service';
 import { Order, OrderStatus } from '../../../domain/entities/order.entity';
 import { IOrdersRepositoryPort } from '../../../domain/ports/orders-repository.port';
+import { ICreateOrder } from '../../../domain/types/order-repository.types';
 
 @Injectable()
 export class OrdersRepository extends IOrdersRepositoryPort {
@@ -9,7 +10,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
         super();
     }
 
-    async create(input: { productId: string; quantity: number; description: string }): Promise<Order | null> {
+    async create(input: ICreateOrder): Promise<Order | null> {
         const order = await this.db.order.create({
             data: {
                 productId: input.productId,

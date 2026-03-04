@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Product } from 'src/product/domain/entities/product.entity';
 import { IProductRepositoryPort } from '../../domain/ports/product-repository.ports';
+import { ICreateProduct } from '../../domain/types/product-repository.types';
 import { TCreateProduct } from '../dto/create-product.schema';
 
 @Injectable()
@@ -16,7 +17,12 @@ export class CreateProductUseCase {
             throw new BadRequestException('Product already exists');
         }
 
-        const createdProduct = await this.productRepositoryPort.create({ name, description, price });
+        const createInput: ICreateProduct = {
+            name,
+            description,
+            price,
+        };
+        const createdProduct = await this.productRepositoryPort.create(createInput);
 
         if (!createdProduct) {
             throw new InternalServerErrorException('Failed to create product');
