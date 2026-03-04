@@ -6,19 +6,19 @@ import { FindOrderByIdUseCase } from '../../../application/use-cases/find-order-
 
 @Controller('orders')
 export class OrdersController {
-  constructor(
-    private readonly createOrderUseCase: CreateOrderUseCase,
-    private readonly findOrderByIdUseCase: FindOrderByIdUseCase,
-  ) {}
+    constructor(
+        private readonly createOrderUseCase: CreateOrderUseCase,
+        private readonly findOrderByIdUseCase: FindOrderByIdUseCase,
+    ) {}
 
-  @Post()
-  @UsePipes(new ZodValidationPipe(SCreateOrder))
-  create(@Body() dto: TCreateOrder) {
-    return this.createOrderUseCase.execute(dto);
-  }
+    @Post()
+    @UsePipes(new ZodValidationPipe(SCreateOrder))
+    createOrder(@Body() dto: TCreateOrder) {
+        return this.createOrderUseCase.execute(dto);
+    }
 
-  @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.findOrderByIdUseCase.execute(id);
-  }
+    @Get(':id')
+    findOrderById(@Param('id') id: string) {
+        return this.findOrderByIdUseCase.execute(id);
+    }
 }

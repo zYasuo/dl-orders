@@ -11,7 +11,7 @@ export type TOrderParams = {
     readonly description: string;
     status: OrderStatus;
     readonly createdAt: Date;
-    updatedAt: Date;
+    readonly updatedAt: Date;
 };
 
 export class Order {

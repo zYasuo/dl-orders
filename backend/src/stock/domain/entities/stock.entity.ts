@@ -1,10 +1,10 @@
 export interface IStockParams {
-    id: string;
+    readonly id: string;
     name: string;
     quantity: number;
-    productId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    readonly productId: string;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
 }
 
 export class Stock {
