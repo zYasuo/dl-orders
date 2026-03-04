@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { TCreateOrder } from '../dto/create-order.dto';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
-import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { OrderWasCreatedEvent } from '../../domain/events/order-was-created.event';
+import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
+import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { TCreateOrder } from '../dto/create-order.dto';
 
 @Injectable()
 export class CreateOrderUseCase {

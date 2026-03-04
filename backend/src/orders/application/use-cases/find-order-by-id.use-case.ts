@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { Order } from '../../domain/entities/order.entity';
+import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 
 @Injectable()
 export class FindOrderByIdUseCase {
@@ -12,7 +12,6 @@ export class FindOrderByIdUseCase {
         if (!order) {
             throw new NotFoundException('Order not found');
         }
-        
 
         return order;
     }
