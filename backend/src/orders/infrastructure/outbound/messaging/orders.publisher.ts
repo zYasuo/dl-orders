@@ -15,6 +15,7 @@ export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
             productId: event.order.productId,
             quantity: event.order.quantity,
             description: event.order.description,
+            recipient: event.order.recipient,
             createdAt: event.order.createdAt.toISOString(),
             updatedAt: event.order.updatedAt.toISOString(),
         });

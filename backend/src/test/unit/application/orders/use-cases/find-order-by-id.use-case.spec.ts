@@ -17,6 +17,7 @@ describe('FindOrderByIdUseCase', () => {
         quantity: 1,
         createdAt,
         updatedAt: createdAt,
+        recipient: 'test@test.com',
     });
 
     beforeEach(async () => {

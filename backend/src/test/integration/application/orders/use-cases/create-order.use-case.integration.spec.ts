@@ -3,16 +3,20 @@ import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
+import { IProductRepositoryPort } from '../../../../../product/domain/ports/product-repository.ports';
 import { FakeOrderEventsPublisher } from '../../../../doubles/fake-order-events.publisher';
 import { InMemoryOrdersRepository } from '../../../../doubles/in-memory-orders.repository';
+import { InMemoryProductRepository } from '../../../../doubles/in-memory-product.repository';
 
 describe('CreateOrderUseCase (integration)', () => {
     let sut: CreateOrderUseCase;
     let ordersRepository: InMemoryOrdersRepository;
+    let productRepository: InMemoryProductRepository;
     let orderEventsPublisher: FakeOrderEventsPublisher;
 
     beforeEach(async () => {
         ordersRepository = new InMemoryOrdersRepository();
+        productRepository = new InMemoryProductRepository();
         orderEventsPublisher = new FakeOrderEventsPublisher();
 
         const module: TestingModule = await Test.createTestingModule({
@@ -20,6 +24,7 @@ describe('CreateOrderUseCase (integration)', () => {
                 CreateOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
+                { provide: IProductRepositoryPort, useValue: productRepository },
             ],
         }).compile();
 
@@ -28,7 +33,8 @@ describe('CreateOrderUseCase (integration)', () => {
 
     describe('execute', () => {
         it('persists order and publishes OrderWasCreated', async () => {
-            const input = { productId: '123', quantity: 1, description: 'test order' };
+            const product = await productRepository.create({ name: 'Produto', description: 'Desc', price: 10 });
+            const input = { productId: product!.id, quantity: 1, description: 'test order', recipient: 'test@test.com' };
 
             const result = await sut.execute(input);
 
@@ -46,6 +52,7 @@ describe('CreateOrderUseCase (integration)', () => {
             expect(event.order.productId).toBe(input.productId);
             expect(event.order.quantity).toBe(input.quantity);
             expect(event.order.description).toBe(input.description);
+            expect(event.order.recipient).toBe(input.recipient);
         });
     });
 });

@@ -16,6 +16,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 productId: input.productId,
                 quantity: input.quantity,
                 description: input.description,
+                recipient: input.recipient,
             },
         });
 
@@ -26,6 +27,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
             productId: order.productId,
             quantity: order.quantity,
             description: order.description,
+            recipient: order.recipient,
             status: order.status as OrderStatus,
             createdAt: order.createdAt,
             updatedAt: order.updatedAt,
@@ -45,6 +47,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                   productId: item.productId,
                   quantity: item.quantity,
                   description: item.description,
+                  recipient: item.recipient,
                   status: item.status as OrderStatus,
                   createdAt: item.createdAt,
                   updatedAt: item.updatedAt,

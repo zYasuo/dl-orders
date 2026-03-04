@@ -20,20 +20,22 @@ describe('FindOrderByIdUseCase (integration)', () => {
 
     describe('execute', () => {
         it('returns order when found', async () => {
-            const created1 = await ordersRepository.create({ productId: '123', quantity: 1, description: 'order 1' });
-            const created2 = await ordersRepository.create({ productId: '456', quantity: 2, description: 'order 2' });
+            const created1 = await ordersRepository.create({ productId: '123', quantity: 1, description: 'order 1', recipient: 'test@test.com' });
+            const created2 = await ordersRepository.create({ productId: '456', quantity: 2, description: 'order 2', recipient: 'test@test.com' });
 
             const result1 = await sut.execute(created1.id);
             expect(result1.id).toBe(created1.id);
             expect(result1.productId).toBe(created1.productId);
             expect(result1.quantity).toBe(created1.quantity);
-            expect(result1.description).toBe('order 1');
+            expect(result1.description).toBe(created1.description);
+            expect(result1.recipient).toBe(created1.recipient);
 
             const result2 = await sut.execute(created2.id);
             expect(result2.id).toBe(created2.id);
             expect(result2.productId).toBe(created2.productId);
             expect(result2.quantity).toBe(created2.quantity);
             expect(result2.description).toBe('order 2');
+            expect(result2.recipient).toBe(created2.recipient);
         });
 
         it('throws NotFoundException when order does not exist', async () => {

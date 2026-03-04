@@ -6,7 +6,7 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
     private readonly orders = new Map<string, Order>();
 
     async create(input: ICreateOrder): Promise<Order> {
-        const { description, productId, quantity } = input;
+        const { description, productId, quantity, recipient } = input;
 
         const now = new Date();
         const order = new Order({
@@ -15,6 +15,7 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
             productId,
             quantity,
             status: OrderStatus.PENDING,
+            recipient,
             createdAt: now,
             updatedAt: now,
         });

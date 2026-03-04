@@ -9,6 +9,7 @@ export type TOrderParams = {
     readonly productId: string;
     readonly quantity: number;
     readonly description: string;
+    readonly recipient: string;
     status: OrderStatus;
     readonly createdAt: Date;
     readonly updatedAt: Date;
@@ -17,13 +18,14 @@ export type TOrderParams = {
 export class Order {
     constructor(private params: TOrderParams) {}
 
-    static create(params: { productId: string; quantity: number; description: string }): Order {
+    static create(params: { productId: string; quantity: number; description: string; recipient: string }): Order {
         const now = new Date();
         return new Order({
             id: crypto.randomUUID(),
             productId: params.productId,
             quantity: params.quantity,
             description: params.description,
+            recipient: params.recipient,
             status: OrderStatus.PENDING,
             createdAt: now,
             updatedAt: now,
@@ -44,6 +46,10 @@ export class Order {
 
     get description(): string {
         return this.params.description;
+    }
+
+    get recipient(): string {
+        return this.params.recipient;
     }
 
     get status(): OrderStatus {
