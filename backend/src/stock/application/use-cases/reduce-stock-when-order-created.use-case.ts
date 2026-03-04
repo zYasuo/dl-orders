@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Stock } from 'src/stock/domain/entities/stock.entity';
 import { IStockRepositoryPort } from '../../domain/ports/stock-repository.port';
 import { TReduceStock } from '../dto/reduce-stock-when-order-created.dto';
 
@@ -6,7 +7,7 @@ import { TReduceStock } from '../dto/reduce-stock-when-order-created.dto';
 export class ReduceStockWhenOrderCreatedUseCase {
     constructor(private readonly stockRepositoryPort: IStockRepositoryPort) {}
 
-    async execute(input: TReduceStock): Promise<void> {
+    async execute(input: TReduceStock): Promise<Stock> {
         const { productId, quantity } = input;
 
         const stock = await this.stockRepositoryPort.findByProductId(productId);
@@ -21,6 +22,12 @@ export class ReduceStockWhenOrderCreatedUseCase {
             throw new BadRequestException('Stock quantity is not enough');
         }
 
-        await this.stockRepositoryPort.updateQuantity(stock.id, newQuantity);
+        const updatedStock = await this.stockRepositoryPort.updateQuantity(stock.id, newQuantity);
+
+        if (!updatedStock) {
+            throw new InternalServerErrorException('Failed to update stock');
+        }
+
+        return updatedStock;
     }
 }

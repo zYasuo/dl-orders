@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
-import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
-import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
-import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 import { Order, OrderStatus } from '../../../../../orders/domain/entities/order.entity';
+import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
+import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
+import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
 
 describe('CreateOrderUseCase', () => {
     let sut: CreateOrderUseCase;
@@ -15,6 +15,8 @@ describe('CreateOrderUseCase', () => {
         id: 'id-123',
         description: 'test order',
         status: OrderStatus.PENDING,
+        productId: 'product-123',
+        quantity: 1,
         createdAt,
         updatedAt: createdAt,
     });
@@ -44,7 +46,7 @@ describe('CreateOrderUseCase', () => {
 
     describe('execute', () => {
         it('persists order, publishes OrderWasCreated and returns the order', async () => {
-            const input = { description: 'test order' };
+            const input = { productId: 'product-123', quantity: 1, description: 'test order' };
 
             const result = await sut.execute(input);
 
@@ -62,7 +64,7 @@ describe('CreateOrderUseCase', () => {
         });
 
         it('does not publish event when repository throws', async () => {
-            const input = { description: 'order' };
+            const input = { productId: 'product-123', quantity: 1, description: 'order' };
             ordersRepository.create.mockRejectedValueOnce(new Error('DB failed'));
 
             await expect(sut.execute(input)).rejects.toThrow('DB failed');

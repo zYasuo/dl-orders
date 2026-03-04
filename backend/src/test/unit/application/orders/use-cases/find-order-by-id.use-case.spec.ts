@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../../../orders/application/use-cases/find-order-by-id.use-case';
-import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
 import { Order, OrderStatus } from '../../../../../orders/domain/entities/order.entity';
+import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
 
 describe('FindOrderByIdUseCase', () => {
     let sut: FindOrderByIdUseCase;
@@ -13,6 +13,8 @@ describe('FindOrderByIdUseCase', () => {
         id: 'id-123',
         description: 'test order',
         status: OrderStatus.PENDING,
+        productId: 'product-123',
+        quantity: 1,
         createdAt,
         updatedAt: createdAt,
     });

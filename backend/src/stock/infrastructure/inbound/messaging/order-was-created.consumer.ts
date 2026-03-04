@@ -1,7 +1,8 @@
-import { Controller, Logger } from '@nestjs/common';
-import { EventPattern } from '@nestjs/microservices';
+import { Controller, Logger, UsePipes } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { SReduceStock, type TReduceStock } from '../../../application/dto/reduce-stock-when-order-created.dto';
 import { ReduceStockWhenOrderCreatedUseCase } from '../../../application/use-cases/reduce-stock-when-order-created.use-case';
-import { SReduceStock } from '../../../application/dto/reduce-stock-when-order-created.dto';
 
 @Controller()
 export class OrderWasCreatedConsumer {
@@ -10,23 +11,10 @@ export class OrderWasCreatedConsumer {
     constructor(private readonly reduceStockUseCase: ReduceStockWhenOrderCreatedUseCase) {}
 
     @EventPattern('order.was_created')
-    async handle(payload: unknown): Promise<void> {
-        const raw = payload as Record<string, unknown>;
-        const input = {
-            id: raw?.stockId ?? raw?.id,
-            quantity: raw?.quantity,
-        };
+    @UsePipes(new ZodValidationPipe(SReduceStock))
+    async handle(@Payload() payload: TReduceStock): Promise<void> {
+        ~this.logger.log('Reducing stock for order', { payload });
 
-        const parsed = SReduceStock.safeParse(input);
-       
-        if (!parsed.success) {
-            this.logger.warn('Invalid order.was_created payload, skipping', {
-                message: parsed.error.message,
-            });
-            return;
-       
-          }
-          
-        await this.reduceStockUseCase.execute(parsed.data);
+        await this.reduceStockUseCase.execute(payload);
     }
 }

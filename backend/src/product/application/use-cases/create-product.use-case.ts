@@ -21,6 +21,7 @@ export class CreateProductUseCase {
         if (!createdProduct) {
             throw new InternalServerErrorException('Failed to create product');
         }
+
         return createdProduct;
     }
 }
