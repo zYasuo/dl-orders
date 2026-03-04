@@ -1,24 +1,17 @@
-import { IStockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
 import { Stock } from '../../stock/domain/entities/stock.entity';
+import { IStockRepositoryPort } from '../../stock/domain/ports/stock-repository.port';
 
 export class InMemoryStockRepository extends IStockRepositoryPort {
     private readonly stocks = new Map<string, Stock>();
 
-    async findById(id: string): Promise<Stock | null> {
-        return this.stocks.get(id) ?? null;
-    }
-
-    async findByName(name: string): Promise<Stock | null> {
-        for (const stock of this.stocks.values()) {
-            if (stock.name === name) return stock;
-        }
-        return null;
+    async findByProductId(productId: string): Promise<Stock | null> {
+        return this.stocks.get(productId) ?? null;
     }
 
     async updateQuantity(id: string, quantity: number): Promise<void> {
         const stock = this.stocks.get(id);
         if (!stock) return;
-        const updated = new Stock(stock.id, stock.name, stock.price, quantity, stock.description, stock.createdAt, stock.updatedAt);
+        const updated = new Stock(stock.id, stock.name, quantity, stock.productId, stock.createdAt, stock.updatedAt);
         this.stocks.set(id, updated);
     }
 

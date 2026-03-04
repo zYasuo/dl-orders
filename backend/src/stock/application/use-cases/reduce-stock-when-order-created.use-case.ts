@@ -7,7 +7,7 @@ export class ReduceStockWhenOrderCreatedUseCase {
     constructor(private readonly stockRepositoryPort: IStockRepositoryPort) {}
 
     async execute(input: TReduceStock): Promise<void> {
-        const stock = await this.stockRepositoryPort.findById(input.id);
+        const stock = await this.stockRepositoryPort.findByProductId(input.productId);
 
         if (!stock) {
             throw new NotFoundException('Stock not found');

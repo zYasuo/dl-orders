@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../../infrastructure/db/db.service';
-import { IStockRepositoryPort } from '../../../domain/ports/stock-repository.port';
 import { Stock } from '../../../domain/entities/stock.entity';
+import { IStockRepositoryPort } from '../../../domain/ports/stock-repository.port';
 
 @Injectable()
 export class StockRepository extends IStockRepositoryPort {
@@ -9,24 +9,24 @@ export class StockRepository extends IStockRepositoryPort {
         super();
     }
 
-    async findById(id: string): Promise<Stock | null> {
+    async findByProductId(productId: string): Promise<Stock | null> {
         const row = await this.db.stock.findUnique({
-            where: { id },
+            where: { productId },
         });
-        
+
         if (!row) return null;
-        
-        return new Stock(row.id, row.name, row.price, row.quantity, row.description, row.createdAt, row.updatedAt);
+
+        return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
     }
 
     async findByName(name: string): Promise<Stock | null> {
         const row = await this.db.stock.findFirst({
             where: { name },
         });
-        
+
         if (!row) return null;
-        
-        return new Stock(row.id, row.name, row.price, row.quantity, row.description, row.createdAt, row.updatedAt);
+
+        return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
     }
 
     async updateQuantity(id: string, quantity: number): Promise<void> {

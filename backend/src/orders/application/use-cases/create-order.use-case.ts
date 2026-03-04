@@ -13,6 +13,8 @@ export class CreateOrderUseCase {
 
     async execute(input: TCreateOrder) {
         const order = await this.ordersRepositoryPort.create({
+            productId: input.productId,
+            quantity: input.quantity,
             description: input.description,
         });
 

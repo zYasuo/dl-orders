@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 export const SCreateOrder = z.object({
-  description: z.string().min(1, 'description is required'),
+    productId: z.string().min(1, 'productId is required'),
+    quantity: z.number().min(1, 'quantity is required'),
+    description: z.string().min(1, 'description is required'),
 });
 
 export type TCreateOrder = z.infer<typeof SCreateOrder>;

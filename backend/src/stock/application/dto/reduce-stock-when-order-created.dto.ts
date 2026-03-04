@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const SReduceStock = z.object({
-    id: z.string().min(1, 'id is required'),
+    productId: z.string().min(1, 'productId is required'),
     quantity: z.number().min(1, 'quantity must be greater than 0'),
 });
 

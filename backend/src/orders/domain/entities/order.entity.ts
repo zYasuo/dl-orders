@@ -6,6 +6,8 @@ export enum OrderStatus {
 
 export type TOrderParams = {
     readonly id: string;
+    readonly productId: string;
+    readonly quantity: number;
     readonly description: string;
     status: OrderStatus;
     readonly createdAt: Date;
@@ -15,10 +17,12 @@ export type TOrderParams = {
 export class Order {
     constructor(private params: TOrderParams) {}
 
-    static create(params: { description: string }): Order {
+    static create(params: { productId: string; quantity: number; description: string }): Order {
         const now = new Date();
         return new Order({
             id: crypto.randomUUID(),
+            productId: params.productId,
+            quantity: params.quantity,
             description: params.description,
             status: OrderStatus.PENDING,
             createdAt: now,
@@ -28,6 +32,14 @@ export class Order {
 
     get id(): string {
         return this.params.id;
+    }
+
+    get productId(): string {
+        return this.params.productId;
+    }
+
+    get quantity(): number {
+        return this.params.quantity;
     }
 
     get description(): string {

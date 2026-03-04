@@ -7,21 +7,47 @@ datasource db {
 }
 
 model Order {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
+  sequenceId  Int         @unique @default(autoincrement())
   description String
   status      OrderStatus @default(PENDING)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  productId   String
+  quantity    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("orders")
 }
 
 model Stock {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  price     Float
-  quantity  Int
+  id         String   @id @default(uuid())
+  sequenceId Int      @unique @default(autoincrement())
+  name       String   @unique
+  quantity   Int
+  productId  String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("stocks")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  sequenceId  Int      @unique @default(autoincrement())
+  name        String   @unique
+  price       Float
   description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Stock  Stock[]
+  orders Order[]
+
+  @@map("products")
 }
 
 enum OrderStatus {
