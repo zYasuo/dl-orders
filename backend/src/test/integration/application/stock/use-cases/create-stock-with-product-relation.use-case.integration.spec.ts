@@ -1,6 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Product } from '../../../../../product/domain/entities/product.entity';
 import { IProductRepositoryPort } from '../../../../../product/domain/ports/product-repository.ports';
 import { CreateStockWithProductRelationUseCase } from '../../../../../stock/application/use-cases/create-stock-with-product-relation.use-case';
 import { IStockRepositoryPort } from '../../../../../stock/domain/ports/stock-repository.port';
@@ -11,14 +10,13 @@ describe('CreateStockWithProductRelationUseCase (integration)', () => {
     let sut: CreateStockWithProductRelationUseCase;
     let stockRepository: InMemoryStockRepository;
     let productRepository: InMemoryProductRepository;
-
-    const productId = 'product-1';
+    let productId: string;
 
     beforeEach(async () => {
         stockRepository = new InMemoryStockRepository();
         productRepository = new InMemoryProductRepository();
-        const product = new Product(productId, 'Product A', 'Description A', 99.9, new Date(), new Date());
-        productRepository.create(product);
+        const created = await productRepository.create({ name: 'Product A', description: 'Description A', price: 99.9 });
+        productId = created!.id;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -64,10 +62,9 @@ describe('CreateStockWithProductRelationUseCase (integration)', () => {
         it('throws BadRequestException when stock name already exists', async () => {
             await sut.execute({ productId, name: 'Warehouse 1', quantity: 10 });
 
-            const otherProduct = new Product('product-2', 'Product B', 'Description B', 50, new Date(), new Date());
-            await productRepository.create(otherProduct);
+            const otherCreated = await productRepository.create({ name: 'Product B', description: 'Description B', price: 50 });
 
-            await expect(sut.execute({ productId: otherProduct.id, name: 'Warehouse 1', quantity: 5 })).rejects.toMatchObject({
+            await expect(sut.execute({ productId: otherCreated!.id, name: 'Warehouse 1', quantity: 5 })).rejects.toMatchObject({
                 name: 'BadRequestException',
                 message: expect.stringContaining('A stock with this name already exists'),
             });
