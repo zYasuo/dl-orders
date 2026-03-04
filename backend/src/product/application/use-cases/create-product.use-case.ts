@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Product } from 'src/product/domain/entrities/product.entity';
+import { Product } from 'src/product/domain/entities/product.entity';
 import { IProductRepositoryPort } from '../../domain/ports/product-repository.ports';
 import { TCreateProduct } from '../dto/create-product.schema';
 
@@ -12,12 +12,12 @@ export class CreateProductUseCase {
 
         const product = Product.create({ name, description, price });
 
-        await this.productRepositoryPort.create(product);
+        const createdProduct = await this.productRepositoryPort.create(product);
 
-        if (!product) {
+        if (!createdProduct) {
             throw new InternalServerErrorException('Failed to create product');
         }
 
-        return product;
+        return createdProduct;
     }
 }

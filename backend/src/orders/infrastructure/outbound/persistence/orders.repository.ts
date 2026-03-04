@@ -9,7 +9,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
         super();
     }
 
-    async create(input: { productId: string; quantity: number; description: string }): Promise<Order> {
+    async create(input: { productId: string; quantity: number; description: string }): Promise<Order | null> {
         const order = await this.db.order.create({
             data: {
                 productId: input.productId,
@@ -17,6 +17,8 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 description: input.description,
             },
         });
+
+        if (!order) return null;
 
         return new Order({
             id: order.id,

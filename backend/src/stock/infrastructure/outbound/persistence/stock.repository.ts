@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { TCreateStockWithProductRelation } from 'src/stock/application/dto/create-stock-with-product-relation.schema';
 import { DbService } from '../../../../infrastructure/db/db.service';
@@ -44,23 +45,27 @@ export class StockRepository extends IStockRepositoryPort {
     }
 
     async updateQuantity(id: string, quantity: number): Promise<Stock | null> {
-        const row = await this.db.stock.update({
-            where: { id },
-            data: { quantity },
-        });
-
-        if (!row) return null;
-
-        return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
+        try {
+            const row = await this.db.stock.update({
+                where: { id },
+                data: { quantity },
+            });
+            return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
+        } catch (e) {
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') return null;
+            throw e;
+        }
     }
 
     async delete(id: string): Promise<Stock | null> {
-        const row = await this.db.stock.delete({
-            where: { id },
-        });
-
-        if (!row) return null;
-
-        return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
+        try {
+            const row = await this.db.stock.delete({
+                where: { id },
+            });
+            return new Stock(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
+        } catch (e) {
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') return null;
+            throw e;
+        }
     }
 }

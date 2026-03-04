@@ -15,6 +15,7 @@ export class CreateStockWithProductRelationUseCase {
         const { productId, name, quantity } = input;
 
         const product = await this.productRepositoryPort.findById(productId);
+
         if (!product) {
             throw new NotFoundException('Product not found');
         }

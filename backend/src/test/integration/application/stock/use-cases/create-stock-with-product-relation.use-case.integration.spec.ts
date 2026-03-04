@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Product } from '../../../../../product/domain/entrities/product.entity';
+import { Product } from '../../../../../product/domain/entities/product.entity';
 import { IProductRepositoryPort } from '../../../../../product/domain/ports/product-repository.ports';
 import { CreateStockWithProductRelationUseCase } from '../../../../../stock/application/use-cases/create-stock-with-product-relation.use-case';
 import { IStockRepositoryPort } from '../../../../../stock/domain/ports/stock-repository.port';
@@ -55,8 +55,10 @@ describe('CreateStockWithProductRelationUseCase (integration)', () => {
         it('throws BadRequestException when stock already exists for this product', async () => {
             await sut.execute({ productId, name: 'Warehouse 1', quantity: 10 });
 
-            await expect(sut.execute({ productId, name: 'Warehouse 2', quantity: 5 })).rejects.toThrow(BadRequestException);
-            await expect(sut.execute({ productId, name: 'Warehouse 2', quantity: 5 })).rejects.toThrow('Stock already exists for this product');
+            await expect(sut.execute({ productId, name: 'Warehouse 2', quantity: 5 })).rejects.toMatchObject({
+                name: 'BadRequestException',
+                message: expect.stringContaining('Stock already exists for this product'),
+            });
         });
 
         it('throws BadRequestException when stock name already exists', async () => {
@@ -65,10 +67,10 @@ describe('CreateStockWithProductRelationUseCase (integration)', () => {
             const otherProduct = new Product('product-2', 'Product B', 'Description B', 50, new Date(), new Date());
             await productRepository.create(otherProduct);
 
-            await expect(sut.execute({ productId: otherProduct.id, name: 'Warehouse 1', quantity: 5 })).rejects.toThrow(BadRequestException);
-            await expect(sut.execute({ productId: otherProduct.id, name: 'Warehouse 1', quantity: 5 })).rejects.toThrow(
-                'A stock with this name already exists',
-            );
+            await expect(sut.execute({ productId: otherProduct.id, name: 'Warehouse 1', quantity: 5 })).rejects.toMatchObject({
+                name: 'BadRequestException',
+                message: expect.stringContaining('A stock with this name already exists'),
+            });
         });
     });
 });

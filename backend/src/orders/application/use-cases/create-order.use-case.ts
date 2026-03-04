@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { OrderWasCreatedEvent } from '../../domain/events/order-was-created.event';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
@@ -12,11 +12,13 @@ export class CreateOrderUseCase {
     ) {}
 
     async execute(input: TCreateOrder) {
-        const order = await this.ordersRepositoryPort.create({
-            productId: input.productId,
-            quantity: input.quantity,
-            description: input.description,
-        });
+        const { productId, quantity, description } = input;
+
+        const order = await this.ordersRepositoryPort.create({ productId, quantity, description });
+
+        if (!order) {
+            throw new InternalServerErrorException('Failed to create order');
+        }
 
         await this.orderEventsPublisherPort.publishOrderWasCreated(new OrderWasCreatedEvent(order));
 

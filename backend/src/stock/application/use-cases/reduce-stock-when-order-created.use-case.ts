@@ -7,13 +7,16 @@ export class ReduceStockWhenOrderCreatedUseCase {
     constructor(private readonly stockRepositoryPort: IStockRepositoryPort) {}
 
     async execute(input: TReduceStock): Promise<void> {
-        const stock = await this.stockRepositoryPort.findByProductId(input.productId);
+        const { productId, quantity } = input;
+
+        const stock = await this.stockRepositoryPort.findByProductId(productId);
 
         if (!stock) {
             throw new NotFoundException('Stock not found');
         }
 
-        const newQuantity = stock.quantity - input.quantity;
+        const newQuantity = stock.quantity - quantity;
+
         if (newQuantity < 0) {
             throw new BadRequestException('Stock quantity is not enough');
         }
