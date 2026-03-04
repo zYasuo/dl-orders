@@ -6,20 +6,18 @@ import { OrderWasCreatedEvent } from '../../domain/events/order-was-created.even
 
 @Injectable()
 export class CreateOrderUseCase {
-  constructor(
-    private readonly ordersRepositoryPort: IOrdersRepositoryPort,
-    private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
-  ) {}
+    constructor(
+        private readonly ordersRepositoryPort: IOrdersRepositoryPort,
+        private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
+    ) {}
 
-  async execute(input: TCreateOrder) {
-    const order = await this.ordersRepositoryPort.create({
-      description: input.description,
-    });
+    async execute(input: TCreateOrder) {
+        const order = await this.ordersRepositoryPort.create({
+            description: input.description,
+        });
 
-    await this.orderEventsPublisherPort.publishOrderWasCreated(
-      new OrderWasCreatedEvent(order),
-    );
+        await this.orderEventsPublisherPort.publishOrderWasCreated(new OrderWasCreatedEvent(order));
 
-    return order;
-  }
+        return order;
+    }
 }
