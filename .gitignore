@@ -5,6 +5,9 @@ node_modules
 backend/dist
 backend/coverage
 
+# generated (Prisma client, etc.)
+**/generated
+
 # Logs
 logs
 *.log
