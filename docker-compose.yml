@@ -1,5 +1,4 @@
 services:
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -12,7 +11,7 @@ services:
     networks:
       - dl-orders-network
 
-  postgres:
+  postgres-write:
     image: postgres:17
     container_name: dl-orders-postgres
     restart: always
@@ -23,12 +22,29 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - dl-orders-postgres-data:/var/lib/postgresql/data
+      - dl-orders-postgres-write-data:/var/lib/postgresql/data
     networks:
       - dl-orders-network
+  postgres-read:
+    image: postgres:17
+    container_name: dl-orders-postgres-read
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_orders
+    ports:
+      - "5433:5432"
+    volumes:
+      - dl-orders-postgres-read-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    depends_on:
+      - postgres-write
 
 volumes:
-  dl-orders-postgres-data:
+  dl-orders-postgres-write-data:
+  dl-orders-postgres-read-data:
 
 networks:
   dl-orders-network:
