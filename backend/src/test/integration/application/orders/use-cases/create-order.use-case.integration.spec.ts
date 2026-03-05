@@ -1,22 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { IInventoryRepositoryPort } from '../../../../../inventory/domain/ports/inventory-repository.port';
 import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
-import { IProductRepositoryPort } from '../../../../../product/domain/ports/product-repository.ports';
 import { FakeOrderEventsPublisher } from '../../../../doubles/fake-order-events.publisher';
+import { InMemoryInventoryRepository } from '../../../../doubles/in-memory-inventory.repository';
 import { InMemoryOrdersRepository } from '../../../../doubles/in-memory-orders.repository';
-import { InMemoryProductRepository } from '../../../../doubles/in-memory-product.repository';
 
 describe('CreateOrderUseCase (integration)', () => {
     let sut: CreateOrderUseCase;
     let ordersRepository: InMemoryOrdersRepository;
-    let productRepository: InMemoryProductRepository;
+    let inventoryRepository: InMemoryInventoryRepository;
     let orderEventsPublisher: FakeOrderEventsPublisher;
 
     beforeEach(async () => {
         ordersRepository = new InMemoryOrdersRepository();
-        productRepository = new InMemoryProductRepository();
+        inventoryRepository = new InMemoryInventoryRepository();
         orderEventsPublisher = new FakeOrderEventsPublisher();
 
         const module: TestingModule = await Test.createTestingModule({
@@ -24,7 +24,7 @@ describe('CreateOrderUseCase (integration)', () => {
                 CreateOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-                { provide: IProductRepositoryPort, useValue: productRepository },
+                { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
             ],
         }).compile();
 
@@ -33,8 +33,17 @@ describe('CreateOrderUseCase (integration)', () => {
 
     describe('execute', () => {
         it('persists order and publishes OrderWasCreated', async () => {
-            const product = await productRepository.create({ name: 'Produto', description: 'Desc', price: 10 });
-            const input = { productId: product!.id, quantity: 1, description: 'test order', recipient: 'test@test.com' };
+            const created = await inventoryRepository.create({
+                name: 'Estoque Produto',
+                quantity: 5,
+                productId: 'product-123',
+            });
+            const input = {
+                productId: created!.productId,
+                quantity: 1,
+                description: 'test order',
+                recipient: 'test@test.com',
+            };
 
             const result = await sut.execute(input);
 

@@ -4,9 +4,9 @@ import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 import { NotificationModule } from './notification/application/notification.module';
 import { OrdersModule } from './orders/application/orders.module';
 import { ProductModule } from './product/application/product.module';
-import { StockModule } from './stock/application/stock.module';
+import { InventoryModule } from './inventory/application/inventory.module';
 
 @Module({
-    imports: [RabbitMQModule, DbModule, OrdersModule, StockModule, ProductModule, NotificationModule],
+    imports: [RabbitMQModule, DbModule, OrdersModule, InventoryModule, ProductModule, NotificationModule],
 })
 export class AppModule {}

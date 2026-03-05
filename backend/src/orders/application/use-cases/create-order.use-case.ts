@@ -1,5 +1,5 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { IProductRepositoryPort } from 'src/product/domain/ports/product-repository.ports';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { IInventoryRepositoryPort } from 'src/inventory/domain/ports/inventory-repository.port';
 import { OrderWasCreatedEvent } from '../../domain/events/order-was-created.event';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
@@ -11,16 +11,20 @@ export class CreateOrderUseCase {
     constructor(
         private readonly ordersRepositoryPort: IOrdersRepositoryPort,
         private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
-        private readonly productRepositoryPort: IProductRepositoryPort,
+        private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
     ) {}
 
     async execute(input: TCreateOrder) {
         const { productId, quantity, description, recipient } = input;
 
-        const existingProduct = await this.productRepositoryPort.findById(productId);
+        const inventory = await this.inventoryRepositoryPort.findByProductId(productId);
 
-        if (!existingProduct) {
-            throw new NotFoundException('Product not found');
+        if (!inventory) {
+            throw new NotFoundException('Inventory not available for this product');
+        }
+
+        if (inventory.quantity < quantity) {
+            throw new BadRequestException('Inventory quantity is not enough');
         }
 
         const createInput: ICreateOrder = {

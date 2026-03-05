@@ -1,21 +1,21 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Inventory } from '../../../../../inventory/domain/entities/inventory.entity';
+import { IInventoryRepositoryPort } from '../../../../../inventory/domain/ports/inventory-repository.port';
 import { CreateOrderUseCase } from '../../../../../orders/application/use-cases/create-order.use-case';
 import { Order, OrderStatus } from '../../../../../orders/domain/entities/order.entity';
 import { OrderWasCreatedEvent } from '../../../../../orders/domain/events/order-was-created.event';
 import { IOrderEventsPublisherPort } from '../../../../../orders/domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../../../../orders/domain/ports/orders-repository.port';
-import { Product } from '../../../../../product/domain/entities/product.entity';
-import { IProductRepositoryPort } from '../../../../../product/domain/ports/product-repository.ports';
 
 describe('CreateOrderUseCase', () => {
     let sut: CreateOrderUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
     let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
-    let productRepository: jest.Mocked<IProductRepositoryPort>;
+    let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeProduct = new Product('product-123', 'Produto Teste', 'Desc', 10, createdAt, createdAt);
+    const fakeInventory = new Inventory('inv-1', 'Estoque Produto', 10, 'product-123', createdAt, createdAt);
     const fakeOrder = new Order({
         id: 'id-123',
         description: 'test order',
@@ -39,19 +39,20 @@ describe('CreateOrderUseCase', () => {
             publishOrderWasCreated: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
 
-        productRepository = {
-            findById: jest.fn().mockResolvedValue(fakeProduct),
+        inventoryRepository = {
+            findByProductId: jest.fn().mockResolvedValue(fakeInventory),
             create: jest.fn(),
             findByName: jest.fn(),
-            update: jest.fn(),
-        } as unknown as jest.Mocked<IProductRepositoryPort>;
+            updateProductAvailable: jest.fn(),
+            delete: jest.fn(),
+        } as unknown as jest.Mocked<IInventoryRepositoryPort>;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreateOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-                { provide: IProductRepositoryPort, useValue: productRepository },
+                { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
             ],
         }).compile();
 
@@ -64,7 +65,7 @@ describe('CreateOrderUseCase', () => {
 
             const result = await sut.execute(input);
 
-            expect(productRepository.findById).toHaveBeenCalledWith('product-123');
+            expect(inventoryRepository.findByProductId).toHaveBeenCalledWith('product-123');
             expect(ordersRepository.create).toHaveBeenCalledTimes(1);
             expect(ordersRepository.create).toHaveBeenCalledWith({
                 productId: input.productId,
@@ -81,11 +82,25 @@ describe('CreateOrderUseCase', () => {
             expect(result).toEqual(fakeOrder);
         });
 
-        it('throws NotFoundException when product does not exist', async () => {
+        it('throws NotFoundException when product has no inventory', async () => {
             const input = { productId: 'non-existent', quantity: 1, description: 'order', recipient: 'test@test.com' };
-            productRepository.findById.mockResolvedValueOnce(null);
+            inventoryRepository.findByProductId.mockResolvedValueOnce(null);
 
-            await expect(sut.execute(input)).rejects.toThrow(new NotFoundException('Product not found'));
+            await expect(sut.execute(input)).rejects.toThrow(
+                new NotFoundException('Inventory not available for this product'),
+            );
+
+            expect(ordersRepository.create).not.toHaveBeenCalled();
+            expect(orderEventsPublisher.publishOrderWasCreated).not.toHaveBeenCalled();
+        });
+
+        it('throws BadRequestException when available quantity is not enough', async () => {
+            const input = { productId: 'product-123', quantity: 100, description: 'order', recipient: 'test@test.com' };
+            inventoryRepository.findByProductId.mockResolvedValueOnce(fakeInventory);
+
+            await expect(sut.execute(input)).rejects.toThrow(
+                new BadRequestException('Inventory quantity is not enough'),
+            );
 
             expect(ordersRepository.create).not.toHaveBeenCalled();
             expect(orderEventsPublisher.publishOrderWasCreated).not.toHaveBeenCalled();

@@ -22,7 +22,7 @@ model Order {
   @@map("orders")
 }
 
-model Stock {
+model Inventory {
   id         String   @id @default(uuid())
   sequenceId Int      @unique @default(autoincrement())
   name       String   @unique
@@ -33,7 +33,7 @@ model Stock {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@map("stocks")
+  @@map("inventories")
 }
 
 model Product {
@@ -45,8 +45,8 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  Stock  Stock[]
-  orders Order[]
+  Inventory Inventory[]
+  orders    Order[]
 
   @@map("products")
 }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { IProductRepositoryPort } from 'src/product/domain/ports/product-repository.ports';
-import { ProductRepository } from 'src/product/infrastructure/outbound/product.repository';
+import { IInventoryRepositoryPort } from 'src/inventory/domain/ports/inventory-repository.port';
+import { InventoryRepository } from 'src/inventory/infrastructure/outbound/persistence/inventory.repository';
 import { RabbitMQModule } from '../../infrastructure/rabbitmq/rabbitmq.module';
 import { IOrderEventsPublisherPort } from '../domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../domain/ports/orders-repository.port';
@@ -25,8 +25,8 @@ import { FindOrderByIdUseCase } from './use-cases/find-order-by-id.use-case';
             useClass: OrdersRabbitMqPublisher,
         },
         {
-            provide: IProductRepositoryPort,
-            useClass: ProductRepository,
+            provide: IInventoryRepositoryPort,
+            useClass: InventoryRepository,
         },
     ],
 })
