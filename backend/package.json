@@ -7,26 +7,46 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "build:orders": "nest build orders",
+    "build:inventory": "nest build inventory",
+    "build:product": "nest build product",
+    "build:notification": "nest build notification",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "start:orders": "nest start orders",
+    "start:inventory": "nest start inventory",
+    "start:product": "nest start product",
+    "start:notification": "nest start notification",
+    "start:dev:orders": "nest start orders --watch",
+    "start:dev:inventory": "nest start inventory --watch",
+    "start:dev:product": "nest start product --watch",
+    "start:dev:notification": "nest start notification --watch",
+    "start:debug:orders": "nest start orders --debug --watch",
+    "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "db:push": "prisma db push"
+    "prisma:orders:generate": "prisma generate --schema=apps/orders/prisma/schema.prisma",
+    "prisma:orders:push": "cd apps/orders/prisma && prisma db push",
+    "prisma:orders:migrate": "cd apps/orders/prisma && prisma migrate dev",
+    "prisma:inventory:generate": "prisma generate --schema=apps/inventory/prisma/schema.prisma",
+    "prisma:inventory:push": "cd apps/inventory/prisma && prisma db push",
+    "prisma:inventory:migrate": "cd apps/inventory/prisma && prisma migrate dev",
+    "prisma:product:generate": "prisma generate --schema=apps/product/prisma/schema.prisma",
+    "prisma:product:push": "cd apps/product/prisma && prisma db push",
+    "prisma:product:migrate": "cd apps/product/prisma && prisma migrate dev",
+    "prisma:notification:generate": "prisma generate --schema=apps/notification/prisma/schema.prisma",
+    "prisma:notification:push": "cd apps/notification/prisma && prisma db push",
+    "prisma:notification:migrate": "cd apps/notification/prisma && prisma migrate dev",
+    "prisma:generate:all": "npm run prisma:orders:generate && npm run prisma:inventory:generate && npm run prisma:product:generate && npm run prisma:notification:generate"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/microservices": "^11.1.14",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
-    "@prisma/extension-read-replicas": "^0.5.0",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
     "dotenv": "^16.4.5",
@@ -69,17 +89,18 @@
       "ts"
     ],
     "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/$1"
+      "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
     },
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "apps/**/*.(t|j)s",
+      "libs/**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "./coverage",
     "testEnvironment": "node"
   }
 }

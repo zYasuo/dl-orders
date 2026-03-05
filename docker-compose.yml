@@ -3,28 +3,31 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672" # AMQP
-      - "15672:15672" # Management UI
+      - "5672:5672"
+      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
     networks:
       - dl-orders-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  postgres-write:
+  postgres-orders:
     image: postgres:17
-    container_name: dl-orders-postgres
+    container_name: dl-orders-postgres-orders
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=dl_orders
-      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD:-replicator}
+      - POSTGRES_DB=dl_orders_svc
     ports:
       - "5432:5432"
     volumes:
-      - dl-orders-postgres-write-data:/var/lib/postgresql/data
-      - ./docker/postgres-primary/init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
+      - dl-orders-postgres-orders-data:/var/lib/postgresql/data
     networks:
       - dl-orders-network
     healthcheck:
@@ -33,29 +36,146 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres-read:
+  postgres-inventory:
     image: postgres:17
-    container_name: dl-orders-postgres-read
+    container_name: dl-orders-postgres-inventory
     restart: always
     environment:
-      - PGDATA=/var/lib/postgresql/data
-      - REPLICATION_USER=replicator
-      - REPLICATION_PASSWORD=${REPLICATION_PASSWORD:-replicator}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_inventory_svc
     ports:
       - "5433:5432"
     volumes:
-      - dl-orders-postgres-read-data:/var/lib/postgresql/data
-      - ./docker/postgres-replica/entrypoint.sh:/entrypoint-replica.sh
-    entrypoint: ["sh", "/entrypoint-replica.sh"]
+      - dl-orders-postgres-inventory-data:/var/lib/postgresql/data
     networks:
       - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-product:
+    image: postgres:17
+    container_name: dl-orders-postgres-product
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_product_svc
+    ports:
+      - "5434:5432"
+    volumes:
+      - dl-orders-postgres-product-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-notification:
+    image: postgres:17
+    container_name: dl-orders-postgres-notification
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_notification_svc
+    ports:
+      - "5435:5432"
+    volumes:
+      - dl-orders-postgres-notification-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  orders-service:
+    build:
+      context: ./backend
+      dockerfile: apps/orders/Dockerfile
+    container_name: orders-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-orders:5432/dl_orders_svc
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=orders_queue
     depends_on:
-      postgres-write:
+      postgres-orders:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
+
+  inventory-service:
+    build:
+      context: ./backend
+      dockerfile: apps/inventory/Dockerfile
+    container_name: inventory-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-inventory:5432/dl_inventory_svc
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=inventory_queue
+    depends_on:
+      postgres-inventory:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
+
+  product-service:
+    build:
+      context: ./backend
+      dockerfile: apps/product/Dockerfile
+    container_name: product-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-product:5432/dl_product_svc
+    depends_on:
+      postgres-product:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: apps/notification/Dockerfile
+    container_name: notification-service
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-notification:5432/dl_notification_svc
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=notification_queue
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notificações <onboarding@resend.dev>}
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
 
 volumes:
-  dl-orders-postgres-write-data:
-  dl-orders-postgres-read-data:
+  dl-orders-postgres-orders-data:
+  dl-orders-postgres-inventory-data:
+  dl-orders-postgres-product-data:
+  dl-orders-postgres-notification-data:
 
 networks:
   dl-orders-network:

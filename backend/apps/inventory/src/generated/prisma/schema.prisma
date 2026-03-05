@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Inventory {
+  id         String   @id @default(uuid())
+  sequenceId Int      @unique @default(autoincrement())
+  name       String   @unique
+  quantity   Int
+  productId  String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("inventories")
+}
