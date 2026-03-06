@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
 import { OrderStatus } from '../../../src/domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { FakeOrderEventsPublisher } from '../../doubles/fake-order-events.publisher';
@@ -14,12 +15,17 @@ describe('CreateOrderUseCase (integration)', () => {
     beforeEach(async () => {
         ordersRepository = new InMemoryOrdersRepository();
         orderEventsPublisher = new FakeOrderEventsPublisher();
+        const orderAuditLog: IOrderAuditLogPort = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue([]),
+        };
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreateOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
+                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
             ],
         }).compile();
 

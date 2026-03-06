@@ -40,6 +40,8 @@
     "prisma:generate:all": "npm run prisma:orders:generate && npm run prisma:inventory:generate && npm run prisma:product:generate && npm run prisma:notification:generate"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",

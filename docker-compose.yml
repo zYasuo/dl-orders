@@ -16,6 +16,19 @@ services:
       timeout: 5s
       retries: 5
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - ./docker/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+    networks:
+      - dl-orders-network
+
   postgres-orders:
     image: postgres:17
     container_name: dl-orders-postgres-orders
@@ -108,11 +121,16 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres-orders:5432/dl_orders_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=orders_queue
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - DYNAMODB_AUDIT_TABLE=OrderAuditLog
     depends_on:
       postgres-orders:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      localstack:
+        condition: service_started
     networks:
       - dl-orders-network
 
@@ -128,11 +146,16 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres-inventory:5432/dl_inventory_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=inventory_queue
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - DYNAMODB_AUDIT_TABLE=ReservationAuditLog
     depends_on:
       postgres-inventory:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      localstack:
+        condition: service_started
     networks:
       - dl-orders-network
 
@@ -163,11 +186,16 @@ services:
       - QUEUE_NAME=notification_queue
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notificações <onboarding@resend.dev>}
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - DYNAMODB_AUDIT_TABLE=NotificationAuditLog
     depends_on:
       postgres-notification:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      localstack:
+        condition: service_started
     networks:
       - dl-orders-network
 

@@ -1,16 +1,16 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InventoryReservedEvent } from '@app/shared';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '../../domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
-import { InventoryReservedEvent } from '@app/shared';
 
 @Injectable()
 export class ConfirmOrderUseCase {
-    private readonly logger = new Logger(ConfirmOrderUseCase.name);
-
     constructor(
         private readonly ordersRepositoryPort: IOrdersRepositoryPort,
         private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
+        private readonly orderAuditLogPort: IOrderAuditLogPort,
     ) {}
 
     async execute(event: InventoryReservedEvent): Promise<void> {
@@ -20,7 +20,17 @@ export class ConfirmOrderUseCase {
             throw new NotFoundException(`Order ${event.orderId} not found`);
         }
 
-        this.logger.log(`Order ${order.id} confirmed`);
+        await this.orderAuditLogPort.log({
+            orderId: order.id,
+            action: 'ORDER_CONFIRMED',
+            timestamp: new Date().toISOString(),
+            details: {
+                productId: order.productId,
+                quantity: order.quantity,
+                description: order.description,
+                recipient: order.recipient,
+            },
+        });
 
         await this.orderEventsPublisherPort.publishOrderConfirmed({
             orderId: order.id,

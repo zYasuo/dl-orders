@@ -2,6 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfirmOrderUseCase } from '../../../src/application/use-cases/confirm-order.use-case';
 import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
@@ -9,6 +10,7 @@ describe('ConfirmOrderUseCase', () => {
     let sut: ConfirmOrderUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
     let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
+    let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const confirmedOrder = new Order({
@@ -36,11 +38,17 @@ describe('ConfirmOrderUseCase', () => {
             publishOrderConfirmed: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
 
+        orderAuditLog = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue([]),
+        } as unknown as jest.Mocked<IOrderAuditLogPort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ConfirmOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
+                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
             ],
         }).compile();
 

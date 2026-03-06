@@ -1,16 +1,25 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UsePipes } from '@nestjs/common';
 import { ZodValidationPipe } from '@app/shared';
 import { SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { Inventory } from '../../../domain/entities/inventory.entity';
+import { IReservationAuditLogPort } from '../../../domain/ports/reservation-audit-log.port';
 
 @Controller('inventories')
 export class InventoryController {
-    constructor(private readonly createInventoryUseCase: CreateInventoryUseCase) {}
+    constructor(
+        private readonly createInventoryUseCase: CreateInventoryUseCase,
+        private readonly reservationAuditLogPort: IReservationAuditLogPort,
+    ) {}
 
     @Post()
     @UsePipes(new ZodValidationPipe(SCreateInventory))
     async create(@Body() input: TCreateInventory): Promise<Inventory> {
         return this.createInventoryUseCase.execute(input);
+    }
+
+    @Get('reservations/:orderId/audit-log')
+    getReservationAuditLog(@Param('orderId') orderId: string) {
+        return this.reservationAuditLogPort.getByOrderId(orderId);
     }
 }

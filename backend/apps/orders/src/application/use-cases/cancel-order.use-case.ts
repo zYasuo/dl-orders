@@ -1,13 +1,15 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { OrderStatus } from '../../domain/entities/order.entity';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { InventoryReservationFailedEvent } from '@app/shared';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { OrderStatus } from '../../domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
+import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 
 @Injectable()
 export class CancelOrderUseCase {
-    private readonly logger = new Logger(CancelOrderUseCase.name);
-
-    constructor(private readonly ordersRepositoryPort: IOrdersRepositoryPort) {}
+    constructor(
+        private readonly ordersRepositoryPort: IOrdersRepositoryPort,
+        private readonly orderAuditLogPort: IOrderAuditLogPort,
+    ) {}
 
     async execute(event: InventoryReservationFailedEvent): Promise<void> {
         const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CANCELLED);
@@ -16,6 +18,11 @@ export class CancelOrderUseCase {
             throw new NotFoundException(`Order ${event.orderId} not found`);
         }
 
-        this.logger.log(`Order ${order.id} cancelled: ${event.reason}`);
+        await this.orderAuditLogPort.log({
+            orderId: order.id,
+            action: 'ORDER_CANCELLED',
+            timestamp: new Date().toISOString(),
+            details: { reason: event.reason },
+        });
     }
 }

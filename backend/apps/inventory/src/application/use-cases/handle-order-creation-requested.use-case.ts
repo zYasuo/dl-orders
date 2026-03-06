@@ -1,24 +1,36 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { OrderCreationRequestedEvent } from '@app/shared';
-import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
+import { Injectable } from '@nestjs/common';
 import { IInventoryEventsPublisherPort } from '../../domain/ports/inventory-events-publisher.port';
+import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
+import { IReservationAuditLogPort } from '../../domain/ports/reservation-audit-log.port';
 
 @Injectable()
 export class HandleOrderCreationRequestedUseCase {
-    private readonly logger = new Logger(HandleOrderCreationRequestedUseCase.name);
-
     constructor(
         private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
         private readonly inventoryEventsPublisherPort: IInventoryEventsPublisherPort,
+        private readonly reservationAuditLogPort: IReservationAuditLogPort,
     ) {}
 
     async execute(event: OrderCreationRequestedEvent): Promise<void> {
         const { orderId, productId, quantity } = event;
 
+        await this.reservationAuditLogPort.log({
+            orderId,
+            action: 'RESERVATION_REQUESTED',
+            timestamp: new Date().toISOString(),
+            details: { productId, quantity },
+        });
+
         const inventory = await this.inventoryRepositoryPort.findByProductId(productId);
 
         if (!inventory) {
-            this.logger.warn(`No inventory for product ${productId}`);
+            await this.reservationAuditLogPort.log({
+                orderId,
+                action: 'RESERVATION_FAILED',
+                timestamp: new Date().toISOString(),
+                details: { productId, quantity, reason: 'Inventory not available for this product' },
+            });
             await this.inventoryEventsPublisherPort.publishInventoryReservationFailed({
                 orderId,
                 productId,
@@ -29,7 +41,12 @@ export class HandleOrderCreationRequestedUseCase {
         }
 
         if (inventory.quantity < quantity) {
-            this.logger.warn(`Insufficient stock for product ${productId}: have ${inventory.quantity}, need ${quantity}`);
+            await this.reservationAuditLogPort.log({
+                orderId,
+                action: 'RESERVATION_FAILED',
+                timestamp: new Date().toISOString(),
+                details: { productId, quantity, reason: 'Insufficient inventory quantity' },
+            });
             await this.inventoryEventsPublisherPort.publishInventoryReservationFailed({
                 orderId,
                 productId,
@@ -39,12 +56,15 @@ export class HandleOrderCreationRequestedUseCase {
             return;
         }
 
-        const updated = await this.inventoryRepositoryPort.updateProductAvailable(
-            inventory.id,
-            inventory.quantity - quantity,
-        );
+        const updated = await this.inventoryRepositoryPort.updateProductAvailable(inventory.id, inventory.quantity - quantity);
 
         if (!updated) {
+            await this.reservationAuditLogPort.log({
+                orderId,
+                action: 'RESERVATION_FAILED',
+                timestamp: new Date().toISOString(),
+                details: { productId, quantity, reason: 'Failed to update inventory' },
+            });
             await this.inventoryEventsPublisherPort.publishInventoryReservationFailed({
                 orderId,
                 productId,
@@ -54,7 +74,12 @@ export class HandleOrderCreationRequestedUseCase {
             return;
         }
 
-        this.logger.log(`Inventory reserved for order ${orderId}`);
+        await this.reservationAuditLogPort.log({
+            orderId,
+            action: 'RESERVED',
+            timestamp: new Date().toISOString(),
+            details: { productId, quantity },
+        });
         await this.inventoryEventsPublisherPort.publishInventoryReserved({
             orderId,
             productId,

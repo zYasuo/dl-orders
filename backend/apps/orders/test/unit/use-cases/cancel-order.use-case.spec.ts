@@ -2,11 +2,13 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelOrderUseCase } from '../../../src/application/use-cases/cancel-order.use-case';
 import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('CancelOrderUseCase', () => {
     let sut: CancelOrderUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
+    let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const cancelledOrder = new Order({
@@ -29,10 +31,16 @@ describe('CancelOrderUseCase', () => {
             updateStatus: jest.fn().mockResolvedValue(cancelledOrder),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
+        orderAuditLog = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue([]),
+        } as unknown as jest.Mocked<IOrderAuditLogPort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CancelOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
             ],
         }).compile();
 
