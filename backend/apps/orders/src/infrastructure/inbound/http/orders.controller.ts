@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, Post } from '@nestjs/common';
 import { ZodValidationPipe } from '@app/shared';
 import { SCreateOrder, type TCreateOrder } from '../../../application/dto/create-order.dto';
 import { CreateOrderUseCase } from '../../../application/use-cases/create-order.use-case';
@@ -17,8 +17,7 @@ export class OrdersController {
 
     @Post()
     @HttpCode(HttpStatus.ACCEPTED)
-    @UsePipes(new ZodValidationPipe(SCreateOrder))
-    createOrder(@Body() dto: TCreateOrder) {
+    createOrder(@Body(new ZodValidationPipe(SCreateOrder)) dto: TCreateOrder) {
         return this.createOrderUseCase.execute(dto);
     }
 

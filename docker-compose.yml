@@ -109,6 +109,46 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-auth:
+    image: postgres:17
+    container_name: dl-orders-postgres-auth
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_auth_svc
+    ports:
+      - "5436:5432"
+    volumes:
+      - dl-orders-postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-users:
+    image: postgres:17
+    container_name: dl-orders-postgres-users
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_users_svc
+    ports:
+      - "5437:5432"
+    volumes:
+      - dl-orders-postgres-users-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   orders-service:
     build:
       context: ./backend
@@ -204,11 +244,59 @@ services:
     networks:
       - dl-orders-network
 
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: apps/auth/Dockerfile
+    container_name: auth-service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-auth:5432/dl_auth_svc
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - JWT_EXPIRES_IN=1d
+      - OTP_EXPIRES_IN_MINUTES=10
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Auth <onboarding@resend.dev>}
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=auth_queue
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
+
+  users-service:
+    build:
+      context: ./backend
+      dockerfile: apps/users/Dockerfile
+    container_name: users-service
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-users:5432/dl_users_svc
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=users_queue
+    depends_on:
+      postgres-users:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - dl-orders-network
+
 volumes:
   dl-orders-postgres-orders-data:
   dl-orders-postgres-inventory-data:
   dl-orders-postgres-product-data:
   dl-orders-postgres-notification-data:
+  dl-orders-postgres-auth-data:
+  dl-orders-postgres-users-data:
 
 networks:
   dl-orders-network:

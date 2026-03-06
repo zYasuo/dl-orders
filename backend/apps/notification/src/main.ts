@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { snakeToCamelBody } from '@app/shared';
 import { NotificationModule } from './notification.module';
 
 async function bootstrap() {
     const app = await NestFactory.create(NotificationModule);
     const configService = app.get(ConfigService);
+
+    app.use(snakeToCamelBody);
 
     app.connectMicroservice<MicroserviceOptions>({
         transport: Transport.RMQ,

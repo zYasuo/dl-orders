@@ -8,7 +8,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 
 ## Tech highlights
 
-- **NestJS monorepo** — one repo, four apps: orders, inventory, product, notification
+- **NestJS monorepo** — one repo, six apps: orders, inventory, product, notification, auth, users
 - **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, order confirmed)
 - **Hexagonal architecture** per app — domain (entities, ports), application (use cases), infrastructure (HTTP, messaging, persistence)
 - **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
@@ -31,6 +31,7 @@ flowchart LR
     Inventory -->|"inventory.reserved"| Orders
     Inventory -->|"inventory.reservation_failed"| Orders
     Orders -->|"order.confirmed"| Notification
+    Auth -->|"user.verified"| Users
     Product[Product]
 ```
 
@@ -38,6 +39,8 @@ flowchart LR
 - **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`.
 - **Product** — HTTP-only catalog (e.g. create product); no messaging.
 - **Notification** — Listens for `order.confirmed` and sends email (e.g. via Resend).
+- **Auth** — Signup (with email OTP), verify OTP, signin; issues JWT. Publishes `user.verified` when email is confirmed.
+- **Users** — Listens for `user.verified`, stores user profile. HTTP `GET/PATCH /users/me` protected by JWT.
 
 ## Practices used
 
@@ -60,7 +63,7 @@ flowchart LR
 
 - **Root** — npm workspace; only `backend` is a workspace member. Scripts: Docker, dev, build, test, lint.
 - **backend/** — NestJS monorepo:
-  - **apps/** — `orders`, `inventory`, `product`, `notification` (each with its own `main.ts`, Prisma schema, optional Dockerfile).
+  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users` (each with its own `main.ts`, Prisma schema, optional Dockerfile).
   - **libs/shared** — constants, event types, validation.
   - **scripts/** — e.g. DynamoDB table init for local/CI.
 
@@ -95,7 +98,7 @@ flowchart LR
    npm run prisma:orders:push -w backend
    ```
 
-   Repeat for `inventory`, `product`, `notification` (see `backend/package.json` scripts).
+   Repeat for `inventory`, `product`, `notification`, `auth`, `users` (see `backend/package.json` scripts).
 
 4. **Env**  
    Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`). Copy from `.env.example` if present.
@@ -114,9 +117,11 @@ flowchart LR
    npm run start:dev:inventory
    npm run start:dev:product
    npm run start:dev:notification
+   npm run start:dev:auth
+   npm run start:dev:users
    ```
 
-   Orders (3001), inventory (3002), product (3003), notification (3004 when HTTP is enabled in compose).
+   Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006).
 
 ## Scripts reference
 
@@ -136,4 +141,4 @@ flowchart LR
 
 ---
 
-For more detail per service, see the READMEs in `backend/apps/orders`, `backend/apps/inventory`, `backend/apps/product`, and `backend/apps/notification`.
+For more detail per service, see the READMEs in `backend/apps/orders`, `backend/apps/inventory`, `backend/apps/product`, `backend/apps/notification`, `backend/apps/auth`, and `backend/apps/users`.

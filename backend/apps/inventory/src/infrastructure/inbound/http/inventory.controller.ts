@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ZodValidationPipe } from '@app/shared';
 import { SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
@@ -13,8 +13,7 @@ export class InventoryController {
     ) {}
 
     @Post()
-    @UsePipes(new ZodValidationPipe(SCreateInventory))
-    async create(@Body() input: TCreateInventory): Promise<Inventory> {
+    async create(@Body(new ZodValidationPipe(SCreateInventory)) input: TCreateInventory): Promise<Inventory> {
         return this.createInventoryUseCase.execute(input);
     }
 
