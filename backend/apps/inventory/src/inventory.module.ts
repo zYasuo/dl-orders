@@ -9,8 +9,8 @@ import { IReservationAuditLogPort } from './domain/ports/reservation-audit-log.p
 import { InventoryController } from './infrastructure/inbound/http/inventory.controller';
 import { OrderCreationRequestedConsumer } from './infrastructure/inbound/messaging/order-creation-requested.consumer';
 import { InventoryRabbitMqPublisher } from './infrastructure/outbound/messaging/inventory-events.publisher';
-import { DynamoDBReservationAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb-reservation-audit-log.repository';
-import { InventoryRepository } from './infrastructure/outbound/persistence/inventory.repository';
+import { DynamoDBReservationAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/reservation-audit-log.repository';
+import { InventoryRepository } from './infrastructure/outbound/persistence/sql/inventory.repository';
 import { CreateInventoryUseCase } from './application/use-cases/create-inventory.use-case';
 import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
 

@@ -16,7 +16,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Outbound
 
-- **Persistence:** Postgres via Prisma only; no events, no DynamoDB.
+- **Persistence:** `persistence/sql/` (products via Prisma) only; no events, no DynamoDB.
 
 ## Data
 

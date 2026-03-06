@@ -3,6 +3,7 @@ import { CreateOrderUseCase } from '../../../src/application/use-cases/create-or
 import { OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
+import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { FakeOrderEventsPublisher } from '../../doubles/fake-order-events.publisher';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
@@ -19,6 +20,10 @@ describe('CreateOrderUseCase (integration)', () => {
             log: jest.fn().mockResolvedValue(undefined),
             getByOrderId: jest.fn().mockResolvedValue([]),
         };
+        const orderSummary: IOrderSummaryPort = {
+            put: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue(null),
+        };
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -26,6 +31,7 @@ describe('CreateOrderUseCase (integration)', () => {
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
                 { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+                { provide: IOrderSummaryPort, useValue: orderSummary },
             ],
         }).compile();
 

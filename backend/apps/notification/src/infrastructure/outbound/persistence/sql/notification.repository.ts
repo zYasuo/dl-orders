@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from '../../db/db.service';
+import { DbService } from '../../../db/db.service';
 import {
     Notification,
     INotificationStatus,
     INotificationType,
-} from '../../../domain/entities/notification.entity';
-import { INotificationRepositoryPort } from '../../../domain/ports/notification-repository.port';
-import { ICreateNotification, IUpdateNotification } from '../../../domain/types/notification-repository.types';
+} from '../../../../domain/entities/notification.entity';
+import { INotificationRepositoryPort } from '../../../../domain/ports/notification-repository.port';
+import { ICreateNotification, IUpdateNotification } from '../../../../domain/types/notification-repository.types';
 
 @Injectable()
 export class NotificationRepository extends INotificationRepositoryPort {

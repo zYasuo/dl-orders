@@ -20,7 +20,7 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Outbound
 
-- **Persistence:** Postgres via Prisma (inventory/reservations), DynamoDB (reservation audit log).
+- **Persistence:** `persistence/sql/` (inventory via Prisma), `persistence/dynamodb/` (reservation audit log).
 - **Events:** `inventory.reserved`, `inventory.reservation_failed`.
 
 ## Data

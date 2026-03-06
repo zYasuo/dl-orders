@@ -1,30 +1,33 @@
 # Notification service
 
-Sends notifications (e.g. email) when an order is confirmed. Message-driven only; no HTTP API.
+Sends notifications (e.g. email) when an order is confirmed. Listens for `order.confirmed` and exposes HTTP to list user notifications.
 
 ## Role
 
-- **Events in:** Listens for `order.confirmed` (from orders). Runs the notification use case (e.g. send email via Resend) and records the outcome in an audit log.
+- **Events in:** Listens for `order.confirmed` (from orders). Runs the notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model.
+- **HTTP:** `GET /users/:userId/notifications` to list notifications for a user (e.g. by email until auth exists).
 
 ## Ports
 
 - **INotificationRepositoryPort** — Persist notification records (Postgres/Prisma).
 - **IEmailSenderPort** — Send email (e.g. Resend adapter).
 - **INotificationAuditLogPort** — Append notification audit entries (DynamoDB).
+- **IUserNotificationsPort** — Read/write user notifications list (DynamoDB).
 
 ## Inbound
 
-- **Messaging:** `order.confirmed` only; no HTTP controllers.
+- **HTTP:** `GET /users/:userId/notifications` (optional query `limit`, `cursor`).
+- **Messaging:** `order.confirmed`.
 
 ## Outbound
 
-- **Persistence:** Postgres (notifications), DynamoDB (notification audit log).
+- **Persistence:** `persistence/sql/` (notifications via Prisma), `persistence/dynamodb/` (notification audit log, user notifications).
 - **Email:** Outbound email via Resend (or similar) using `IEmailSenderPort`.
 
 ## Data
 
 - **Postgres** — Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
-- **DynamoDB** — Notification audit log table (e.g. NotificationAuditLog); LocalStack in dev.
+- **DynamoDB** — Notification audit log (NotificationAuditLog), user notifications (UserNotifications); LocalStack in dev.
 
 ## Run locally
 

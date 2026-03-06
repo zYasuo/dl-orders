@@ -12,6 +12,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 - **IOrdersRepositoryPort** — Persist and load orders (Postgres/Prisma).
 - **IOrderEventsPublisherPort** — Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
 - **IOrderAuditLogPort** — Append audit entries (DynamoDB).
+- **IOrderSummaryPort** — Read/write order summary read model (DynamoDB).
 
 ## Inbound
 
@@ -20,13 +21,13 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Outbound
 
-- **Persistence:** Postgres via Prisma (orders), DynamoDB (audit log).
+- **Persistence:** `persistence/sql/` (orders via Prisma), `persistence/dynamodb/` (order audit log, order summary).
 - **Events:** `order.creation_requested` (after create), `order.confirmed` (after confirm).
 
 ## Data
 
 - **Postgres** — Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
-- **DynamoDB** — Audit log table (e.g. OrderAuditLog); LocalStack in dev, config via AWS env vars.
+- **DynamoDB** — Audit log (OrderAuditLog), order summaries (OrderSummaries); LocalStack in dev, config via AWS env vars.
 
 ## Run locally
 

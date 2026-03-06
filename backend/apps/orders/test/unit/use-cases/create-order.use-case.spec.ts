@@ -4,6 +4,7 @@ import { CreateOrderUseCase } from '../../../src/application/use-cases/create-or
 import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
+import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('CreateOrderUseCase', () => {
@@ -11,6 +12,7 @@ describe('CreateOrderUseCase', () => {
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
     let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
     let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
+    let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeOrder = new Order({
@@ -43,12 +45,18 @@ describe('CreateOrderUseCase', () => {
             getByOrderId: jest.fn().mockResolvedValue([]),
         } as unknown as jest.Mocked<IOrderAuditLogPort>;
 
+        orderSummary = {
+            put: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue(null),
+        } as unknown as jest.Mocked<IOrderSummaryPort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreateOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
                 { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+                { provide: IOrderSummaryPort, useValue: orderSummary },
             ],
         }).compile();
 
@@ -80,6 +88,18 @@ describe('CreateOrderUseCase', () => {
                     description: fakeOrder.description,
                     recipient: fakeOrder.recipient,
                 },
+            });
+
+            expect(orderSummary.put).toHaveBeenCalledTimes(1);
+            expect(orderSummary.put).toHaveBeenCalledWith({
+                orderId: fakeOrder.id,
+                status: fakeOrder.status,
+                productId: fakeOrder.productId,
+                quantity: fakeOrder.quantity,
+                description: fakeOrder.description,
+                recipient: fakeOrder.recipient,
+                createdAt: fakeOrder.createdAt.toISOString(),
+                updatedAt: expect.any(String),
             });
 
             expect(orderEventsPublisher.publishOrderCreationRequested).toHaveBeenCalledTimes(1);

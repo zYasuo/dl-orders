@@ -1,10 +1,13 @@
 import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { IOrderAuditLogPort, TOrderAuditEvent } from '../../../domain/ports/order-audit-log.port';
+import {
+    INotificationAuditLogPort,
+    TNotificationAuditEvent,
+} from '../../../../domain/ports/notification-audit-log.port';
 
 @Injectable()
-export class DynamoDBOrderAuditLogRepository extends IOrderAuditLogPort {
+export class DynamoDBNotificationAuditLogRepository extends INotificationAuditLogPort {
     private readonly tableName: string;
 
     constructor(
@@ -15,7 +18,7 @@ export class DynamoDBOrderAuditLogRepository extends IOrderAuditLogPort {
         this.tableName = configService.getOrThrow<string>('DYNAMODB_AUDIT_TABLE');
     }
 
-    async log(event: TOrderAuditEvent): Promise<void> {
+    async log(event: TNotificationAuditEvent): Promise<void> {
         const { orderId, timestamp, action, details } = event;
 
         await this.docClient.send(
@@ -31,7 +34,7 @@ export class DynamoDBOrderAuditLogRepository extends IOrderAuditLogPort {
         );
     }
 
-    async getByOrderId(orderId: string): Promise<TOrderAuditEvent[]> {
+    async getByOrderId(orderId: string): Promise<TNotificationAuditEvent[]> {
         const result = await this.docClient.send(
             new QueryCommand({
                 TableName: this.tableName,

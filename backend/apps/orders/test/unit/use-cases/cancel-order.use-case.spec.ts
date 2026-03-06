@@ -3,12 +3,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CancelOrderUseCase } from '../../../src/application/use-cases/cancel-order.use-case';
 import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
+import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('CancelOrderUseCase', () => {
     let sut: CancelOrderUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
     let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
+    let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const cancelledOrder = new Order({
@@ -36,11 +38,17 @@ describe('CancelOrderUseCase', () => {
             getByOrderId: jest.fn().mockResolvedValue([]),
         } as unknown as jest.Mocked<IOrderAuditLogPort>;
 
+        orderSummary = {
+            put: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue(null),
+        } as unknown as jest.Mocked<IOrderSummaryPort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CancelOrderUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
                 { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+                { provide: IOrderSummaryPort, useValue: orderSummary },
             ],
         }).compile();
 
@@ -54,6 +62,17 @@ describe('CancelOrderUseCase', () => {
             await sut.execute(event);
 
             expect(ordersRepository.updateStatus).toHaveBeenCalledWith('order-1', OrderStatus.CANCELLED);
+            expect(orderSummary.put).toHaveBeenCalledTimes(1);
+            expect(orderSummary.put).toHaveBeenCalledWith({
+                orderId: cancelledOrder.id,
+                status: cancelledOrder.status,
+                productId: cancelledOrder.productId,
+                quantity: cancelledOrder.quantity,
+                description: cancelledOrder.description,
+                recipient: cancelledOrder.recipient,
+                createdAt: cancelledOrder.createdAt.toISOString(),
+                updatedAt: expect.any(String),
+            });
         });
 
         it('throws NotFoundException when order does not exist', async () => {

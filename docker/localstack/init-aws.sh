@@ -20,3 +20,15 @@ create_table \
   --attribute-definitions AttributeName=orderId,AttributeType=S AttributeName=timestamp,AttributeType=S \
   --key-schema AttributeName=orderId,KeyType=HASH AttributeName=timestamp,KeyType=RANGE \
   --billing-mode PAY_PER_REQUEST
+
+create_table \
+  --table-name OrderSummaries \
+  --attribute-definitions AttributeName=orderId,AttributeType=S \
+  --key-schema AttributeName=orderId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+
+create_table \
+  --table-name UserNotifications \
+  --attribute-definitions AttributeName=userId,AttributeType=S AttributeName=timestamp,AttributeType=S \
+  --key-schema AttributeName=userId,KeyType=HASH AttributeName=timestamp,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST

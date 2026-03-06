@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '.prisma/orders-client';
-import { DbService } from '../../db/db.service';
-import { Order, OrderStatus } from '../../../domain/entities/order.entity';
-import { IOrdersRepositoryPort } from '../../../domain/ports/orders-repository.port';
-import { ICreateOrder } from '../../../domain/types/order-repository.types';
+import { DbService } from '../../../db/db.service';
+import { Order, OrderStatus } from '../../../../domain/entities/order.entity';
+import { IOrdersRepositoryPort } from '../../../../domain/ports/orders-repository.port';
+import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 
 @Injectable()
 export class OrdersRepository extends IOrdersRepositoryPort {
@@ -51,6 +51,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 where: { id },
                 data: { status: status as any },
             });
+
             return new Order({
                 id: item.id,
                 productId: item.productId,

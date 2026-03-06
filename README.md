@@ -44,7 +44,7 @@ flowchart LR
 - **Hexagonal (ports & adapters)**  
   - **Domain:** entities and ports (repository, event publisher, audit log, etc.).  
   - **Application:** use cases and DTOs; no infra here.  
-  - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (Prisma repos, DynamoDB audit, RabbitMQ publishers, email).  
+  - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (persistence, messaging, email). Persistence adapters live under `infrastructure/outbound/persistence/`, split into **sql/** (Prisma/Postgres) and **dynamodb/** (DynamoDB) so it’s clear which store each repo uses.  
   Wiring happens in the app module: ports bound to concrete implementations.
 
 - **Event-driven**  
@@ -116,7 +116,7 @@ flowchart LR
    npm run start:dev:notification
    ```
 
-   Orders (e.g. 3001), inventory (3002), product (3003); notification is message-driven only (no HTTP port in compose by default).
+   Orders (3001), inventory (3002), product (3003), notification (3004 when HTTP is enabled in compose).
 
 ## Scripts reference
 

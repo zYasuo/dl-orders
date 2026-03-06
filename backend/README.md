@@ -4,7 +4,7 @@ NestJS monorepo for the dl-orders system: four apps and a shared library.
 
 ## Layout
 
-- **apps/** — Microservices: `orders`, `inventory`, `product`, `notification`. Each has its own `main.ts`, Prisma schema (under `apps/<app>/prisma/`), and optional Dockerfile.
+- **apps/** — Microservices: `orders`, `inventory`, `product`, `notification`. Each has its own `main.ts`, Prisma schema (under `apps/<app>/prisma/`), and optional Dockerfile. Inside each app, outbound persistence is under `src/infrastructure/outbound/persistence/` with **sql/** (Prisma repos) and **dynamodb/** (DynamoDB repos) subfolders.
 - **libs/shared** — Shared code: queue names, event pattern names, event payloads, Zod validation pipe. Import as `@app/shared`.
 - **scripts/** — Utilities (e.g. `init-dynamodb-tables.js` for creating DynamoDB tables locally).
 

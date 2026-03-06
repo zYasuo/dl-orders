@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
+import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
 
@@ -11,8 +12,17 @@ describe('FindOrderByIdUseCase (integration)', () => {
     beforeEach(async () => {
         ordersRepository = new InMemoryOrdersRepository();
 
+        const orderAuditLog: IOrderAuditLogPort = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue([]),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FindOrderByIdUseCase, { provide: IOrdersRepositoryPort, useValue: ordersRepository }],
+            providers: [
+                FindOrderByIdUseCase,
+                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+            ],
         }).compile();
 
         sut = module.get(FindOrderByIdUseCase);

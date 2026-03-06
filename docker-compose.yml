@@ -124,6 +124,7 @@ services:
       - AWS_ENDPOINT=http://localstack:4566
       - AWS_REGION=us-east-1
       - DYNAMODB_AUDIT_TABLE=OrderAuditLog
+      - DYNAMODB_ORDER_SUMMARY_TABLE=OrderSummaries
     depends_on:
       postgres-orders:
         condition: service_healthy
@@ -180,7 +181,10 @@ services:
       context: ./backend
       dockerfile: apps/notification/Dockerfile
     container_name: notification-service
+    ports:
+      - "3004:3004"
     environment:
+      - PORT=3004
       - DATABASE_URL=postgresql://postgres:postgres@postgres-notification:5432/dl_notification_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=notification_queue
@@ -189,6 +193,7 @@ services:
       - AWS_ENDPOINT=http://localstack:4566
       - AWS_REGION=us-east-1
       - DYNAMODB_AUDIT_TABLE=NotificationAuditLog
+      - DYNAMODB_USER_NOTIFICATIONS_TABLE=UserNotifications
     depends_on:
       postgres-notification:
         condition: service_healthy

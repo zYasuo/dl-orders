@@ -2,11 +2,13 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
 import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('FindOrderByIdUseCase', () => {
     let sut: FindOrderByIdUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
+    let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeOrder = new Order({
@@ -29,8 +31,17 @@ describe('FindOrderByIdUseCase', () => {
             updateStatus: jest.fn(),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
+        orderAuditLog = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByOrderId: jest.fn().mockResolvedValue([]),
+        } as unknown as jest.Mocked<IOrderAuditLogPort>;
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FindOrderByIdUseCase, { provide: IOrdersRepositoryPort, useValue: ordersRepository }],
+            providers: [
+                FindOrderByIdUseCase,
+                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+            ],
         }).compile();
 
         sut = module.get(FindOrderByIdUseCase);

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '.prisma/product-client';
-import { DbService } from '../../db/db.service';
-import { Product } from '../../../domain/entities/product.entity';
-import { IProductRepositoryPort } from '../../../domain/ports/product-repository.port';
-import { ICreateProduct, IUpdateProduct } from '../../../domain/types/product-repository.types';
+import { DbService } from '../../../db/db.service';
+import { Product } from '../../../../domain/entities/product.entity';
+import { IProductRepositoryPort } from '../../../../domain/ports/product-repository.port';
+import { ICreateProduct, IUpdateProduct } from '../../../../domain/types/product-repository.types';
 
 @Injectable()
 export class ProductRepository extends IProductRepositoryPort {
