@@ -9,7 +9,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 ## Tech highlights
 
 - **NestJS monorepo** — one repo, six apps: orders, inventory, product, notification, auth, users
-- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, order confirmed)
+- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, order confirmed, OTP send requested, user verified)
 - **Hexagonal architecture** per app — domain (entities, ports), application (use cases), infrastructure (HTTP, messaging, persistence)
 - **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
@@ -31,6 +31,7 @@ flowchart LR
     Inventory -->|"inventory.reserved"| Orders
     Inventory -->|"inventory.reservation_failed"| Orders
     Orders -->|"order.confirmed"| Notification
+    Auth -->|"otp.send_requested"| Notification
     Auth -->|"user.verified"| Users
     Product[Product]
 ```
@@ -38,8 +39,8 @@ flowchart LR
 - **Orders** — Creates orders (HTTP), publishes `order.creation_requested`. Listens for `inventory.reserved` (confirm) and `inventory.reservation_failed` (cancel), then publishes `order.confirmed` so notification can send email.
 - **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`.
 - **Product** — HTTP-only catalog (e.g. create product); no messaging.
-- **Notification** — Listens for `order.confirmed` and sends email (e.g. via Resend).
-- **Auth** — Signup (with email OTP), verify OTP, signin; issues JWT. Publishes `user.verified` when email is confirmed.
+- **Notification** — Listens for `order.confirmed` (sends order confirmation email) and `otp.send_requested` (sends OTP verification email); uses Resend.
+- **Auth** — Signup (publishes `otp.send_requested` so notification sends OTP email), verify OTP, signin; issues JWT. Publishes `user.verified` when email is confirmed.
 - **Users** — Listens for `user.verified`, stores user profile. HTTP `GET/PATCH /users/me` protected by JWT.
 
 ## Practices used
