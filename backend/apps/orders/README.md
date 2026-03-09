@@ -10,7 +10,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 ## Ports
 
 - **IOrdersRepositoryPort** — Persist and load orders (Postgres/Prisma).
-- **IProductCatalogPort** — Fetch product by id from the product service (HTTP); used at order creation to enrich the order with name, description, and price.
+- **IProductCatalogPort** — Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
 - **IOrderEventsPublisherPort** — Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
 - **IOrderAuditLogPort** — Append audit entries (DynamoDB).
 - **IOrderSummaryPort** — Read/write order summary read model (DynamoDB).

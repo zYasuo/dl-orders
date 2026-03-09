@@ -4,7 +4,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Role
 
-- **HTTP:** Create and read products. The orders service calls `GET /products/:id` when creating an order to fetch name, description, and price so it can store a price snapshot and compute the order total.
+- **HTTP:** Create and read products. The orders service calls `GET /api/v1/products/:id` when creating an order to fetch name, description, and price so it can store a price snapshot and compute the order total (versioned contract).
 
 ## Ports
 
@@ -12,7 +12,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Inbound
 
-- **HTTP:** REST API — `POST /products` (create product), `GET /products/:id` (get product by id).
+- **HTTP:** REST API (v1) — `POST /api/v1/products` (create product), `GET /api/v1/products/:id` (get product by id). Global prefix `api/v1` keeps the contract stable for consumers (e.g. orders service).
 
 ## Outbound
 

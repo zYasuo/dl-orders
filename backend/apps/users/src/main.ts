@@ -8,6 +8,7 @@ async function bootstrap() {
     const app = await NestFactory.create(UsersModule);
     const configService = app.get(ConfigService);
 
+    app.setGlobalPrefix('api/v1');
     app.useGlobalFilters(new HttpExceptionFilter());
     app.use(snakeToCamelBody);
 
