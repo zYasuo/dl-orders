@@ -7,12 +7,16 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
 
     async create(input: ICreateInventory): Promise<Inventory | null> {
         const { name, quantity, productId } = input;
+
         const existing = await this.findByProductId(productId);
         if (existing) return null;
+
         const existingByName = await this.findByName(name);
         if (existingByName) return null;
+
         const inventory = new Inventory(crypto.randomUUID(), name, quantity, productId, new Date(), new Date());
         this.inventories.set(inventory.id, inventory);
+
         return inventory;
     }
 
@@ -32,6 +36,7 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
 
         const updated = new Inventory(inventory.id, inventory.name, newQuantity, inventory.productId, inventory.createdAt, new Date());
         this.inventories.set(id, updated);
+
         return updated;
     }
     async findAll(): Promise<Inventory[]> {
@@ -41,7 +46,9 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
     async delete(id: string): Promise<Inventory | null> {
         const inventory = this.inventories.get(id);
         if (!inventory) return null;
+
         this.inventories.delete(id);
+
         return inventory;
     }
 
