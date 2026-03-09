@@ -1,4 +1,10 @@
-import { CurrentUser, JwtAuthGuard, TJwtPayload, ZodValidationPipe } from '@app/shared';
+import {
+    CurrentUser,
+    JwtAuthGuard,
+    StandardErrorResponseDto,
+    TJwtPayload,
+    ZodValidationPipe,
+} from '@app/shared';
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SUpdateUserProfile, type TUpdateUserProfileDto, UpdateUserProfileDto } from '../../../application/dto/update-user-profile.dto';
@@ -18,7 +24,7 @@ export class UsersController {
     @Get('me')
     @ApiOperation({ summary: 'Authenticated user profile' })
     @ApiResponse({ status: 200, description: 'Profile data' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 401, description: 'Unauthorized', type: StandardErrorResponseDto })
     async getMe(@CurrentUser() user: TJwtPayload) {
         const { sub } = user;
 
@@ -37,8 +43,8 @@ export class UsersController {
     @ApiOperation({ summary: 'Update profile' })
     @ApiBody({ type: UpdateUserProfileDto })
     @ApiResponse({ status: 200, description: 'Profile updated' })
-    @ApiResponse({ status: 400, description: 'Invalid input' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 400, description: 'Invalid input', type: StandardErrorResponseDto })
+    @ApiResponse({ status: 401, description: 'Unauthorized', type: StandardErrorResponseDto })
     async updateMe(@CurrentUser() user: TJwtPayload, @Body(new ZodValidationPipe(SUpdateUserProfile)) body: TUpdateUserProfileDto) {
         const { sub } = user;
 

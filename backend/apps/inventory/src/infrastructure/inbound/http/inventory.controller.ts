@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ZodValidationPipe } from '@app/shared';
+import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { CreateInventoryDto, SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { Inventory } from '../../../domain/entities/inventory.entity';
@@ -18,7 +18,7 @@ export class InventoryController {
     @ApiOperation({ summary: 'Create inventory item' })
     @ApiBody({ type: CreateInventoryDto })
     @ApiResponse({ status: 201, description: 'Inventory item created' })
-    @ApiResponse({ status: 400, description: 'Invalid input' })
+    @ApiResponse({ status: 400, description: 'Invalid input', type: StandardErrorResponseDto })
     async create(@Body(new ZodValidationPipe(SCreateInventory)) input: TCreateInventory): Promise<Inventory> {
         return this.createInventoryUseCase.execute(input);
     }

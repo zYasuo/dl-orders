@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ZodValidationPipe } from '@app/shared';
+import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { SigninDto, SSignin, type TSignin } from '../../../application/dto/signin.dto';
 import { SignupDto, SSignup, type TSignup } from '../../../application/dto/signup.dto';
 import { SVerifyOtp, type TVerifyOtp, VerifyOtpDto } from '../../../application/dto/verify-otp.dto';
@@ -22,7 +22,7 @@ export class AuthController {
     @ApiOperation({ summary: 'User signup' })
     @ApiBody({ type: SignupDto })
     @ApiResponse({ status: 201, description: 'User created successfully' })
-    @ApiResponse({ status: 400, description: 'Invalid input' })
+    @ApiResponse({ status: 400, description: 'Invalid input', type: StandardErrorResponseDto })
     signup(@Body(new ZodValidationPipe(SSignup)) dto: TSignup) {
         return this.signupUseCase.execute(dto);
     }
@@ -32,7 +32,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Verify OTP code' })
     @ApiBody({ type: VerifyOtpDto })
     @ApiResponse({ status: 200, description: 'OTP verified, returns accessToken' })
-    @ApiResponse({ status: 400, description: 'Invalid or expired code' })
+    @ApiResponse({ status: 400, description: 'Invalid or expired code', type: StandardErrorResponseDto })
     verifyOtp(@Body(new ZodValidationPipe(SVerifyOtp)) dto: TVerifyOtp) {
         return this.verifyOtpUseCase.execute(dto);
     }
@@ -42,7 +42,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Sign in' })
     @ApiBody({ type: SigninDto })
     @ApiResponse({ status: 200, description: 'Sign in successful, returns accessToken' })
-    @ApiResponse({ status: 400, description: 'Invalid credentials' })
+    @ApiResponse({ status: 400, description: 'Invalid credentials', type: StandardErrorResponseDto })
     signin(@Body(new ZodValidationPipe(SSignin)) dto: TSignin) {
         return this.signinUseCase.execute(dto);
     }

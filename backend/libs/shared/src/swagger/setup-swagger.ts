@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import { StandardErrorResponseDto } from '../filters/standard-error.response';
 
 export function setupSwagger(
     app: INestApplication,
@@ -13,7 +14,9 @@ export function setupSwagger(
         .addBearerAuth()
         .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, config, {
+        extraModels: [StandardErrorResponseDto],
+    });
 
     app.use(
         '/docs',
