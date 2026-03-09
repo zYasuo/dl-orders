@@ -1,14 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { snakeToCamelBody } from '@app/shared';
+import { HttpExceptionFilter, setupSwagger, snakeToCamelBody } from '@app/shared';
 import { OrdersModule } from './orders.module';
 
 async function bootstrap() {
     const app = await NestFactory.create(OrdersModule);
     const configService = app.get(ConfigService);
 
+    app.useGlobalFilters(new HttpExceptionFilter());
     app.use(snakeToCamelBody);
+
+    setupSwagger(app, {
+        title: 'Orders API',
+        description: 'Orders microservice',
+        version: '1.0',
+    });
 
     app.connectMicroservice<MicroserviceOptions>({
         transport: Transport.RMQ,

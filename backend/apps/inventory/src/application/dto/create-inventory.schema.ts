@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SCreateInventory = z.object({
@@ -7,3 +8,4 @@ export const SCreateInventory = z.object({
 });
 
 export type TCreateInventory = z.infer<typeof SCreateInventory>;
+export class CreateInventoryDto extends createZodDto(SCreateInventory) {}

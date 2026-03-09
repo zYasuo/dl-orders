@@ -14,6 +14,8 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 - **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
 - **Zod** — request validation via a shared validation pipe
+- **API documentation** — each service exposes interactive OpenAPI docs at `/docs` (Scalar UI)
+- **Standardized error responses** — all HTTP errors return a consistent JSON body: `statusCode`, `error`, `message`, optional `details`, and `timestamp`
 
 ## Demo
 
@@ -123,6 +125,21 @@ flowchart LR
    ```
 
    Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006).
+
+## API documentation
+
+Each microservice serves interactive API docs (Scalar) at **`/docs`**:
+
+| Service     | Port | Docs URL                |
+|------------|------|-------------------------|
+| Orders     | 3001 | http://localhost:3001/docs |
+| Inventory  | 3002 | http://localhost:3002/docs |
+| Product    | 3003 | http://localhost:3003/docs |
+| Notification | 3004 | http://localhost:3004/docs |
+| Auth       | 3005 | http://localhost:3005/docs |
+| Users      | 3006 | http://localhost:3006/docs |
+
+Start the app you need, then open the URL above in a browser to explore routes, request/response schemas, and try requests. The Users API uses Bearer (JWT) auth; get a token from Auth (`/auth/signin` or `/auth/verify-otp`) and use it in the Scalar UI.
 
 ## Scripts reference
 

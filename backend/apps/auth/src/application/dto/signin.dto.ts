@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SSignin = z.object({
@@ -6,3 +7,4 @@ export const SSignin = z.object({
 });
 
 export type TSignin = z.infer<typeof SSignin>;
+export class SigninDto extends createZodDto(SSignin) {}

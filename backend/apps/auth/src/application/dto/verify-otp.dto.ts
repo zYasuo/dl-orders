@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SVerifyOtp = z.object({
@@ -6,3 +7,4 @@ export const SVerifyOtp = z.object({
 });
 
 export type TVerifyOtp = z.infer<typeof SVerifyOtp>;
+export class VerifyOtpDto extends createZodDto(SVerifyOtp) {}
