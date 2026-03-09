@@ -1,8 +1,9 @@
+import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { CreateInventoryDto, SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
+import { FindAllInventoryUseCase } from '../../../application/use-cases/find-all-invetory.use-case';
 import { Inventory } from '../../../domain/entities/inventory.entity';
 import { IReservationAuditLogPort } from '../../../domain/ports/reservation-audit-log.port';
 
@@ -12,6 +13,7 @@ export class InventoryController {
     constructor(
         private readonly createInventoryUseCase: CreateInventoryUseCase,
         private readonly reservationAuditLogPort: IReservationAuditLogPort,
+        private readonly findAllInventoryUseCase: FindAllInventoryUseCase,
     ) {}
 
     @Post()
@@ -29,5 +31,12 @@ export class InventoryController {
     @ApiResponse({ status: 200, description: 'List of reservation audit events' })
     getReservationAuditLog(@Param('orderId') orderId: string) {
         return this.reservationAuditLogPort.getByOrderId(orderId);
+    }
+
+    @Get()
+    @ApiOperation({ summary: 'Get all inventory items' })
+    @ApiResponse({ status: 200, description: 'List of inventory items' })
+    async findAll(): Promise<Inventory[]> {
+        return this.findAllInventoryUseCase.execute();
     }
 }

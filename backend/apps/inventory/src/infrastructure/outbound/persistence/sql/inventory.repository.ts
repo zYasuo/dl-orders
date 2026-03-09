@@ -49,6 +49,11 @@ export class InventoryRepository extends IInventoryRepositoryPort {
         return new Inventory(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
     }
 
+    async findAll(): Promise<Inventory[]> {
+        const rows = await this.db.inventory.findMany();
+        return rows.map((row) => new Inventory(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt));
+    }
+
     async delete(id: string): Promise<Inventory | null> {
         try {
             const row = await this.db.inventory.delete({ where: { id } });

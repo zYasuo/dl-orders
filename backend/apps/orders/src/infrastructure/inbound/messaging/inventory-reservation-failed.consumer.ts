@@ -11,7 +11,9 @@ export class InventoryReservationFailedConsumer {
 
     @EventPattern(PATTERNS.INVENTORY_RESERVATION_FAILED)
     async handle(@Payload() payload: InventoryReservationFailedEvent): Promise<void> {
-        this.logger.log('Inventory reservation failed, cancelling order', { orderId: payload.orderId });
+        this.logger.warn(
+            `Inventory reservation failed, cancelling order. orderId=${payload.orderId} productId=${payload.productId} quantity=${payload.quantity} reason=${payload.reason}`,
+        );
         await this.cancelOrderUseCase.execute(payload);
     }
 }

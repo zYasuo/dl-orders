@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DbModule } from './infrastructure/db/db.module';
-import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
-import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { CreateInventoryUseCase } from './application/use-cases/create-inventory.use-case';
+import { FindAllInventoryUseCase } from './application/use-cases/find-all-invetory.use-case';
+import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
 import { IInventoryEventsPublisherPort } from './domain/ports/inventory-events-publisher.port';
 import { IInventoryRepositoryPort } from './domain/ports/inventory-repository.port';
 import { IReservationAuditLogPort } from './domain/ports/reservation-audit-log.port';
+import { DbModule } from './infrastructure/db/db.module';
+import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { InventoryController } from './infrastructure/inbound/http/inventory.controller';
 import { OrderCreationRequestedConsumer } from './infrastructure/inbound/messaging/order-creation-requested.consumer';
 import { InventoryRabbitMqPublisher } from './infrastructure/outbound/messaging/inventory-events.publisher';
 import { DynamoDBReservationAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/reservation-audit-log.repository';
 import { InventoryRepository } from './infrastructure/outbound/persistence/sql/inventory.repository';
-import { CreateInventoryUseCase } from './application/use-cases/create-inventory.use-case';
-import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
+import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { HandleOrderCreationRequestedUseCase } from './application/use-cases/han
     providers: [
         CreateInventoryUseCase,
         HandleOrderCreationRequestedUseCase,
+        FindAllInventoryUseCase,
         { provide: IInventoryRepositoryPort, useClass: InventoryRepository },
         { provide: IInventoryEventsPublisherPort, useClass: InventoryRabbitMqPublisher },
         { provide: IReservationAuditLogPort, useClass: DynamoDBReservationAuditLogRepository },

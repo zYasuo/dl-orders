@@ -34,6 +34,9 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
         this.inventories.set(id, updated);
         return updated;
     }
+    async findAll(): Promise<Inventory[]> {
+        return Array.from(this.inventories.values());
+    }
 
     async delete(id: string): Promise<Inventory | null> {
         const inventory = this.inventories.get(id);

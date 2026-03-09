@@ -5,6 +5,7 @@ export abstract class IInventoryRepositoryPort {
     abstract create(input: ICreateInventory): Promise<Inventory | null>;
     abstract findByProductId(productId: string): Promise<Inventory | null>;
     abstract findByName(name: string): Promise<Inventory | null>;
+    abstract findAll(): Promise<Inventory[]>;
     abstract decrementStock(id: string, quantity: number): Promise<Inventory | null>;
     abstract delete(id: string): Promise<Inventory | null>;
 }
