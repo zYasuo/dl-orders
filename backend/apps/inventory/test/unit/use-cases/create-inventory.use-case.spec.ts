@@ -18,7 +18,7 @@ describe('CreateInventoryUseCase', () => {
             create: jest.fn().mockResolvedValue(fakeInventory),
             findByProductId: jest.fn().mockResolvedValue(null),
             findByName: jest.fn().mockResolvedValue(null),
-            updateProductAvailable: jest.fn(),
+            decrementStock: jest.fn(),
             delete: jest.fn(),
         } as unknown as jest.Mocked<IInventoryRepositoryPort>;
 

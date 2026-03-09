@@ -40,7 +40,9 @@ export class HandleOrderCreationRequestedUseCase {
             return;
         }
 
-        if (inventory.quantity < quantity) {
+        const updated = await this.inventoryRepositoryPort.decrementStock(inventory.id, quantity);
+
+        if (!updated) {
             await this.reservationAuditLogPort.log({
                 orderId,
                 action: 'RESERVATION_FAILED',
@@ -52,24 +54,6 @@ export class HandleOrderCreationRequestedUseCase {
                 productId,
                 quantity,
                 reason: 'Insufficient inventory quantity',
-            });
-            return;
-        }
-
-        const updated = await this.inventoryRepositoryPort.updateProductAvailable(inventory.id, inventory.quantity - quantity);
-
-        if (!updated) {
-            await this.reservationAuditLogPort.log({
-                orderId,
-                action: 'RESERVATION_FAILED',
-                timestamp: new Date().toISOString(),
-                details: { productId, quantity, reason: 'Failed to update inventory' },
-            });
-            await this.inventoryEventsPublisherPort.publishInventoryReservationFailed({
-                orderId,
-                productId,
-                quantity,
-                reason: 'Failed to update inventory',
             });
             return;
         }

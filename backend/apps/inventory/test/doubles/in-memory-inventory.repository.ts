@@ -24,10 +24,13 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
         return Array.from(this.inventories.values()).find((inv) => inv.name === name) ?? null;
     }
 
-    async updateProductAvailable(id: string, quantity: number): Promise<Inventory | null> {
+    async decrementStock(id: string, quantity: number): Promise<Inventory | null> {
         const inventory = this.inventories.get(id);
-        if (!inventory) return null;
-        const updated = new Inventory(inventory.id, inventory.name, quantity, inventory.productId, inventory.createdAt, inventory.updatedAt);
+        if (!inventory || inventory.quantity < quantity) return null;
+
+        const newQuantity = inventory.quantity - quantity;
+
+        const updated = new Inventory(inventory.id, inventory.name, newQuantity, inventory.productId, inventory.createdAt, new Date());
         this.inventories.set(id, updated);
         return updated;
     }

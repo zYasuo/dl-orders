@@ -20,7 +20,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
 
         inventoryRepository = {
             findByProductId: jest.fn().mockResolvedValue(fakeInventory),
-            updateProductAvailable: jest.fn().mockResolvedValue(reducedInventory),
+            decrementStock: jest.fn().mockResolvedValue(reducedInventory),
             create: jest.fn(),
             findByName: jest.fn(),
             delete: jest.fn(),
@@ -77,7 +77,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                 details: { productId: 'product-123', quantity: 3 },
             });
             expect(inventoryRepository.findByProductId).toHaveBeenCalledWith('product-123');
-            expect(inventoryRepository.updateProductAvailable).toHaveBeenCalledWith('inv-1', 7);
+            expect(inventoryRepository.decrementStock).toHaveBeenCalledWith('inv-1', 3);
             expect(eventsPublisher.publishInventoryReserved).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
@@ -98,6 +98,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                 timestamp: expect.any(String),
                 details: { productId: 'product-123', quantity: 3 },
             });
+
             expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
                 orderId: 'order-1',
                 action: 'RESERVATION_FAILED',
@@ -108,41 +109,20 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                     reason: 'Inventory not available for this product',
                 },
             });
+            
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
                 quantity: 3,
                 reason: 'Inventory not available for this product',
             });
+            
             expect(eventsPublisher.publishInventoryReserved).not.toHaveBeenCalled();
-            expect(inventoryRepository.updateProductAvailable).not.toHaveBeenCalled();
+            expect(inventoryRepository.decrementStock).not.toHaveBeenCalled();
         });
 
-        it('publishes reservation_failed when insufficient stock', async () => {
-            await sut.execute({ ...baseEvent, quantity: 100 });
-
-            expect(reservationAuditLog.log).toHaveBeenCalledTimes(2);
-            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
-                orderId: 'order-1',
-                action: 'RESERVATION_FAILED',
-                timestamp: expect.any(String),
-                details: {
-                    productId: 'product-123',
-                    quantity: 100,
-                    reason: 'Insufficient inventory quantity',
-                },
-            });
-            expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
-                orderId: 'order-1',
-                productId: 'product-123',
-                quantity: 100,
-                reason: 'Insufficient inventory quantity',
-            });
-            expect(eventsPublisher.publishInventoryReserved).not.toHaveBeenCalled();
-        });
-
-        it('publishes reservation_failed when update returns null', async () => {
-            inventoryRepository.updateProductAvailable.mockResolvedValueOnce(null);
+        it('publishes reservation_failed when decrementStock returns null', async () => {
+            inventoryRepository.decrementStock.mockResolvedValueOnce(null);
 
             await sut.execute(baseEvent);
 
@@ -154,14 +134,14 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                 details: {
                     productId: 'product-123',
                     quantity: 3,
-                    reason: 'Failed to update inventory',
+                    reason: 'Insufficient inventory quantity',
                 },
             });
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
                 quantity: 3,
-                reason: 'Failed to update inventory',
+                reason: 'Insufficient inventory quantity',
             });
         });
     });

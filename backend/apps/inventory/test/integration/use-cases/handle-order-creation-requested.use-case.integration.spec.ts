@@ -39,7 +39,16 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
 
     describe('execute', () => {
         it('reduces inventory and publishes reserved', async () => {
-            await sut.execute({ orderId: 'o1', productId, quantity: 3, description: 'test', recipient: 'a@b.com' });
+            await sut.execute({
+                orderId: 'o1',
+                productId,
+                quantity: 3,
+                productName: 'Product A',
+                productDescription: 'test',
+                totalPrice: 10,
+                userId: 'u1',
+                recipientEmail: 'a@b.com',
+            });
 
             expect(repository.getQuantity(inventoryId)).toBe(initialQuantity - 3);
             expect(eventsPublisher.reserved).toHaveLength(1);
@@ -48,14 +57,32 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
         });
 
         it('publishes failed when no inventory for product', async () => {
-            await sut.execute({ orderId: 'o1', productId: 'non-existent', quantity: 1, description: 't', recipient: 'a@b.com' });
+            await sut.execute({
+                orderId: 'o1',
+                productId: 'non-existent',
+                quantity: 1,
+                productName: 'X',
+                productDescription: 't',
+                totalPrice: 1,
+                userId: 'u1',
+                recipientEmail: 'a@b.com',
+            });
 
             expect(eventsPublisher.failed).toHaveLength(1);
             expect(eventsPublisher.reserved).toHaveLength(0);
         });
 
         it('publishes failed when quantity exceeds stock', async () => {
-            await sut.execute({ orderId: 'o1', productId, quantity: initialQuantity + 5, description: 't', recipient: 'a@b.com' });
+            await sut.execute({
+                orderId: 'o1',
+                productId,
+                quantity: initialQuantity + 5,
+                productName: 'X',
+                productDescription: 't',
+                totalPrice: 1,
+                userId: 'u1',
+                recipientEmail: 'a@b.com',
+            });
 
             expect(eventsPublisher.failed).toHaveLength(1);
             expect(eventsPublisher.reserved).toHaveLength(0);

@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
 import { Prisma } from '.prisma/inventory-client';
-import { DbService } from '../../../db/db.service';
+import { Injectable } from '@nestjs/common';
 import { Inventory } from '../../../../domain/entities/inventory.entity';
 import { IInventoryRepositoryPort } from '../../../../domain/ports/inventory-repository.port';
 import { ICreateInventory } from '../../../../domain/types/inventory-repository.types';
+import { DbService } from '../../../db/db.service';
 
 @Injectable()
 export class InventoryRepository extends IInventoryRepositoryPort {
-    constructor(private readonly db: DbService) { super(); }
+    constructor(private readonly db: DbService) {
+        super();
+    }
 
     async create(input: ICreateInventory): Promise<Inventory | null> {
         const { name, quantity, productId } = input;
@@ -31,14 +33,20 @@ export class InventoryRepository extends IInventoryRepositoryPort {
         return new Inventory(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
     }
 
-    async updateProductAvailable(id: string, quantity: number): Promise<Inventory | null> {
-        try {
-            const row = await this.db.inventory.update({ where: { id }, data: { quantity } });
-            return new Inventory(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
-        } catch (e) {
-            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') return null;
-            throw e;
-        }
+    async decrementStock(id: string, quantity: number): Promise<Inventory | null> {
+        type Row = { id: string; name: string; quantity: number; productId: string; createdAt: Date; updatedAt: Date };
+
+        const rows = await this.db.$queryRaw<Row[]>`
+            UPDATE inventories
+            SET quantity = quantity - ${quantity}, "updatedAt" = NOW()
+            WHERE id = ${id} AND quantity >= ${quantity}
+            RETURNING id, name, quantity, "productId", "createdAt", "updatedAt"
+        `;
+
+        if (!rows?.length) return null;
+
+        const row = rows[0];
+        return new Inventory(row.id, row.name, row.quantity, row.productId, row.createdAt, row.updatedAt);
     }
 
     async delete(id: string): Promise<Inventory | null> {
