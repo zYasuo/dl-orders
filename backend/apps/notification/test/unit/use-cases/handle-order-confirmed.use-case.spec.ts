@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderConfirmedUseCase } from '../../../src/application/use-cases/handle-order-confirmed.use-case';
 import { INotificationStatus, INotificationType, Notification } from '../../../src/domain/entities/notification.entity';
+import { INotificationTemplatePort } from '../../../src/domain/ports/notification-template.port';
 import { CreateNotificationUseCase } from '../../../src/application/use-cases/create-notification.use-case';
 import { SendNotificationEmailUseCase } from '../../../src/application/use-cases/send-notification-email.use-case';
 
@@ -21,11 +22,12 @@ describe('HandleOrderConfirmedUseCase', () => {
     let sut: HandleOrderConfirmedUseCase;
     let createNotificationUseCase: jest.Mocked<CreateNotificationUseCase>;
     let sendNotificationEmailUseCase: jest.Mocked<SendNotificationEmailUseCase>;
+    let notificationTemplatePort: jest.Mocked<INotificationTemplatePort>;
 
     const createdNotification = new Notification(
         'notif-1',
-        'Pedido confirmado',
-        'Seu pedido #order-1 foi confirmado: Product A (2 un.). Produto: Product A. Total: 99.9.',
+        'Order confirmed',
+        '<p>Order #order-1 – Product A, 2 unit(s), Total $99.9</p>',
         INotificationType.EMAIL,
         INotificationStatus.PENDING,
         'order-1',
@@ -47,11 +49,19 @@ describe('HandleOrderConfirmedUseCase', () => {
             execute: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<SendNotificationEmailUseCase>;
 
+        notificationTemplatePort = {
+            getOrderConfirmedMessage: jest.fn().mockReturnValue({
+                title: 'Order confirmed',
+                content: '<p>Order #order-1 – Product A, 2 unit(s), Total $99.9</p>',
+            }),
+        } as unknown as jest.Mocked<INotificationTemplatePort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 HandleOrderConfirmedUseCase,
                 { provide: CreateNotificationUseCase, useValue: createNotificationUseCase },
                 { provide: SendNotificationEmailUseCase, useValue: sendNotificationEmailUseCase },
+                { provide: INotificationTemplatePort, useValue: notificationTemplatePort },
             ],
         }).compile();
 
@@ -62,9 +72,11 @@ describe('HandleOrderConfirmedUseCase', () => {
         it('calls CreateNotificationUseCase with derived title, content and payload fields', async () => {
             await sut.execute(orderConfirmedPayload);
 
+            expect(notificationTemplatePort.getOrderConfirmedMessage).toHaveBeenCalledTimes(1);
+            expect(notificationTemplatePort.getOrderConfirmedMessage).toHaveBeenCalledWith(orderConfirmedPayload);
             expect(createNotificationUseCase.execute).toHaveBeenCalledTimes(1);
             const createPayload = createNotificationUseCase.execute.mock.calls[0][0];
-            expect(createPayload.title).toBe('Pedido confirmado');
+            expect(createPayload.title).toBe('Order confirmed');
             expect(createPayload.content).toContain('order-1');
             expect(createPayload.content).toContain('Product A');
             expect(createPayload.content).toContain('99.9');
