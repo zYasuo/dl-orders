@@ -5,7 +5,12 @@ export interface ICreateNotification {
     content: string;
     type: INotificationType;
     sourceEventId: string;
-    recipient: string;
+    recipientEmail: string;
+    userId: string;
+    productName: string;
+    productDescription: string;
+    totalPrice: number;
+    quantity: number;
 }
 
 export interface IUpdateNotification {

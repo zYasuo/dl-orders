@@ -30,7 +30,16 @@ describe('FindOrderByIdUseCase (integration)', () => {
 
     describe('execute', () => {
         it('returns order when found', async () => {
-            const created = await ordersRepository.create({ productId: '123', quantity: 1, description: 'order 1', recipient: 'test@test.com' });
+            const created = await ordersRepository.create({
+                productId: '123',
+                quantity: 1,
+                description: 'order 1',
+                recipient: 'test@test.com',
+                productName: 'Product',
+                productDescription: 'Desc',
+                unitPrice: 10,
+                totalPrice: 10,
+            });
 
             const result = await sut.execute(created!.id);
             expect(result.id).toBe(created!.id);

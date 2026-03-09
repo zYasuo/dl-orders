@@ -5,12 +5,14 @@ import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 import { IOrderAuditLogPort } from './domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from './domain/ports/order-events-publisher.port';
+import { IProductCatalogPort } from './domain/ports/product-catalog.port';
 import { IOrderSummaryPort } from './domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from './domain/ports/orders-repository.port';
 import { OrdersController } from './infrastructure/inbound/http/orders.controller';
 import { InventoryReservedConsumer } from './infrastructure/inbound/messaging/inventory-reserved.consumer';
 import { InventoryReservationFailedConsumer } from './infrastructure/inbound/messaging/inventory-reservation-failed.consumer';
 import { OrdersRabbitMqPublisher } from './infrastructure/outbound/messaging/orders.publisher';
+import { ProductCatalogHttpClient } from './infrastructure/outbound/http/product-catalog.client';
 import { OrdersRepository } from './infrastructure/outbound/persistence/sql/orders.repository';
 import { DynamoDBOrderAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/order-audit-log.repository';
 import { DynamoDBOrderSummaryRepository } from './infrastructure/outbound/persistence/dynamodb/order-summary.repository';
@@ -36,6 +38,7 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
         ConfirmOrderUseCase,
         CancelOrderUseCase,
         { provide: IOrdersRepositoryPort, useClass: OrdersRepository },
+        { provide: IProductCatalogPort, useClass: ProductCatalogHttpClient },
         { provide: IOrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
         { provide: IOrderAuditLogPort, useClass: DynamoDBOrderAuditLogRepository },
         { provide: IOrderSummaryPort, useClass: DynamoDBOrderSummaryRepository },

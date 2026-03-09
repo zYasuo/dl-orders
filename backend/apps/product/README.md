@@ -4,7 +4,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Role
 
-- **HTTP:** Create products (and any other CRUD the API exposes). Used by the rest of the system or by clients that need product data; orders reference products by id.
+- **HTTP:** Create and read products. The orders service calls `GET /products/:id` when creating an order to fetch name, description, and price so it can store a price snapshot and compute the order total.
 
 ## Ports
 
@@ -12,7 +12,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Inbound
 
-- **HTTP:** REST API (e.g. `POST /products` to create a product).
+- **HTTP:** REST API — `POST /products` (create product), `GET /products/:id` (get product by id).
 
 ## Outbound
 

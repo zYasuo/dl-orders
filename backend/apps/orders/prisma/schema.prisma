@@ -8,15 +8,19 @@ datasource db {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  sequenceId  Int         @unique @default(autoincrement())
-  description String
-  status      OrderStatus @default(PENDING)
-  productId   String
-  quantity    Int
-  recipient   String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                 String      @id @default(uuid())
+  sequenceId         Int         @unique @default(autoincrement())
+  description        String
+  status             OrderStatus @default(PENDING)
+  productId          String
+  quantity           Int
+  recipient          String
+  productName        String   @default("")
+  productDescription String   @default("")
+  unitPrice          Float    @default(0)
+  totalPrice         Float    @default(0)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   @@map("orders")
 }

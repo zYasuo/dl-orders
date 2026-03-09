@@ -24,6 +24,10 @@ describe('ConfirmOrderUseCase', () => {
         createdAt,
         updatedAt: createdAt,
         recipient: 'test@test.com',
+        productName: 'Product A',
+        productDescription: 'Description A',
+        unitPrice: 99.9,
+        totalPrice: 199.8,
     });
 
     beforeEach(async () => {
@@ -86,8 +90,11 @@ describe('ConfirmOrderUseCase', () => {
             expect(published.orderId).toBe('order-1');
             expect(published.productId).toBe('product-123');
             expect(published.quantity).toBe(2);
-            expect(published.description).toBe('test order');
-            expect(published.recipient).toBe('test@test.com');
+            expect(published.productName).toBe('Product A');
+            expect(published.productDescription).toBe('Description A');
+            expect(published.totalPrice).toBe(199.8);
+            expect(published.userId).toBe('test@test.com');
+            expect(published.recipientEmail).toBe('test@test.com');
             expect(published.confirmedAt).toBeDefined();
         });
 

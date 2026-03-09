@@ -3,4 +3,8 @@ export interface ICreateOrder {
     quantity: number;
     description: string;
     recipient: string;
+    productName: string;
+    productDescription: string;
+    unitPrice: number;
+    totalPrice: number;
 }

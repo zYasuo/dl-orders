@@ -13,20 +13,25 @@ export class NotificationRepository extends INotificationRepositoryPort {
     constructor(private readonly db: DbService) { super(); }
 
     async create(params: ICreateNotification): Promise<Notification | null> {
-        const { title, content, type, sourceEventId, recipient } = params;
+        const { title, content, type, sourceEventId, recipientEmail, userId, productName, productDescription, totalPrice, quantity } = params;
         const row = await this.db.notification.create({
             data: {
                 title,
                 content,
                 type: type as 'EMAIL',
                 sourceEventId,
-                recipient,
+                recipientEmail,
+                userId,
+                productName,
+                productDescription,
+                totalPrice,
+                quantity,
             },
         });
         return new Notification(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
-            row.sourceEventId, row.recipient, row.sentAt,
+            row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,
             row.createdAt, row.updatedAt,
         );
     }
@@ -43,7 +48,7 @@ export class NotificationRepository extends INotificationRepositoryPort {
         return new Notification(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
-            row.sourceEventId, row.recipient, row.sentAt,
+            row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,
             row.createdAt, row.updatedAt,
         );
     }
@@ -53,7 +58,7 @@ export class NotificationRepository extends INotificationRepositoryPort {
         return new Notification(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
-            row.sourceEventId, row.recipient, row.sentAt,
+            row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,
             row.createdAt, row.updatedAt,
         );
     }

@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { OrderConfirmedEvent } from '@app/shared';
+import { Injectable, Logger } from '@nestjs/common';
 import { INotificationType } from '../../domain/entities/notification.entity';
 import { CreateNotificationUseCase } from './create-notification.use-case';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
@@ -14,17 +14,22 @@ export class HandleOrderConfirmedUseCase {
     ) {}
 
     async execute(payload: OrderConfirmedEvent): Promise<void> {
-        const { orderId, description, quantity, productId, recipient } = payload;
+        const { orderId, productName, productDescription, totalPrice, userId, quantity, recipientEmail } = payload;
 
         const title = 'Pedido confirmado';
-        const content = `Seu pedido #${orderId} foi confirmado: ${description} (${quantity} un.). Produto: ${productId}.`;
+        const content = `Seu pedido #${orderId} foi confirmado: ${productName} (${quantity} un.). Produto: ${productName}. Total: ${totalPrice}.`;
 
         const notification = await this.createNotificationUseCase.execute({
             title,
             content,
             type: INotificationType.EMAIL,
             sourceEventId: orderId,
-            recipient,
+            recipientEmail,
+            userId,
+            productName,
+            productDescription,
+            totalPrice,
+            quantity,
         });
 
         if (notification) {

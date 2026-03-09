@@ -17,7 +17,7 @@ export class SendNotificationEmailUseCase {
     ) {}
 
     async execute(notification: Notification): Promise<void> {
-        const { recipient, title, content, sourceEventId } = notification;
+        const { recipient, title, content, sourceEventId, userId } = notification;
         const orderId = sourceEventId;
         const timestamp = new Date().toISOString();
 
@@ -35,7 +35,7 @@ export class SendNotificationEmailUseCase {
 
             try {
                 await this.userNotificationsPort.add({
-                    userId: recipient,
+                    userId,
                     timestamp,
                     notificationId: notification.id,
                     orderId,

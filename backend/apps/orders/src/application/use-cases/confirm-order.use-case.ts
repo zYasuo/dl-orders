@@ -57,9 +57,12 @@ export class ConfirmOrderUseCase {
         await this.orderEventsPublisherPort.publishOrderConfirmed({
             orderId: order.id,
             productId: order.productId,
+            productName: order.productName,
+            productDescription: order.productDescription,
+            totalPrice: order.totalPrice,
+            userId: order.recipient,
             quantity: order.quantity,
-            description: order.description,
-            recipient: order.recipient,
+            recipientEmail: order.recipient,
             confirmedAt: new Date().toISOString(),
         });
     }

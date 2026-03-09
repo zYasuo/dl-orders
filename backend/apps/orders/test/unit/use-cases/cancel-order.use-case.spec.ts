@@ -22,6 +22,10 @@ describe('CancelOrderUseCase', () => {
         createdAt,
         updatedAt: createdAt,
         recipient: 'test@test.com',
+        productName: 'Product A',
+        productDescription: 'Description A',
+        unitPrice: 99.9,
+        totalPrice: 199.8,
     });
 
     beforeEach(async () => {

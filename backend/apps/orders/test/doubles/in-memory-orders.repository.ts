@@ -14,6 +14,10 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
             quantity: input.quantity,
             status: OrderStatus.PENDING,
             recipient: input.recipient,
+            productName: input.productName,
+            productDescription: input.productDescription,
+            unitPrice: input.unitPrice,
+            totalPrice: input.totalPrice,
             createdAt: now,
             updatedAt: now,
         });
@@ -35,6 +39,10 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
             quantity: order.quantity,
             status: status as OrderStatus,
             recipient: order.recipient,
+            productName: order.productName,
+            productDescription: order.productDescription,
+            unitPrice: order.unitPrice,
+            totalPrice: order.totalPrice,
             createdAt: order.createdAt,
             updatedAt: new Date(),
         });

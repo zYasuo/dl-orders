@@ -1,6 +1,7 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
+import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { ICreateOrder } from '../../domain/types/order-repository.types';
@@ -12,6 +13,7 @@ export class CreateOrderUseCase {
 
     constructor(
         private readonly ordersRepositoryPort: IOrdersRepositoryPort,
+        private readonly productCatalogPort: IProductCatalogPort,
         private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
         private readonly orderAuditLogPort: IOrderAuditLogPort,
         private readonly orderSummaryPort: IOrderSummaryPort,
@@ -20,7 +22,21 @@ export class CreateOrderUseCase {
     async execute(input: TCreateOrder) {
         const { productId, quantity, description, recipient } = input;
 
-        const createInput: ICreateOrder = { productId, quantity, description, recipient };
+        const product = await this.productCatalogPort.findById(productId);
+        if (!product) {
+            throw new NotFoundException('Product not found');
+        }
+        const totalPrice = quantity * product.price;
+        const createInput: ICreateOrder = {
+            productId,
+            quantity,
+            description,
+            recipient,
+            productName: product.name,
+            productDescription: product.description ?? '',
+            unitPrice: product.price,
+            totalPrice,
+        };
         const order = await this.ordersRepositoryPort.create(createInput);
 
         if (!order) {
@@ -60,9 +76,12 @@ export class CreateOrderUseCase {
         await this.orderEventsPublisherPort.publishOrderCreationRequested({
             orderId: order.id,
             productId: order.productId,
+            productName: order.productName,
+            productDescription: order.productDescription,
+            totalPrice: order.totalPrice,
+            userId: order.recipient,
             quantity: order.quantity,
-            description: order.description,
-            recipient: order.recipient,
+            recipientEmail: order.recipient,
         });
 
         return order;

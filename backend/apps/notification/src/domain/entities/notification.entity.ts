@@ -16,6 +16,7 @@ export interface INotification {
     status: INotificationStatus;
     readonly sourceEventId: string;
     readonly recipient: string;
+    readonly userId: string;
     sentAt: Date | null;
     readonly createdAt: Date;
     updatedAt: Date;
@@ -30,6 +31,7 @@ export class Notification implements INotification {
         readonly status: INotificationStatus,
         readonly sourceEventId: string,
         readonly recipient: string,
+        readonly userId: string,
         readonly sentAt: Date | null,
         readonly createdAt: Date,
         readonly updatedAt: Date,
@@ -41,12 +43,13 @@ export class Notification implements INotification {
         type: INotificationType;
         sourceEventId: string;
         recipient: string;
+        userId: string;
     }): Notification {
-        const { title, content, type, sourceEventId, recipient } = params;
+        const { title, content, type, sourceEventId, recipient, userId } = params;
         const now = new Date();
         return new Notification(
             crypto.randomUUID(), title, content, type,
-            INotificationStatus.PENDING, sourceEventId, recipient,
+            INotificationStatus.PENDING, sourceEventId, recipient, userId,
             null, now, now,
         );
     }

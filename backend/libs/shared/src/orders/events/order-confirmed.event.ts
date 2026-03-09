@@ -1,8 +1,11 @@
 export interface OrderConfirmedEvent {
     orderId: string;
     productId: string;
+    productName: string;
+    productDescription: string;
+    totalPrice: number;
+    userId: string;
     quantity: number;
-    description: string;
-    recipient: string;
+    recipientEmail: string;
     confirmedAt: string;
 }

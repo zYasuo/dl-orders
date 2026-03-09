@@ -5,6 +5,7 @@ import { IProductRepositoryPort } from './domain/ports/product-repository.port';
 import { ProductController } from './infrastructure/inbound/http/product.controller';
 import { ProductRepository } from './infrastructure/outbound/persistence/sql/product.repository';
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
+import { FindProductByIdUseCase } from './application/use-cases/find-product-by-id.use-case';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { CreateProductUseCase } from './application/use-cases/create-product.use
     controllers: [ProductController],
     providers: [
         CreateProductUseCase,
+        FindProductByIdUseCase,
         { provide: IProductRepositoryPort, useClass: ProductRepository },
     ],
 })
