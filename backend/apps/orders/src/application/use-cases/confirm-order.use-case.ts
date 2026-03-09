@@ -1,10 +1,11 @@
-import { InventoryReservedEvent } from '@app/shared';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '../../domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+
+export type TConfirmOrderEvent = { orderId: string };
 
 @Injectable()
 export class ConfirmOrderUseCase {
@@ -17,7 +18,7 @@ export class ConfirmOrderUseCase {
         private readonly orderSummaryPort: IOrderSummaryPort,
     ) {}
 
-    async execute(event: InventoryReservedEvent): Promise<void> {
+    async execute(event: TConfirmOrderEvent): Promise<void> {
         const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CONFIRMED);
 
         if (!order) {

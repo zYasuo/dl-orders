@@ -1,9 +1,10 @@
-import { InventoryReservationFailedEvent } from '@app/shared';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '../../domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+
+export type TCancelOrderEvent = { orderId: string; reason: string };
 
 @Injectable()
 export class CancelOrderUseCase {
@@ -15,7 +16,7 @@ export class CancelOrderUseCase {
         private readonly orderSummaryPort: IOrderSummaryPort,
     ) {}
 
-    async execute(event: InventoryReservationFailedEvent): Promise<void> {
+    async execute(event: TCancelOrderEvent): Promise<void> {
         const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CANCELLED);
 
         if (!order) {

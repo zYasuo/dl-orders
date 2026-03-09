@@ -149,6 +149,26 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-payment:
+    image: postgres:17
+    container_name: dl-orders-postgres-payment
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dl_payment_svc
+    ports:
+      - "5438:5432"
+    volumes:
+      - dl-orders-postgres-payment-data:/var/lib/postgresql/data
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   orders-service:
     build:
       context: ./backend
@@ -290,6 +310,35 @@ services:
     networks:
       - dl-orders-network
 
+  payment-service:
+    build:
+      context: ./backend
+      dockerfile: apps/payment/Dockerfile
+    container_name: payment-service
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-payment:5432/dl_payment_svc
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=payment_queue
+      - ORDERS_SERVICE_URL=http://orders-service:3001
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-}
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - DYNAMODB_AUDIT_TABLE=PaymentAuditLog
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+      orders-service:
+        condition: service_started
+    networks:
+      - dl-orders-network
+
 volumes:
   dl-orders-postgres-orders-data:
   dl-orders-postgres-inventory-data:
@@ -297,6 +346,7 @@ volumes:
   dl-orders-postgres-notification-data:
   dl-orders-postgres-auth-data:
   dl-orders-postgres-users-data:
+  dl-orders-postgres-payment-data:
 
 networks:
   dl-orders-network:

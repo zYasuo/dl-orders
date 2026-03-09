@@ -42,6 +42,7 @@ describe('ConfirmOrderUseCase', () => {
         orderEventsPublisher = {
             publishOrderCreationRequested: jest.fn(),
             publishOrderConfirmed: jest.fn().mockResolvedValue(undefined),
+            publishInventoryReservedToPayment: jest.fn(),
         } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
 
         orderAuditLog = {
@@ -69,7 +70,7 @@ describe('ConfirmOrderUseCase', () => {
 
     describe('execute', () => {
         it('updates order to CONFIRMED and publishes OrderConfirmed', async () => {
-            const event = { orderId: 'order-1', productId: 'product-123', quantity: 2 };
+            const event = { orderId: 'order-1' };
 
             await sut.execute(event);
 
@@ -113,7 +114,7 @@ describe('ConfirmOrderUseCase', () => {
         it('throws NotFoundException when order does not exist', async () => {
             ordersRepository.updateStatus.mockResolvedValueOnce(null);
 
-            await expect(sut.execute({ orderId: 'non-existent', productId: 'p', quantity: 1 })).rejects.toThrow(NotFoundException);
+            await expect(sut.execute({ orderId: 'non-existent' })).rejects.toThrow(NotFoundException);
 
             expect(orderAuditLog.log).not.toHaveBeenCalled();
             expect(orderEventsPublisher.publishOrderConfirmed).not.toHaveBeenCalled();
@@ -122,7 +123,7 @@ describe('ConfirmOrderUseCase', () => {
         it('publishes OrderConfirmed and completes when orderSummary.put fails', async () => {
             orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
 
-            await expect(sut.execute({ orderId: 'order-1', productId: 'product-123', quantity: 2 })).resolves.toBeUndefined();
+            await expect(sut.execute({ orderId: 'order-1' })).resolves.toBeUndefined();
 
             expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
             expect(orderEventsPublisher.publishOrderConfirmed).toHaveBeenCalledTimes(1);

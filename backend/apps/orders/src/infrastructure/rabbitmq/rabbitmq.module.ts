@@ -30,6 +30,18 @@ import { QUEUES } from '@app/shared';
                     },
                 }),
             },
+            {
+                name: 'PAYMENT_SERVICE',
+                inject: [ConfigService],
+                useFactory: (config: ConfigService) => ({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [config.getOrThrow<string>('RABBITMQ_URL')],
+                        queue: QUEUES.PAYMENT,
+                        queueOptions: { durable: true },
+                    },
+                }),
+            },
         ]),
     ],
     exports: [ClientsModule],

@@ -77,6 +77,18 @@ const tables = [
     ],
     BillingMode: 'PAY_PER_REQUEST',
   },
+  {
+    TableName: 'PaymentAuditLog',
+    AttributeDefinitions: [
+      { AttributeName: 'orderId', AttributeType: 'S' },
+      { AttributeName: 'timestamp', AttributeType: 'S' },
+    ],
+    KeySchema: [
+      { AttributeName: 'orderId', KeyType: 'HASH' },
+      { AttributeName: 'timestamp', KeyType: 'RANGE' },
+    ],
+    BillingMode: 'PAY_PER_REQUEST',
+  },
 ];
 
 async function main() {

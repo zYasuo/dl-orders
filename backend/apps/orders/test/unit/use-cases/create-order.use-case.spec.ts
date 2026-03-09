@@ -49,6 +49,7 @@ describe('CreateOrderUseCase', () => {
         orderEventsPublisher = {
             publishOrderCreationRequested: jest.fn().mockResolvedValue(undefined),
             publishOrderConfirmed: jest.fn().mockResolvedValue(undefined),
+            publishInventoryReservedToPayment: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
 
         orderAuditLog = {

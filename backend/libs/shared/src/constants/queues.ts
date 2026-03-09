@@ -3,4 +3,5 @@ export const QUEUES = {
     INVENTORY: 'inventory_queue',
     NOTIFICATION: 'notification_queue',
     USERS: 'users_queue',
+    PAYMENT: 'payment_queue',
 } as const;

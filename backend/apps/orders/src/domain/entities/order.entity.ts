@@ -49,16 +49,47 @@ export class Order {
         });
     }
 
-    get id() { return this.params.id; }
-    get productId() { return this.params.productId; }
-    get quantity() { return this.params.quantity; }
-    get description() { return this.params.description; }
-    get recipient() { return this.params.recipient; }
-    get productName() { return this.params.productName; }
-    get productDescription() { return this.params.productDescription; }
-    get unitPrice() { return this.params.unitPrice; }
-    get totalPrice() { return this.params.totalPrice; }
-    get status() { return this.params.status; }
-    get createdAt() { return this.params.createdAt; }
-    get updatedAt() { return this.params.updatedAt; }
+    get id() {
+        return this.params.id;
+    }
+
+    get productId() {
+        return this.params.productId;
+    }
+
+    get quantity() {
+        return this.params.quantity;
+    }
+
+    get description() {
+        return this.params.description;
+    }
+    get recipient() {
+        return this.params.recipient;
+    }
+    get productName() {
+        return this.params.productName;
+    }
+    get productDescription() {
+        return this.params.productDescription;
+    }
+    get unitPrice() {
+        return this.params.unitPrice;
+    }
+    get totalPrice() {
+        return this.params.totalPrice;
+    }
+    get status() {
+        return this.params.status;
+    }
+    get createdAt() {
+        return this.params.createdAt;
+    }
+    get updatedAt() {
+        return this.params.updatedAt;
+    }
+
+    toJSON(): TOrderParams {
+        return { ...this.params };
+    }
 }

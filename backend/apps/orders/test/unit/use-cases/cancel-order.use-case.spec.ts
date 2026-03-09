@@ -61,7 +61,7 @@ describe('CancelOrderUseCase', () => {
 
     describe('execute', () => {
         it('updates order to CANCELLED', async () => {
-            const event = { orderId: 'order-1', productId: 'product-123', quantity: 2, reason: 'Insufficient stock' };
+            const event = { orderId: 'order-1', reason: 'Insufficient stock' };
 
             await sut.execute(event);
 
@@ -89,13 +89,13 @@ describe('CancelOrderUseCase', () => {
         it('throws NotFoundException when order does not exist', async () => {
             ordersRepository.updateStatus.mockResolvedValueOnce(null);
 
-            await expect(sut.execute({ orderId: 'non-existent', productId: 'p', quantity: 1, reason: 'test' })).rejects.toThrow(NotFoundException);
+            await expect(sut.execute({ orderId: 'non-existent', reason: 'test' })).rejects.toThrow(NotFoundException);
 
             expect(orderAuditLog.log).not.toHaveBeenCalled();
         });
 
         it('completes without throwing when orderSummary.put fails', async () => {
-            const event = { orderId: 'order-1', productId: 'product-123', quantity: 2, reason: 'Insufficient stock' };
+            const event = { orderId: 'order-1', reason: 'Insufficient stock' };
             orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
 
             await expect(sut.execute(event)).resolves.toBeUndefined();

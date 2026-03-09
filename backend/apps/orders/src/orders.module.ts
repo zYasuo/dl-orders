@@ -11,6 +11,8 @@ import { IOrdersRepositoryPort } from './domain/ports/orders-repository.port';
 import { OrdersController } from './infrastructure/inbound/http/orders.controller';
 import { InventoryReservedConsumer } from './infrastructure/inbound/messaging/inventory-reserved.consumer';
 import { InventoryReservationFailedConsumer } from './infrastructure/inbound/messaging/inventory-reservation-failed.consumer';
+import { PaymentApprovedConsumer } from './infrastructure/inbound/messaging/payment-approved.consumer';
+import { PaymentFailedConsumer } from './infrastructure/inbound/messaging/payment-failed.consumer';
 import { OrdersRabbitMqPublisher } from './infrastructure/outbound/messaging/orders.publisher';
 import { ProductCatalogHttpClient } from './infrastructure/outbound/http/product-catalog.client';
 import { OrdersRepository } from './infrastructure/outbound/persistence/sql/orders.repository';
@@ -31,7 +33,7 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
         RabbitMQModule,
         DynamoDBModule.forRoot(),
     ],
-    controllers: [OrdersController, InventoryReservedConsumer, InventoryReservationFailedConsumer],
+    controllers: [OrdersController, InventoryReservedConsumer, InventoryReservationFailedConsumer, PaymentApprovedConsumer, PaymentFailedConsumer],
     providers: [
         CreateOrderUseCase,
         FindOrderByIdUseCase,
