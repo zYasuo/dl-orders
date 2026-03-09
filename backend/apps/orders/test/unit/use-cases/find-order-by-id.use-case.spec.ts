@@ -57,6 +57,18 @@ describe('FindOrderByIdUseCase', () => {
 
             expect(ordersRepository.findById).toHaveBeenCalledTimes(1);
             expect(ordersRepository.findById).toHaveBeenCalledWith('id-123');
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+            expect(orderAuditLog.log).toHaveBeenCalledWith({
+                orderId: fakeOrder.id,
+                action: 'ORDER_FOUND',
+                timestamp: expect.any(String),
+                details: {
+                    productId: fakeOrder.productId,
+                    quantity: fakeOrder.quantity,
+                    description: fakeOrder.description,
+                    recipient: fakeOrder.recipient,
+                },
+            });
             expect(result).toEqual(fakeOrder);
         });
 
@@ -64,6 +76,8 @@ describe('FindOrderByIdUseCase', () => {
             ordersRepository.findById.mockResolvedValueOnce(null);
 
             await expect(sut.execute('non-existent')).rejects.toThrow(new NotFoundException('Order not found'));
+
+            expect(orderAuditLog.log).not.toHaveBeenCalled();
         });
 
         it('propagates error when repository throws', async () => {

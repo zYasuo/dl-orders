@@ -163,5 +163,71 @@ describe('CreateOrderUseCase', () => {
 
             expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
         });
+
+        it('uses empty string for productDescription when product.description is null/undefined', async () => {
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            productCatalogPort.findById.mockResolvedValueOnce({
+                name: 'Product A',
+                description: null,
+                price: 99.9,
+            });
+
+            await sut.execute(input);
+
+            expect(ordersRepository.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    productDescription: '',
+                }),
+            );
+        });
+
+        it('calculates totalPrice as quantity * unitPrice when quantity > 1', async () => {
+            const input = { productId: 'product-123', quantity: 3, description: 'order', recipient: 'test@test.com' };
+            const orderWithTotal = new Order({
+                id: fakeOrder.id,
+                productId: fakeOrder.productId,
+                quantity: 3,
+                description: fakeOrder.description,
+                recipient: fakeOrder.recipient,
+                productName: fakeOrder.productName,
+                productDescription: fakeOrder.productDescription,
+                unitPrice: fakeOrder.unitPrice,
+                totalPrice: 299.7,
+                status: fakeOrder.status,
+                createdAt: fakeOrder.createdAt,
+                updatedAt: fakeOrder.updatedAt,
+            });
+            ordersRepository.create.mockResolvedValueOnce(orderWithTotal);
+
+            const result = await sut.execute(input);
+
+            expect(ordersRepository.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    quantity: 3,
+                    unitPrice: 99.9,
+                    totalPrice: expect.any(Number),
+                }),
+            );
+            const createCall = ordersRepository.create.mock.calls[0][0];
+            expect(createCall.totalPrice).toBeCloseTo(299.7, 10);
+            expect(orderEventsPublisher.publishOrderCreationRequested).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    quantity: 3,
+                }),
+            );
+            expect(orderEventsPublisher.publishOrderCreationRequested.mock.calls[0][0].totalPrice).toBeCloseTo(299.7, 10);
+            expect(result.totalPrice).toBeCloseTo(299.7, 10);
+        });
+
+        it('returns order and publishes event when orderSummary.put fails', async () => {
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
+
+            const result = await sut.execute(input);
+
+            expect(result).toEqual(fakeOrder);
+            expect(orderEventsPublisher.publishOrderCreationRequested).toHaveBeenCalledTimes(1);
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+        });
     });
 });

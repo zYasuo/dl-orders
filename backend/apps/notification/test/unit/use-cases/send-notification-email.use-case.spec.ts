@@ -112,5 +112,23 @@ describe('SendNotificationEmailUseCase', () => {
             });
             expect(userNotificationsPort.add).not.toHaveBeenCalled();
         });
+
+        it('updates notification to SENT when userNotificationsPort.add fails', async () => {
+            userNotificationsPort.add.mockRejectedValueOnce(new Error('User notifications failed'));
+
+            await sut.execute(notification);
+
+            expect(notificationAuditLogPort.log).toHaveBeenCalledWith({
+                orderId: 'order-1',
+                action: 'NOTIFICATION_SENT',
+                timestamp: expect.any(String),
+                details: { notificationId: notification.id, recipient: notification.recipient },
+            });
+            expect(notificationRepositoryPort.update).toHaveBeenCalledWith(notification.id, {
+                status: INotificationStatus.SENT,
+                sentAt: expect.any(Date),
+                updatedAt: expect.any(Date),
+            });
+        });
     });
 });

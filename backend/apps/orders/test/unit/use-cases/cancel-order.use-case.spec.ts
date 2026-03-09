@@ -66,6 +66,13 @@ describe('CancelOrderUseCase', () => {
             await sut.execute(event);
 
             expect(ordersRepository.updateStatus).toHaveBeenCalledWith('order-1', OrderStatus.CANCELLED);
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+            expect(orderAuditLog.log).toHaveBeenCalledWith({
+                orderId: cancelledOrder.id,
+                action: 'ORDER_CANCELLED',
+                timestamp: expect.any(String),
+                details: { reason: event.reason },
+            });
             expect(orderSummary.put).toHaveBeenCalledTimes(1);
             expect(orderSummary.put).toHaveBeenCalledWith({
                 orderId: cancelledOrder.id,
@@ -83,6 +90,17 @@ describe('CancelOrderUseCase', () => {
             ordersRepository.updateStatus.mockResolvedValueOnce(null);
 
             await expect(sut.execute({ orderId: 'non-existent', productId: 'p', quantity: 1, reason: 'test' })).rejects.toThrow(NotFoundException);
+
+            expect(orderAuditLog.log).not.toHaveBeenCalled();
+        });
+
+        it('completes without throwing when orderSummary.put fails', async () => {
+            const event = { orderId: 'order-1', productId: 'product-123', quantity: 2, reason: 'Insufficient stock' };
+            orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
+
+            await expect(sut.execute(event)).resolves.toBeUndefined();
+
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
         });
     });
 });

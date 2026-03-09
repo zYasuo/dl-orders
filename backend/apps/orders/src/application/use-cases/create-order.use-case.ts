@@ -5,6 +5,7 @@ import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { ICreateOrder } from '../../domain/types/order-repository.types';
+import { calculeOrderTotalPrince } from '../../utils/calcule-order-total-prince.util';
 import { TCreateOrder } from '../dto/create-order.dto';
 
 @Injectable()
@@ -28,7 +29,7 @@ export class CreateOrderUseCase {
             throw new NotFoundException('Product not found');
         }
 
-        const totalPrice = quantity * product.price;
+        const totalPrice = calculeOrderTotalPrince(quantity, product.price);
 
         const createInput: ICreateOrder = {
             productId,

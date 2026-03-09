@@ -74,6 +74,18 @@ describe('ConfirmOrderUseCase', () => {
             await sut.execute(event);
 
             expect(ordersRepository.updateStatus).toHaveBeenCalledWith('order-1', OrderStatus.CONFIRMED);
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+            expect(orderAuditLog.log).toHaveBeenCalledWith({
+                orderId: confirmedOrder.id,
+                action: 'ORDER_CONFIRMED',
+                timestamp: expect.any(String),
+                details: {
+                    productId: confirmedOrder.productId,
+                    quantity: confirmedOrder.quantity,
+                    description: confirmedOrder.description,
+                    recipient: confirmedOrder.recipient,
+                },
+            });
             expect(orderSummary.put).toHaveBeenCalledTimes(1);
             expect(orderSummary.put).toHaveBeenCalledWith({
                 orderId: confirmedOrder.id,
@@ -103,7 +115,17 @@ describe('ConfirmOrderUseCase', () => {
 
             await expect(sut.execute({ orderId: 'non-existent', productId: 'p', quantity: 1 })).rejects.toThrow(NotFoundException);
 
+            expect(orderAuditLog.log).not.toHaveBeenCalled();
             expect(orderEventsPublisher.publishOrderConfirmed).not.toHaveBeenCalled();
+        });
+
+        it('publishes OrderConfirmed and completes when orderSummary.put fails', async () => {
+            orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
+
+            await expect(sut.execute({ orderId: 'order-1', productId: 'product-123', quantity: 2 })).resolves.toBeUndefined();
+
+            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+            expect(orderEventsPublisher.publishOrderConfirmed).toHaveBeenCalledTimes(1);
         });
     });
 });

@@ -48,12 +48,34 @@ describe('HandleOrderCreationRequestedUseCase', () => {
         sut = module.get(HandleOrderCreationRequestedUseCase);
     });
 
-    const baseEvent = { orderId: 'order-1', productId: 'product-123', quantity: 3, description: 'test', recipient: 'a@b.com' };
+    const baseEvent = {
+        orderId: 'order-1',
+        productId: 'product-123',
+        productName: 'Product A',
+        productDescription: 'Description A',
+        totalPrice: 99.9,
+        userId: 'user-123',
+        quantity: 3,
+        recipientEmail: 'a@b.com',
+    };
 
     describe('execute', () => {
         it('reduces stock and publishes inventory.reserved when sufficient', async () => {
             await sut.execute(baseEvent);
 
+            expect(reservationAuditLog.log).toHaveBeenCalledTimes(2);
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(1, {
+                orderId: 'order-1',
+                action: 'RESERVATION_REQUESTED',
+                timestamp: expect.any(String),
+                details: { productId: 'product-123', quantity: 3 },
+            });
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
+                orderId: 'order-1',
+                action: 'RESERVED',
+                timestamp: expect.any(String),
+                details: { productId: 'product-123', quantity: 3 },
+            });
             expect(inventoryRepository.findByProductId).toHaveBeenCalledWith('product-123');
             expect(inventoryRepository.updateProductAvailable).toHaveBeenCalledWith('inv-1', 7);
             expect(eventsPublisher.publishInventoryReserved).toHaveBeenCalledWith({
@@ -69,6 +91,23 @@ describe('HandleOrderCreationRequestedUseCase', () => {
 
             await sut.execute(baseEvent);
 
+            expect(reservationAuditLog.log).toHaveBeenCalledTimes(2);
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(1, {
+                orderId: 'order-1',
+                action: 'RESERVATION_REQUESTED',
+                timestamp: expect.any(String),
+                details: { productId: 'product-123', quantity: 3 },
+            });
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
+                orderId: 'order-1',
+                action: 'RESERVATION_FAILED',
+                timestamp: expect.any(String),
+                details: {
+                    productId: 'product-123',
+                    quantity: 3,
+                    reason: 'Inventory not available for this product',
+                },
+            });
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
@@ -82,6 +121,17 @@ describe('HandleOrderCreationRequestedUseCase', () => {
         it('publishes reservation_failed when insufficient stock', async () => {
             await sut.execute({ ...baseEvent, quantity: 100 });
 
+            expect(reservationAuditLog.log).toHaveBeenCalledTimes(2);
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
+                orderId: 'order-1',
+                action: 'RESERVATION_FAILED',
+                timestamp: expect.any(String),
+                details: {
+                    productId: 'product-123',
+                    quantity: 100,
+                    reason: 'Insufficient inventory quantity',
+                },
+            });
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
@@ -96,6 +146,17 @@ describe('HandleOrderCreationRequestedUseCase', () => {
 
             await sut.execute(baseEvent);
 
+            expect(reservationAuditLog.log).toHaveBeenCalledTimes(2);
+            expect(reservationAuditLog.log).toHaveBeenNthCalledWith(2, {
+                orderId: 'order-1',
+                action: 'RESERVATION_FAILED',
+                timestamp: expect.any(String),
+                details: {
+                    productId: 'product-123',
+                    quantity: 3,
+                    reason: 'Failed to update inventory',
+                },
+            });
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
