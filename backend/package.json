@@ -50,7 +50,10 @@
     "prisma:users:push": "cd apps/users/prisma && prisma db push",
     "prisma:users:migrate": "cd apps/users/prisma && prisma migrate dev",
     "prisma:generate:all": "npm run prisma:orders:generate && npm run prisma:inventory:generate && npm run prisma:product:generate && npm run prisma:notification:generate && npm run prisma:auth:generate && npm run prisma:users:generate",
-    "dynamodb:init": "node scripts/init-dynamodb-tables.js"
+    "dynamodb:init": "node scripts/init-dynamodb-tables.js",
+    "dynamodb:init:force": "node scripts/init-dynamodb-tables.js --force",
+    "prisma:push:all": "npm run prisma:orders:push && npm run prisma:inventory:push && npm run prisma:product:push && npm run prisma:notification:push && npm run prisma:auth:push && npm run prisma:users:push",
+    "db:push:all": "npm run dynamodb:init && npm run prisma:push:all"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.700.0",

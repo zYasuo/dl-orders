@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
-import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { ICreateOrder } from '../../domain/types/order-repository.types';
 import { TCreateOrder } from '../dto/create-order.dto';
 
@@ -23,10 +23,13 @@ export class CreateOrderUseCase {
         const { productId, quantity, description, recipient } = input;
 
         const product = await this.productCatalogPort.findById(productId);
+
         if (!product) {
             throw new NotFoundException('Product not found');
         }
+
         const totalPrice = quantity * product.price;
+
         const createInput: ICreateOrder = {
             productId,
             quantity,

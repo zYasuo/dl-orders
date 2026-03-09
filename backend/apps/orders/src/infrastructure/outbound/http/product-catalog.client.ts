@@ -15,19 +15,24 @@ export class ProductCatalogHttpClient extends IProductCatalogPort {
     async findById(productId: string): Promise<TProductCatalogItem | null> {
         const url = `${this.baseUrl}/api/v1/products/${encodeURIComponent(productId)}`;
         const res = await fetch(url);
+
         if (res.status === 404) return null;
+
         if (!res.ok) {
             throw new Error(`Product service returned ${res.status}: ${await res.text()}`);
         }
+
         const raw = (await res.json()) as unknown;
+
         const parsed = SProductCatalogResponse.safeParse(raw);
         if (!parsed.success) {
             throw new Error(
-                `Product service contract mismatch: ${parsed.error.message}. ` +
-                    'Expected name (string), description (string|null), price (number).',
+                `Product service contract mismatch: ${parsed.error.message}. ` + 'Expected name (string), description (string|null), price (number).',
             );
         }
+
         const body = parsed.data;
+
         return {
             name: body.name,
             description: body.description ?? null,

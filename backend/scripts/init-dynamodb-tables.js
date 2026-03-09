@@ -2,11 +2,17 @@
 const {
   DynamoDBClient,
   CreateTableCommand,
+  DeleteTableCommand,
   ListTablesCommand,
 } = require('@aws-sdk/client-dynamodb');
 
 const endpoint = process.env.AWS_ENDPOINT || 'http://localhost:4566';
 const region = process.env.AWS_REGION || 'us-east-1';
+const force = process.argv.includes('--force');
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const client = new DynamoDBClient({
   region,
@@ -75,8 +81,22 @@ const tables = [
 
 async function main() {
   console.log('DynamoDB endpoint:', endpoint);
+  if (force) console.log('Modo --force: apagando e recriando tabelas.');
 
   for (const table of tables) {
+    if (force) {
+      try {
+        await client.send(new DeleteTableCommand({ TableName: table.TableName }));
+        console.log('Apagada tabela:', table.TableName);
+        await sleep(2000);
+      } catch (err) {
+        if (err.name !== 'ResourceNotFoundException') {
+          console.error('Erro ao apagar', table.TableName, err.message);
+          process.exit(1);
+        }
+      }
+    }
+
     try {
       await client.send(new CreateTableCommand(table));
       console.log('Criada tabela:', table.TableName);
