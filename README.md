@@ -9,7 +9,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 ## Tech highlights
 
 - **NestJS monorepo** — one repo, seven apps: orders, inventory, product, notification, auth, users, payment
-- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, payment approved/failed, order confirmed, OTP send requested, user verified)
+- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, payment approved/failed, order confirmed, OTP send requested, user verified, account locked notify)
 - **Hexagonal architecture** per app — domain (entities, ports), application (use cases), infrastructure (HTTP, messaging, persistence)
 - **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
@@ -37,6 +37,7 @@ flowchart LR
     Payment -->|"payment.failed"| Orders
     Orders -->|"order.confirmed"| Notification
     Auth -->|"otp.send_requested"| Notification
+    Auth -->|"account.locked_notify"| Notification
     Auth -->|"user.verified"| Users
     Product[Product]
 ```
@@ -45,8 +46,8 @@ flowchart LR
 - **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`.
 - **Payment** — Listens for `inventory.reserved` (from Orders). Creates Mercado Pago preference, stores checkout URL. Webhook receives approval/rejection; publishes `payment.approved` or `payment.failed` so Orders can confirm or cancel.
 - **Product** — HTTP-only catalog (e.g. create product); no messaging.
-- **Notification** — Listens for `order.confirmed` (sends order confirmation email) and `otp.send_requested` (sends OTP verification email); uses Resend.
-- **Auth** — Signup (publishes `otp.send_requested` so notification sends OTP email), verify OTP, signin; issues JWT. Publishes `user.verified` when email is confirmed.
+- **Notification** — Listens for `order.confirmed` (order confirmation email), `otp.send_requested` (OTP verification email), and `account.locked_notify` (account locked after failed logins email); uses Resend.
+- **Auth** — Signup (publishes `otp.send_requested` so notification sends OTP email), verify OTP, signin; issues JWT. After 3 failed signin attempts the account is locked for 5 minutes and Auth publishes `account.locked_notify` (notification sends the lockout email). Publishes `user.verified` when email is confirmed.
 - **Users** — Listens for `user.verified`, stores user profile. HTTP `GET/PATCH /users/me` protected by JWT.
 
 ## Practices used
