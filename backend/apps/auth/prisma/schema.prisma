@@ -25,7 +25,7 @@ model OtpCode {
   id        String   @id @default(uuid())
   code      String
   userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
@@ -36,7 +36,7 @@ model OtpCode {
 model AuthLogs {
   id        String   @id @default(uuid())
   userId    String   @unique @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   loginAttempts Int    @default(0) @map("login_attempts")
   lastLoginAttempt DateTime @map("last_login_attempt")
   lastLoginAttemptIp String? @map("last_login_attempt_ip")
