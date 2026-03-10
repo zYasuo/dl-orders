@@ -16,6 +16,19 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   localstack:
     image: localstack/localstack:latest
     container_name: localstack
@@ -281,10 +294,13 @@ services:
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Auth <onboarding@resend.dev>}
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=auth_queue
+      - REDIS_URL=redis://redis:6379
     depends_on:
       postgres-auth:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - dl-orders-network

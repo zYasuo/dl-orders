@@ -16,6 +16,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 - **Zod** — request validation via a shared validation pipe
 - **API documentation** — each service exposes interactive OpenAPI docs at `/docs` (Scalar UI)
 - **Standardized error responses** — all HTTP errors return a consistent JSON body: `statusCode`, `error`, `message`, optional `details`, and `timestamp`
+- **Redis** — shared instance (port 6379) for cache/lockout/rate limit; Auth uses it first; keys are namespaced by service prefix (e.g. `auth:`)
 
 ## Demo
 
@@ -78,7 +79,7 @@ flowchart LR
 ## Prerequisites
 
 - Node.js (LTS)
-- Docker and Docker Compose (for RabbitMQ, Postgres, LocalStack)
+- Docker and Docker Compose (for RabbitMQ, Redis, Postgres, LocalStack)
 
 ## Quick start
 
@@ -89,7 +90,7 @@ flowchart LR
    npm run docker:up
    ```
 
-   This brings up RabbitMQ (5672, 15672), LocalStack (4566), and one Postgres per app.
+   This brings up RabbitMQ (5672, 15672), Redis (6379), LocalStack (4566), and one Postgres per app.
 
 2. **DynamoDB tables (audit)**  
    If LocalStack init didn’t create them, from the repo root:

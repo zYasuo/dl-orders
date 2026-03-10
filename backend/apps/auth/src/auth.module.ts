@@ -26,6 +26,7 @@ import { Argon2PasswordHasher } from './infrastructure/outbound/security/argon2-
 import { EmailEncryptedSecurity } from './infrastructure/outbound/security/email-encrypted.security';
 import { JwtService } from './infrastructure/outbound/security/jwt.service';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({
     imports: [
@@ -36,6 +37,7 @@ import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
         }),
         DbModule,
         RabbitMQModule,
+        RedisModule,
     ],
     controllers: [AuthController],
     providers: [

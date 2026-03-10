@@ -34,6 +34,7 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 ## Data
 
 - **Postgres** — Users, OTP codes, auth_logs (per-user login attempts and lockout); `DATABASE_URL` in `apps/auth/.env`. Port 5436 in Docker.
+- **Redis** — Shared instance; `REDIS_URL` in `apps/auth/.env`. Port 6379 in Docker. All keys use the `auth:` prefix (e.g. for future lockout, rate limit, blacklist).
 
 ## Run locally
 
@@ -49,4 +50,4 @@ Or from `backend/`:
 npm run start:dev:auth
 ```
 
-Requires RabbitMQ, Postgres (auth DB), and env: `DATABASE_URL`, `PORT=3005`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `OTP_EXPIRES_IN_MINUTES`, `RABBITMQ_URL`, `QUEUE_NAME`. Copy from `apps/auth/.env.example`.
+Requires RabbitMQ, Redis, Postgres (auth DB), and env: `DATABASE_URL`, `PORT=3005`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `OTP_EXPIRES_IN_MINUTES`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`. Copy from `apps/auth/.env.example`.
