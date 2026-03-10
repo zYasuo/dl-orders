@@ -6,9 +6,7 @@ export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {
     private readonly users = new Map<string, User>();
 
     async create(data: TCreateAuthUser): Promise<User | null> {
-        const existing = Array.from(this.users.values()).find(
-            (u) => u.emailLookupHash === data.emailLookupHash,
-        );
+        const existing = Array.from(this.users.values()).find((u) => u.emailLookupHash === data.emailLookupHash);
         if (existing) return null;
         const now = new Date();
         const user = new User({

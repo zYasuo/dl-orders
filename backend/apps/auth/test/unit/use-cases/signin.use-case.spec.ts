@@ -1,6 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
+import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
 import { User } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
@@ -13,6 +14,7 @@ describe('SigninUseCase', () => {
     let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
     let passwordHasher: jest.Mocked<IPasswordHasherPort>;
     let jwtPort: jest.Mocked<IJwtPort>;
+    let validateAuthAttempt: jest.Mocked<ValidateAuthAttemptUseCase>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const verifiedUser = new User({
@@ -61,6 +63,12 @@ describe('SigninUseCase', () => {
             verify: jest.fn(),
         } as unknown as jest.Mocked<IJwtPort>;
 
+        validateAuthAttempt = {
+            validateBeforeLogin: jest.fn().mockResolvedValue(undefined),
+            registerFailedAttempt: jest.fn().mockResolvedValue(undefined),
+            registerSuccessfulLogin: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<ValidateAuthAttemptUseCase>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 SigninUseCase,
@@ -68,6 +76,7 @@ describe('SigninUseCase', () => {
                 { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IJwtPort, useValue: jwtPort },
+                { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
             ],
         }).compile();
 
@@ -81,39 +90,85 @@ describe('SigninUseCase', () => {
             const result = await sut.execute(input);
 
             expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
-            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
-            expect(passwordHasher.compare).toHaveBeenCalledWith(input.password, verifiedUser.passwordHash);
-            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(verifiedUser.emailEncrypted);
-            expect(jwtPort.sign).toHaveBeenCalledWith({ sub: verifiedUser.id, email: verifiedUser.emailEncrypted });
+            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(
+                input.email,
+            );
+
+            expect(validateAuthAttempt.validateBeforeLogin).toHaveBeenCalledWith(
+                verifiedUser.id,
+            );
+
+            expect(passwordHasher.compare).toHaveBeenCalledWith(
+                input.password,
+                verifiedUser.passwordHash,
+            );
+            
+            expect(validateAuthAttempt.registerSuccessfulLogin).toHaveBeenCalledWith(
+                verifiedUser.id,
+                null,
+            );
+
+            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(
+                verifiedUser.emailEncrypted,
+            );
+
+            expect(jwtPort.sign).toHaveBeenCalledWith({
+                sub: verifiedUser.id,
+                email: verifiedUser.emailEncrypted,
+            });
+
             expect(result).toEqual({ accessToken: 'jwt-token' });
+        });
+
+        it('throws ForbiddenException when account is locked', async () => {
+            validateAuthAttempt.validateBeforeLogin.mockRejectedValueOnce(
+                new ForbiddenException('Account temporarily locked.'),
+            );
+            const input = { email: 'user@test.com', password: 'password123' };
+
+            await expect(sut.execute(input)).rejects.toThrow(ForbiddenException);
+            expect(passwordHasher.compare).not.toHaveBeenCalled();
+            expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when user is not found', async () => {
             authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(null);
             const input = { email: 'unknown@test.com', password: 'password123' };
 
-            await expect(sut.execute(input)).rejects.toThrow(/Invalid email or password/);
+            await expect(sut.execute(input)).rejects.toThrow('Authentication Error');
 
+            expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
             expect(passwordHasher.compare).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when email is not verified', async () => {
-            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(unverifiedUser);
+            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(
+                unverifiedUser,
+            );
+
             const input = { email: 'user@test.com', password: 'password123' };
 
             await expect(sut.execute(input)).rejects.toThrow(/Email not verified/);
 
+            expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
             expect(passwordHasher.compare).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
-        it('throws BadRequestException when password is invalid', async () => {
+        it('throws BadRequestException when password is invalid and calls registerFailedAttempt', async () => {
             passwordHasher.compare.mockResolvedValueOnce(false);
+            emailEncrypted.decrypt.mockResolvedValueOnce('user@test.com');
             const input = { email: 'user@test.com', password: 'wrongpassword' };
 
-            await expect(sut.execute(input)).rejects.toThrow(/Invalid email or password/);
+            await expect(sut.execute(input)).rejects.toThrow('Authentication Error');
 
+            expect(validateAuthAttempt.registerFailedAttempt).toHaveBeenCalledWith(
+                verifiedUser.id,
+                null,
+                'user@test.com',
+            );
+            
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
     });

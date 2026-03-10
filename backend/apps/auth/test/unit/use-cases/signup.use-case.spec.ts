@@ -87,7 +87,7 @@ describe('SignupUseCase', () => {
                 passwordHash: 'hashed-password',
                 name: input.name,
             });
-            
+
             expect(otpRepository.create).toHaveBeenCalledTimes(1);
             expect(otpRepository.create).toHaveBeenCalledWith({
                 code: expect.any(String),

@@ -37,9 +37,11 @@ describe('FindAllInventoryUseCase', () => {
         expect(result).toEqual(fakeInventoryItems);
         expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
     });
-
-    it('should throw BadRequestException when no inventory items exist', async () => {
+    
+    it('should return empty array when no inventory items exist', async () => {
         inventoryRepository.findAll.mockResolvedValueOnce([]);
-        await expect(sut.execute()).rejects.toThrow(new BadRequestException('Inventory items not found'));
+        const result = await sut.execute();
+        expect(result).toEqual([]);
+        expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
     });
 });

@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { SigninDto, SSignin, type TSignin } from '../../../application/dto/signin.dto';
@@ -43,7 +44,9 @@ export class AuthController {
     @ApiBody({ type: SigninDto })
     @ApiResponse({ status: 200, description: 'Sign in successful, returns accessToken' })
     @ApiResponse({ status: 400, description: 'Invalid credentials', type: StandardErrorResponseDto })
-    signin(@Body(new ZodValidationPipe(SSignin)) dto: TSignin) {
-        return this.signinUseCase.execute(dto);
+    @ApiResponse({ status: 403, description: 'Account temporarily locked', type: StandardErrorResponseDto })
+    signin(@Req() req: Request, @Body(new ZodValidationPipe(SSignin)) dto: TSignin) {
+        const ip = req.ip ?? req.socket?.remoteAddress ?? (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? undefined;
+        return this.signinUseCase.execute({ ...dto, ip });
     }
 }

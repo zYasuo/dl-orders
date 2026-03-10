@@ -17,6 +17,7 @@ model User {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
   otpCodes         OtpCode[]
+  authLogs         AuthLogs?
   @@map("users")
 }
 
@@ -28,5 +29,22 @@ model OtpCode {
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
+
   @@map("otp_codes")
 }
+
+model AuthLogs {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  loginAttempts Int    @default(0) @map("login_attempts")
+  lastLoginAttempt DateTime @map("last_login_attempt")
+  lastLoginAttemptIp String? @map("last_login_attempt_ip")
+  lastLoginAttemptSuccess Boolean @default(false) @map("last_login_attempt_success")
+  lockedUntil DateTime? @map("locked_until")
+  createdAt DateTime @default(now()) @map("created_at")
+
+
+  @@map("auth_logs")
+}
+

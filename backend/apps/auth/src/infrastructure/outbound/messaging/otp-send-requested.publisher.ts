@@ -5,9 +5,7 @@ import { IOtpSendRequestedPublisherPort } from '../../../domain/ports/otp-send-r
 
 @Injectable()
 export class OtpSendRequestedRabbitMqPublisher extends IOtpSendRequestedPublisherPort {
-    constructor(
-        @Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy,
-    ) {
+    constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
         super();
     }
 

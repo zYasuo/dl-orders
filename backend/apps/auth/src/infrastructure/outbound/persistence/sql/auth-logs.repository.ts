@@ -1,0 +1,63 @@
+import { Injectable } from '@nestjs/common';
+import { AuthLogs } from '../../../../domain/entities/auth-logs.entity';
+import { IAuthLogsRepositoryPort } from '../../../../domain/ports/auth-logs-repository.port';
+import { TUpsertAuthLogs } from '../../../../domain/types/auth-logs-repository.types';
+import { DbService } from '../../../db/db.service';
+
+@Injectable()
+export class AuthLogsRepository extends IAuthLogsRepositoryPort {
+    constructor(private readonly db: DbService) {
+        super();
+    }
+
+    async findByUserId(userId: string): Promise<AuthLogs | null> {
+        const row = await this.db.authLogs.findUnique({
+            where: { userId },
+        });
+
+        if (!row) return null;
+
+        return new AuthLogs(
+            row.id,
+            row.userId,
+            row.loginAttempts,
+            row.lastLoginAttempt,
+            row.lastLoginAttemptIp,
+            row.lastLoginAttemptSuccess,
+            row.lockedUntil,
+            row.createdAt,
+        );
+    }
+
+    async upsert(data: TUpsertAuthLogs): Promise<AuthLogs> {
+        const row = await this.db.authLogs.upsert({
+            where: { userId: data.userId },
+            create: {
+                userId: data.userId,
+                loginAttempts: data.loginAttempts,
+                lastLoginAttempt: data.lastLoginAttempt,
+                lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
+                lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
+                lockedUntil: data.lockedUntil ?? null,
+            },
+            update: {
+                loginAttempts: data.loginAttempts,
+                lastLoginAttempt: data.lastLoginAttempt,
+                lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
+                lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
+                lockedUntil: data.lockedUntil ?? null,
+            },
+        });
+
+        return new AuthLogs(
+            row.id,
+            row.userId,
+            row.loginAttempts,
+            row.lastLoginAttempt,
+            row.lastLoginAttemptIp,
+            row.lastLoginAttemptSuccess,
+            row.lockedUntil,
+            row.createdAt,
+        );
+    }
+}

@@ -5,9 +5,7 @@ import { IUserVerifiedPublisherPort } from '../../../domain/ports/user-verified-
 
 @Injectable()
 export class UserVerifiedRabbitMqPublisher extends IUserVerifiedPublisherPort {
-    constructor(
-        @Inject('USERS_SERVICE') private readonly usersClient: ClientProxy,
-    ) {
+    constructor(@Inject('USERS_SERVICE') private readonly usersClient: ClientProxy) {
         super();
     }
 

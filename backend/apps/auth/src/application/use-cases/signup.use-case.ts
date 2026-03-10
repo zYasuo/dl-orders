@@ -20,6 +20,7 @@ export class SignupUseCase {
 
     async execute(input: TSignup): Promise<{ userId: string; email: string }> {
         const { email, password, name } = input;
+
         const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
         const existing = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 

@@ -8,6 +8,7 @@ import { INotificationRepositoryPort } from './domain/ports/notification-reposit
 import { INotificationTemplatePort } from './domain/ports/notification-template.port';
 import { IUserNotificationsPort } from './domain/ports/user-notifications.port';
 import { NotificationsController } from './infrastructure/inbound/http/notifications.controller';
+import { AccountLockedNotifyConsumer } from './infrastructure/inbound/messaging/account-locked-notify.consumer';
 import { OrderConfirmedConsumer } from './infrastructure/inbound/messaging/order-confirmed.consumer';
 import { OtpSendRequestedConsumer } from './infrastructure/inbound/messaging/otp-send-requested.consumer';
 import { ResendEmailSender } from './infrastructure/outbound/email/resend-email.sender';
@@ -17,6 +18,7 @@ import { NotificationRepository } from './infrastructure/outbound/persistence/sq
 import { OrderConfirmedTemplateAdapter } from './infrastructure/outbound/templates/order-confirmed-template.adapter';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { HandleOrderConfirmedUseCase } from './application/use-cases/handle-order-confirmed.use-case';
+import { HandleAccountLockedNotifyUseCase } from './application/use-cases/handle-account-locked-notify.use-case';
 import { HandleOtpSendRequestedUseCase } from './application/use-cases/handle-otp-send-requested.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
 
@@ -29,9 +31,15 @@ import { SendNotificationEmailUseCase } from './application/use-cases/send-notif
         DbModule,
         DynamoDBModule.forRoot(),
     ],
-    controllers: [OrderConfirmedConsumer, OtpSendRequestedConsumer, NotificationsController],
+    controllers: [
+        AccountLockedNotifyConsumer,
+        OrderConfirmedConsumer,
+        OtpSendRequestedConsumer,
+        NotificationsController,
+    ],
     providers: [
         CreateNotificationUseCase,
+        HandleAccountLockedNotifyUseCase,
         HandleOrderConfirmedUseCase,
         HandleOtpSendRequestedUseCase,
         SendNotificationEmailUseCase,

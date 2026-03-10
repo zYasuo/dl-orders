@@ -27,10 +27,7 @@ export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
 
     async getLookupHash(email: string): Promise<string> {
         const normalized = this.normalize(email);
-        return crypto
-            .createHmac('sha256', this.config.hashSecret)
-            .update(normalized, 'utf8')
-            .digest('hex');
+        return crypto.createHmac('sha256', this.config.hashSecret).update(normalized, 'utf8').digest('hex');
     }
 
     async encrypt(email: string): Promise<string> {

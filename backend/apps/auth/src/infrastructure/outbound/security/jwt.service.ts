@@ -16,15 +16,10 @@ export class JwtService extends IJwtPort {
 
     async sign(payload: TJwtPayload): Promise<string> {
         return new Promise((resolve, reject) => {
-            jwt.sign(
-                payload,
-                this.secret,
-                { expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'] },
-                (err, encoded) => {
-                    if (err) reject(err);
-                    else resolve(encoded!);
-                },
-            );
+            jwt.sign(payload, this.secret, { expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'] }, (err, encoded) => {
+                if (err) reject(err);
+                else resolve(encoded!);
+            });
         });
     }
 
