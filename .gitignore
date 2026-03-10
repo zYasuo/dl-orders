@@ -40,8 +40,8 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# Cursor (docs/reference not to commit)
 .cursor/*.md
+.cursor/rules/
 
 # dotenv environment variable files
 .env
