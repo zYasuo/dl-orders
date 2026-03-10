@@ -6,7 +6,7 @@ Handles user signup (with email OTP verification), sign-in, and JWT issuance. Tr
 
 - **HTTP:** `POST /auth/signup` (email, password, name) — creates user, publishes `otp.send_requested` (notification service sends OTP email).
 - **HTTP:** `POST /auth/verify-otp` (email, code) — validates OTP, marks email verified, publishes `user.verified`, returns JWT.
-- **HTTP:** `POST /auth/signin` (email, password) — validates credentials and email verified; returns JWT. If the account is locked (after 3 failed attempts), returns `403` with a message to try again after X minutes. IP is captured from the request for audit.
+- **HTTP:** `POST /auth/signin` (email, password) — validates credentials and email verified; returns JWT. If the account is locked (after 3 failed attempts), returns `403` with a message to try again after X minutes. IP is captured from the request for audit. Rate limit per IP applies; when exceeded, returns `429 Too Many Requests` with optional `Retry-After` header.
 
 JWT payload: `{ sub: userId, email }`; other services validate it with the same `JWT_SECRET`.
 
@@ -23,7 +23,7 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 
 ## Inbound
 
-- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin` (Zod-validated bodies).
+- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin` (Zod-validated bodies). Each endpoint is rate-limited per IP via Redis; excess requests return `429 Too Many Requests`.
 
 ## Outbound
 
@@ -34,7 +34,7 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 ## Data
 
 - **Postgres** — Users, OTP codes, auth_logs (per-user login attempts and lockout); `DATABASE_URL` in `apps/auth/.env`. Port 5436 in Docker.
-- **Redis** — Shared instance; `REDIS_URL` in `apps/auth/.env`. Port 6379 in Docker. All keys use the `auth:` prefix (e.g. for future lockout, rate limit, blacklist).
+- **Redis** — Shared instance; `REDIS_URL` in `apps/auth/.env`. Port 6379 in Docker. All keys use the `auth:` prefix (lockout attempts/until, rate limit per endpoint and IP). Rate limit is configurable via optional env vars: `RATE_LIMIT_SIGNUP_MAX`, `RATE_LIMIT_SIGNUP_WINDOW_SECONDS`, `RATE_LIMIT_VERIFY_OTP_*`, `RATE_LIMIT_SIGNIN_*` (defaults: signup 5/hour, verify-otp 10/15min, signin 10/1min).
 
 ## Run locally
 

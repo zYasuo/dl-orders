@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { emailEncryptionConfig } from './config/email-encryption.config';
+import { rateLimitConfig } from './config/rate-limit.config';
 import { SigninUseCase } from './application/use-cases/signin.use-case';
 import { SignupUseCase } from './application/use-cases/signup.use-case';
 import { ValidateAuthAttemptUseCase } from './application/use-cases/validate-auth-attempt.use-case';
@@ -17,6 +18,7 @@ import { IPasswordHasherPort } from './domain/ports/password-hasher.port';
 import { IUserVerifiedPublisherPort } from './domain/ports/user-verified-publisher.port';
 import { DbModule } from './infrastructure/db/db.module';
 import { AuthController } from './infrastructure/inbound/http/auth.controller';
+import { RedisRateLimitGuard } from './infrastructure/inbound/http/guards/redis-rate-limit.guard';
 import { AccountLockedNotifyRabbitMqPublisher } from './infrastructure/outbound/messaging/account-locked-notify.publisher';
 import { OtpSendRequestedRabbitMqPublisher } from './infrastructure/outbound/messaging/otp-send-requested.publisher';
 import { UserVerifiedRabbitMqPublisher } from './infrastructure/outbound/messaging/user-verified.publisher';
@@ -35,7 +37,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
         ConfigModule.forRoot({
             envFilePath: 'apps/auth/.env',
             isGlobal: true,
-            load: [emailEncryptionConfig],
+            load: [emailEncryptionConfig, rateLimitConfig],
         }),
         DbModule,
         RabbitMQModule,
@@ -43,6 +45,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
     ],
     controllers: [AuthController],
     providers: [
+        RedisRateLimitGuard,
         SignupUseCase,
         SigninUseCase,
         VerifyOtpUseCase,
