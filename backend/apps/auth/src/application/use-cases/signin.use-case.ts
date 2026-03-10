@@ -21,7 +21,7 @@ export class SigninUseCase {
         const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 
         if (!user) {
-            throw new BadRequestException('Invalid email or password');
+            throw new BadRequestException('Authentication Error');
         }
 
         if (!user.emailVerified) {
@@ -31,7 +31,7 @@ export class SigninUseCase {
         const valid = await this.passwordHasher.compare(password, user.passwordHash);
 
         if (!valid) {
-            throw new BadRequestException('Invalid email or password');
+            throw new BadRequestException('Authentication Error');
         }
 
         const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
