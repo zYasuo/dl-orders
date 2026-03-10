@@ -9,15 +9,15 @@ datasource db {
 
 model Payment {
   id              String        @id @default(uuid())
-  sequenceId      Int           @unique @default(autoincrement())
-  orderId         String        @unique
-  externalId      String?       @unique
-  preferenceId    String?       @unique
+  sequenceId      Int           @unique @default(autoincrement()) @map("sequence_id")
+  orderId         String        @unique @map("order_id")
+  externalId      String?       @unique @map("external_id")
+  preferenceId    String?       @unique @map("preference_id")
   amount          Float
   status          PaymentStatus @default(PENDING)
-  gatewayResponse Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  gatewayResponse Json?        @map("gateway_response")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   @@map("payments")
 }

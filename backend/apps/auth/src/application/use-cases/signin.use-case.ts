@@ -16,12 +16,14 @@ export class SigninUseCase {
 
     async execute(input: TSignin): Promise<{ accessToken: string }> {
         const { email, password } = input;
+
         const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
         const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 
         if (!user) {
             throw new BadRequestException('Invalid email or password');
         }
+
         if (!user.emailVerified) {
             throw new BadRequestException('Email not verified. Please verify with the OTP sent to your email.');
         }

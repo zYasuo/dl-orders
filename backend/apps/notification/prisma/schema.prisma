@@ -9,21 +9,21 @@ datasource db {
 
 model Notification {
   id                 String             @id @default(uuid())
-  sequenceId         Int                @unique @default(autoincrement())
+  sequenceId         Int                @unique @default(autoincrement()) @map("sequence_id")
   title              String
   content            String
   type               NotificationType   @default(EMAIL)
   status             NotificationStatus @default(PENDING)
-  sourceEventId      String
-  recipientEmail     String
-  userId             String
-  productName        String
-  productDescription String
-  totalPrice         Float
+  sourceEventId      String             @map("source_event_id")
+  recipientEmail     String             @map("recipient_email")
+  userId             String             @map("user_id")
+  productName        String             @map("product_name")
+  productDescription String             @map("product_description")
+  totalPrice         Float              @map("total_price")
   quantity           Int
-  sentAt             DateTime?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  sentAt             DateTime?          @map("sent_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
 
   @@map("notifications")
 }

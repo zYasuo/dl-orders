@@ -11,11 +11,11 @@ model User {
   id               String   @id @default(uuid())
   emailEncrypted   String   @map("email_encrypted")
   emailLookupHash  String   @unique @map("email_lookup_hash")
-  passwordHash     String
+  passwordHash     String   @map("password_hash")
   name             String?
-  emailVerified    Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
   otpCodes         OtpCode[]
   @@map("users")
 }
@@ -23,10 +23,10 @@ model User {
 model OtpCode {
   id        String   @id @default(uuid())
   code      String
-  userId    String
+  userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
-  expiresAt DateTime
+  expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
   @@map("otp_codes")
 }
