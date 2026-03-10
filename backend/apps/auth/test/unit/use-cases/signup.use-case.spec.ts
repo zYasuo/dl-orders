@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
-import { User } from '../../../src/domain/entities/user.entity';
+import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
@@ -17,7 +17,7 @@ describe('SignupUseCase', () => {
     let otpSendRequestedPublisher: jest.Mocked<IOtpSendRequestedPublisherPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeUser = new User({
+    const fakeUser = new UserEntity({
         id: 'user-123',
         emailEncrypted: 'enc-user@test.com',
         emailLookupHash: 'user@test.com',

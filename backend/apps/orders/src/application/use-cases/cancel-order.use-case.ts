@@ -17,11 +17,17 @@ export class CancelOrderUseCase {
     ) {}
 
     async execute(event: TCancelOrderEvent): Promise<void> {
-        const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CANCELLED);
-
-        if (!order) {
+        const existing = await this.ordersRepositoryPort.findById(event.orderId);
+        if (!existing) {
             throw new NotFoundException(`Order ${event.orderId} not found`);
         }
+        if (!existing.isPending()) {
+            this.logger.warn(`Order ${event.orderId} is not pending, skipping cancel`);
+            return;
+        }
+
+        const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CANCELLED);
+        if (!order) return;
 
         await this.orderAuditLogPort.log({
             orderId: order.id,

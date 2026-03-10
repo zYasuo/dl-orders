@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SendNotificationEmailUseCase } from '../../../src/application/use-cases/send-notification-email.use-case';
-import { INotificationStatus, INotificationType, Notification } from '../../../src/domain/entities/notification.entity';
+import { INotificationStatus, INotificationType, NotificationEntity } from '../../../src/domain/entities/notification.entity';
 import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
 import { INotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
 import { INotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
 import { IUserNotificationsPort } from '../../../src/domain/ports/user-notifications.port';
 
 const createdAt = new Date('2025-01-01T12:00:00Z');
-const notification = new Notification(
+const notification = new NotificationEntity(
     'notif-1',
     'Pedido confirmado',
     'Seu pedido foi confirmado.',

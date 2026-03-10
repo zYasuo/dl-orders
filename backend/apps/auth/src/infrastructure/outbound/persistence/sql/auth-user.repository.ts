@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../../../domain/entities/user.entity';
+import { UserEntity } from '../../../../domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../../domain/ports/auth-user-repository.port';
 import { TCreateAuthUser } from '../../../../domain/types/auth-user-repository.types';
 import { DbService } from '../../../db/db.service';
@@ -10,7 +10,7 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
         super();
     }
 
-    async create(data: TCreateAuthUser): Promise<User | null> {
+    async create(data: TCreateAuthUser): Promise<UserEntity | null> {
         const row = await this.db.user.create({
             data: {
                 emailEncrypted: data.emailEncrypted,
@@ -20,7 +20,7 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
             },
         });
 
-        return new User({
+        return new UserEntity({
             id: row.id,
             emailEncrypted: row.emailEncrypted,
             emailLookupHash: row.emailLookupHash,
@@ -32,11 +32,11 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
         });
     }
 
-    async findByEmailLookupHash(emailLookupHash: string): Promise<User | null> {
+    async findByEmailLookupHash(emailLookupHash: string): Promise<UserEntity | null> {
         const row = await this.db.user.findUnique({ where: { emailLookupHash } });
         if (!row) return null;
 
-        return new User({
+        return new UserEntity({
             id: row.id,
             emailEncrypted: row.emailEncrypted,
             emailLookupHash: row.emailLookupHash,
@@ -48,13 +48,13 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
         });
     }
 
-    async markEmailVerified(id: string): Promise<User | null> {
+    async markEmailVerified(id: string): Promise<UserEntity | null> {
         const row = await this.db.user.update({
             where: { id },
             data: { emailVerified: true },
         });
 
-        return new User({
+        return new UserEntity({
             id: row.id,
             emailEncrypted: row.emailEncrypted,
             emailLookupHash: row.emailLookupHash,

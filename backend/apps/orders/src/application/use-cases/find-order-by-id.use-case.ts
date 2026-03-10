@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Order } from '../../domain/entities/order.entity';
+import { OrderEntity } from '../../domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 
@@ -10,7 +10,7 @@ export class FindOrderByIdUseCase {
         private readonly orderAuditLogPort: IOrderAuditLogPort,
     ) {}
 
-    async execute(id: string): Promise<Order> {
+    async execute(id: string): Promise<OrderEntity> {
         const order = await this.ordersRepositoryPort.findById(id);
 
         if (!order) throw new NotFoundException('Order not found');

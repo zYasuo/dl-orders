@@ -22,7 +22,7 @@ export interface INotification {
     updatedAt: Date;
 }
 
-export class Notification implements INotification {
+export class NotificationEntity implements INotification {
     constructor(
         readonly id: string,
         readonly title: string,
@@ -44,13 +44,21 @@ export class Notification implements INotification {
         sourceEventId: string;
         recipient: string;
         userId: string;
-    }): Notification {
+    }): NotificationEntity {
         const { title, content, type, sourceEventId, recipient, userId } = params;
         const now = new Date();
-        return new Notification(
-            crypto.randomUUID(), title, content, type,
-            INotificationStatus.PENDING, sourceEventId, recipient, userId,
-            null, now, now,
+        return new NotificationEntity(
+            crypto.randomUUID(),
+            title,
+            content,
+            type,
+            INotificationStatus.PENDING,
+            sourceEventId,
+            recipient,
+            userId,
+            null,
+            now,
+            now,
         );
     }
 }

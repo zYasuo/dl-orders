@@ -10,6 +10,7 @@ Reserves stock when an order is created and tells the orders service whether the
 ## Ports
 
 - **IInventoryRepositoryPort** — Persist and load inventory/reservations (Postgres/Prisma).
+- **IInventoryListCachePort** — Cache list of inventory items (Redis); invalidated on create and on reservation.
 - **IInventoryEventsPublisherPort** — Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
 - **IReservationAuditLogPort** — Append reservation audit entries (DynamoDB).
 
@@ -20,13 +21,14 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (inventory via Prisma), `persistence/dynamodb/` (reservation audit log).
+- **Persistence:** `persistence/sql/` (inventory via Prisma), `persistence/dynamodb/` (reservation audit log), `persistence/redis/` (list cache).
 - **Events:** `inventory.reserved`, `inventory.reservation_failed`.
 
 ## Data
 
 - **Postgres** — Inventory and reservations; connection via `DATABASE_URL` in `apps/inventory/.env`.
 - **DynamoDB** — Reservation audit log table (e.g. ReservationAuditLog); LocalStack in dev.
+- **Redis** — Shared instance; `REDIS_URL` in `apps/inventory/.env`. Port 6379 in Docker. Keys use prefix `inventory:` (e.g. list cache).
 
 ## Run locally
 
@@ -42,4 +44,4 @@ Or from `backend/`:
 npm run start:dev:inventory
 ```
 
-Ensure RabbitMQ, Postgres, and LocalStack (if using DynamoDB) are up, and that `apps/inventory/.env` has `DATABASE_URL`, `RABBITMQ_URL`, and `QUEUE_NAME`. Port 3002 if exposing HTTP.
+Ensure RabbitMQ, Redis, Postgres, and LocalStack (if using DynamoDB) are up, and that `apps/inventory/.env` has `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`. Copy from `apps/inventory/.env.example`. Port 3002 if exposing HTTP.

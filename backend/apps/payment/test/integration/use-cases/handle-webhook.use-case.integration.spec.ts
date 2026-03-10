@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleWebhookUseCase } from '../../../src/application/use-cases/handle-webhook.use-case';
-import { Payment, PaymentStatus } from '../../../src/domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
 import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
 import { IPaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
 import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
@@ -40,7 +40,7 @@ describe('HandleWebhookUseCase (integration)', () => {
     });
 
     it('updates payment to APPROVED and publishes PaymentApproved', async () => {
-        const payment = new Payment({
+        const payment = new PaymentEntity({
             id: 'pay-1',
             orderId,
             externalId: null,
@@ -71,7 +71,7 @@ describe('HandleWebhookUseCase (integration)', () => {
     });
 
     it('updates payment to REJECTED and publishes PaymentFailed', async () => {
-        const payment = new Payment({
+        const payment = new PaymentEntity({
             id: 'pay-2',
             orderId,
             externalId: null,
@@ -102,7 +102,7 @@ describe('HandleWebhookUseCase (integration)', () => {
     });
 
     it('is idempotent when payment already approved', async () => {
-        const payment = new Payment({
+        const payment = new PaymentEntity({
             id: 'pay-3',
             orderId,
             externalId,

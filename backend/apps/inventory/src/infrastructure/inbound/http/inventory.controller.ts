@@ -4,7 +4,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 import { CreateInventoryDto, SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from '../../../application/use-cases/find-all-invetory.use-case';
-import { Inventory } from '../../../domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../domain/entities/inventory.entity';
 import { IReservationAuditLogPort } from '../../../domain/ports/reservation-audit-log.port';
 
 @ApiTags('Inventories')
@@ -21,7 +21,7 @@ export class InventoryController {
     @ApiBody({ type: CreateInventoryDto })
     @ApiResponse({ status: 201, description: 'Inventory item created' })
     @ApiResponse({ status: 400, description: 'Invalid input', type: StandardErrorResponseDto })
-    async create(@Body(new ZodValidationPipe(SCreateInventory)) input: TCreateInventory): Promise<Inventory> {
+    async create(@Body(new ZodValidationPipe(SCreateInventory)) input: TCreateInventory): Promise<InventoryEntity> {
         return this.createInventoryUseCase.execute(input);
     }
 
@@ -36,7 +36,7 @@ export class InventoryController {
     @Get()
     @ApiOperation({ summary: 'Get all inventory items' })
     @ApiResponse({ status: 200, description: 'List of inventory items' })
-    async findAll(): Promise<Inventory[]> {
+    async findAll(): Promise<InventoryEntity[]> {
         return this.findAllInventoryUseCase.execute();
     }
 }

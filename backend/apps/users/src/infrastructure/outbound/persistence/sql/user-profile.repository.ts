@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
-import { UserProfile } from '../../../../domain/entities/user-profile.entity';
+import { UserProfileEntity } from '../../../../domain/entities/user-profile.entity';
 import { IUserProfileRepositoryPort } from '../../../../domain/ports/user-profile-repository.port';
 import {
     TCreateUserProfile,
@@ -13,7 +13,7 @@ export class UserProfileRepository extends IUserProfileRepositoryPort {
         super();
     }
 
-    async create(data: TCreateUserProfile): Promise<UserProfile | null> {
+    async create(data: TCreateUserProfile): Promise<UserProfileEntity | null> {
         const row = await this.db.userProfile.create({
             data: {
                 id: data.id,
@@ -21,7 +21,7 @@ export class UserProfileRepository extends IUserProfileRepositoryPort {
                 name: data.name ?? null,
             },
         });
-        return new UserProfile({
+        return new UserProfileEntity({
             id: row.id,
             email: row.email,
             name: row.name,
@@ -30,10 +30,10 @@ export class UserProfileRepository extends IUserProfileRepositoryPort {
         });
     }
 
-    async findById(id: string): Promise<UserProfile | null> {
+    async findById(id: string): Promise<UserProfileEntity | null> {
         const row = await this.db.userProfile.findUnique({ where: { id } });
         if (!row) return null;
-        return new UserProfile({
+        return new UserProfileEntity({
             id: row.id,
             email: row.email,
             name: row.name,
@@ -42,12 +42,12 @@ export class UserProfileRepository extends IUserProfileRepositoryPort {
         });
     }
 
-    async update(id: string, data: TUpdateUserProfile): Promise<UserProfile | null> {
+    async update(id: string, data: TUpdateUserProfile): Promise<UserProfileEntity | null> {
         const row = await this.db.userProfile.update({
             where: { id },
             data: { name: data.name ?? undefined },
         });
-        return new UserProfile({
+        return new UserProfileEntity({
             id: row.id,
             email: row.email,
             name: row.name,

@@ -7,7 +7,7 @@ export interface IInventoryParams {
     readonly updatedAt: Date;
 }
 
-export class Inventory {
+export class InventoryEntity {
     constructor(
         public readonly id: string,
         public readonly name: string,
@@ -17,8 +17,8 @@ export class Inventory {
         public readonly updatedAt: Date,
     ) {}
 
-    static create(params: IInventoryParams): Inventory {
+    static create(params: IInventoryParams): InventoryEntity {
         const now = new Date();
-        return new Inventory(params.id, params.name, params.quantity, params.productId, now, now);
+        return new InventoryEntity(params.id, params.name, params.quantity, params.productId, now, now);
     }
 }

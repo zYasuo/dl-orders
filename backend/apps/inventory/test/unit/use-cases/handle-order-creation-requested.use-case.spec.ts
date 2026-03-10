@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
-import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
 import { IInventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
 import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
@@ -14,8 +14,8 @@ describe('HandleOrderCreationRequestedUseCase', () => {
     let listCache: jest.Mocked<IInventoryListCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeInventory = new Inventory('inv-1', 'Warehouse', 10, 'product-123', createdAt, createdAt);
-    const reducedInventory = new Inventory('inv-1', 'Warehouse', 7, 'product-123', createdAt, createdAt);
+    const fakeInventory = new InventoryEntity('inv-1', 'Warehouse', 10, 'product-123', createdAt, createdAt);
+    const reducedInventory = new InventoryEntity('inv-1', 'Warehouse', 7, 'product-123', createdAt, createdAt);
 
     beforeEach(async () => {
         jest.clearAllMocks();

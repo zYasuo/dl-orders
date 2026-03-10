@@ -1,9 +1,9 @@
-import { Product } from '../entities/product.entity';
+import { ProductEntity } from '../entities/product.entity';
 import { ICreateProduct, IUpdateProduct } from '../types/product-repository.types';
 
 export abstract class IProductRepositoryPort {
-    abstract create(params: ICreateProduct): Promise<Product | null>;
-    abstract findById(id: string): Promise<Product | null>;
-    abstract findByName(name: string): Promise<Product | null>;
-    abstract update(id: string, data: IUpdateProduct): Promise<Product | null>;
+    abstract create(params: ICreateProduct): Promise<ProductEntity | null>;
+    abstract findById(id: string): Promise<ProductEntity | null>;
+    abstract findByName(name: string): Promise<ProductEntity | null>;
+    abstract update(id: string, data: IUpdateProduct): Promise<ProductEntity | null>;
 }

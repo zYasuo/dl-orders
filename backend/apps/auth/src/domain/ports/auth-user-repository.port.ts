@@ -1,8 +1,8 @@
-import { User } from '../entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { TCreateAuthUser } from '../types/auth-user-repository.types';
 
 export abstract class IAuthUserRepositoryPort {
-    abstract create(data: TCreateAuthUser): Promise<User | null>;
-    abstract findByEmailLookupHash(emailLookupHash: string): Promise<User | null>;
-    abstract markEmailVerified(id: string): Promise<User | null>;
+    abstract create(data: TCreateAuthUser): Promise<UserEntity | null>;
+    abstract findByEmailLookupHash(emailLookupHash: string): Promise<UserEntity | null>;
+    abstract markEmailVerified(id: string): Promise<UserEntity | null>;
 }

@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
-import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
@@ -11,7 +11,7 @@ describe('FindOrderByIdUseCase', () => {
     let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeOrder = new Order({
+    const fakeOrder = new OrderEntity({
         id: 'id-123',
         description: 'test order',
         status: OrderStatus.PENDING,

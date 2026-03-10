@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderConfirmedUseCase } from '../../../src/application/use-cases/handle-order-confirmed.use-case';
-import { INotificationStatus, INotificationType, Notification } from '../../../src/domain/entities/notification.entity';
+import { INotificationStatus, INotificationType, NotificationEntity } from '../../../src/domain/entities/notification.entity';
 import { INotificationTemplatePort } from '../../../src/domain/ports/notification-template.port';
 import { CreateNotificationUseCase } from '../../../src/application/use-cases/create-notification.use-case';
 import { SendNotificationEmailUseCase } from '../../../src/application/use-cases/send-notification-email.use-case';
@@ -24,7 +24,7 @@ describe('HandleOrderConfirmedUseCase', () => {
     let sendNotificationEmailUseCase: jest.Mocked<SendNotificationEmailUseCase>;
     let notificationTemplatePort: jest.Mocked<INotificationTemplatePort>;
 
-    const createdNotification = new Notification(
+    const createdNotification = new NotificationEntity(
         'notif-1',
         'Order confirmed',
         '<p>Order #order-1 – Product A, 2 unit(s), Total $99.9</p>',
@@ -106,7 +106,7 @@ describe('HandleOrderConfirmedUseCase', () => {
             expect(sendNotificationEmailUseCase.execute).not.toHaveBeenCalled();
         });
 
-        it('catches and logs when SendNotificationEmailUseCase throws', async () => {
+        it('does not throw when SendNotificationEmailUseCase throws', async () => {
             sendNotificationEmailUseCase.execute.mockRejectedValueOnce(new Error('Email failed'));
 
             await expect(sut.execute(orderConfirmedPayload)).resolves.not.toThrow();

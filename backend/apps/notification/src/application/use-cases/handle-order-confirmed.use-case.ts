@@ -1,5 +1,5 @@
 import { OrderConfirmedEvent } from '@app/shared';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { INotificationType } from '../../domain/entities/notification.entity';
 import { INotificationTemplatePort } from '../../domain/ports/notification-template.port';
 import { CreateNotificationUseCase } from './create-notification.use-case';
@@ -7,8 +7,6 @@ import { SendNotificationEmailUseCase } from './send-notification-email.use-case
 
 @Injectable()
 export class HandleOrderConfirmedUseCase {
-    private readonly logger = new Logger(HandleOrderConfirmedUseCase.name);
-
     constructor(
         private readonly createNotificationUseCase: CreateNotificationUseCase,
         private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
@@ -36,8 +34,8 @@ export class HandleOrderConfirmedUseCase {
         if (notification) {
             try {
                 await this.sendNotificationEmailUseCase.execute(notification);
-            } catch (err) {
-                this.logger.error('Send notification email failed', { notificationId: notification.id, error: err });
+            } catch {
+                // falha no envio não propaga; notificação já foi criada
             }
         }
     }

@@ -1,4 +1,4 @@
-import { Payment, PaymentStatus } from '../../src/domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../src/domain/entities/payment.entity';
 import { IPaymentRepositoryPort } from '../../src/domain/ports/payment-repository.port';
 import { ICreatePayment, IUpdatePaymentStatus } from '../../src/domain/types/payment-repository.types';
 
@@ -17,36 +17,35 @@ type StoredPayment = {
 export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
     private readonly payments = new Map<string, StoredPayment>();
 
-    async create(input: ICreatePayment): Promise<Payment | null> {
+    async create(input: ICreatePayment): Promise<PaymentEntity | null> {
         const existing = await this.findByOrderId(input.orderId);
         if (existing) return null;
-        const now = new Date();
-        const stored: StoredPayment = {
-            id: crypto.randomUUID(),
-            orderId: input.orderId,
-            externalId: input.externalId ?? null,
-            preferenceId: input.preferenceId ?? null,
-            amount: input.amount,
-            status: PaymentStatus.PENDING,
-            gatewayResponse: null,
-            createdAt: now,
-            updatedAt: now,
-        };
-        this.payments.set(stored.id, stored);
-        return this.toDomain(stored);
+        const entity = PaymentEntity.create(input);
+        this.payments.set(entity.id, {
+            id: entity.id,
+            orderId: entity.orderId,
+            externalId: entity.externalId,
+            preferenceId: entity.preferenceId,
+            amount: entity.amount,
+            status: entity.status,
+            gatewayResponse: entity.gatewayResponse,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
+        });
+        return entity;
     }
 
-    async findByOrderId(orderId: string): Promise<Payment | null> {
+    async findByOrderId(orderId: string): Promise<PaymentEntity | null> {
         const stored = Array.from(this.payments.values()).find((p) => p.orderId === orderId);
         return stored ? this.toDomain(stored) : null;
     }
 
-    async findByExternalId(externalId: string): Promise<Payment | null> {
+    async findByExternalId(externalId: string): Promise<PaymentEntity | null> {
         const stored = Array.from(this.payments.values()).find((p) => p.externalId === externalId);
         return stored ? this.toDomain(stored) : null;
     }
 
-    async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<Payment | null> {
+    async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
         const stored = this.payments.get(id);
         if (!stored) return null;
         const updated: StoredPayment = {
@@ -61,14 +60,14 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
         return this.toDomain(updated);
     }
 
-    async updateStatusIfPending(id: string, data: IUpdatePaymentStatus): Promise<Payment | null> {
+    async updateStatusIfPending(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
         const stored = this.payments.get(id);
         if (!stored || stored.status !== PaymentStatus.PENDING) return null;
         return this.updateStatus(id, data);
     }
 
-    private toDomain(stored: StoredPayment): Payment {
-        return new Payment({
+    private toDomain(stored: StoredPayment): PaymentEntity {
+        return new PaymentEntity({
             id: stored.id,
             orderId: stored.orderId,
             externalId: stored.externalId,
@@ -81,7 +80,7 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
         });
     }
 
-    seed(payment: Payment): void {
+    seed(payment: PaymentEntity): void {
         this.payments.set(payment.id, {
             id: payment.id,
             orderId: payment.orderId,

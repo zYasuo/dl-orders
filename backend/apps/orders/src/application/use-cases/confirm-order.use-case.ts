@@ -19,11 +19,17 @@ export class ConfirmOrderUseCase {
     ) {}
 
     async execute(event: TConfirmOrderEvent): Promise<void> {
-        const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CONFIRMED);
-
-        if (!order) {
+        const existing = await this.ordersRepositoryPort.findById(event.orderId);
+        if (!existing) {
             throw new NotFoundException(`Order ${event.orderId} not found`);
         }
+        if (!existing.isPending()) {
+            this.logger.warn(`Order ${event.orderId} is not pending, skipping confirm`);
+            return;
+        }
+
+        const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CONFIRMED);
+        if (!order) return;
 
         await this.orderAuditLogPort.log({
             orderId: order.id,

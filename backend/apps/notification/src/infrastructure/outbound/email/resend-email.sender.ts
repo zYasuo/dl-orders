@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import { IEmailSenderPort } from '../../../domain/ports/email-sender.port';
 
 const resendApiKey = process.env.RESEND_API_KEY ?? '';
-const resendFromEmail = process.env.RESEND_FROM_EMAIL ?? 'Notificações <onboarding@resend.dev>';
+const resendFromEmail = process.env.RESEND_FROM_EMAIL ?? 'Notifications <onboarding@resend.dev>';
 
 @Injectable()
 export class ResendEmailSender extends IEmailSenderPort {

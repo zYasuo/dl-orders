@@ -7,7 +7,7 @@ export interface IProduct {
     readonly updatedAt: Date;
 }
 
-export class Product implements IProduct {
+export class ProductEntity implements IProduct {
     constructor(
         public readonly id: string,
         public readonly name: string,
@@ -17,8 +17,8 @@ export class Product implements IProduct {
         public readonly updatedAt: Date,
     ) {}
 
-    static create(params: { name: string; description: string; price: number }): Product {
+    static create(params: { name: string; description: string; price: number }): ProductEntity {
         const now = new Date();
-        return new Product(crypto.randomUUID(), params.name, params.description, params.price, now, now);
+        return new ProductEntity(crypto.randomUUID(), params.name, params.description, params.price, now, now);
     }
 }

@@ -19,7 +19,7 @@ export type TOrderParams = {
     readonly updatedAt: Date;
 };
 
-export class Order {
+export class OrderEntity {
     constructor(private params: TOrderParams) {}
 
     static create(params: {
@@ -31,9 +31,9 @@ export class Order {
         productDescription: string;
         unitPrice: number;
         totalPrice: number;
-    }): Order {
+    }): OrderEntity {
         const now = new Date();
-        return new Order({
+        return new OrderEntity({
             id: crypto.randomUUID(),
             productId: params.productId,
             quantity: params.quantity,
@@ -64,32 +64,48 @@ export class Order {
     get description() {
         return this.params.description;
     }
+    
     get recipient() {
         return this.params.recipient;
     }
+
     get productName() {
         return this.params.productName;
     }
+
     get productDescription() {
         return this.params.productDescription;
     }
+
     get unitPrice() {
         return this.params.unitPrice;
     }
+
     get totalPrice() {
         return this.params.totalPrice;
     }
+
     get status() {
         return this.params.status;
     }
+
     get createdAt() {
         return this.params.createdAt;
     }
+
     get updatedAt() {
         return this.params.updatedAt;
     }
 
-    toJSON(): TOrderParams {
-        return { ...this.params };
+    isPending(): boolean {
+        return this.params.status === OrderStatus.PENDING;
+    }
+
+    isConfirmed(): boolean {
+        return this.params.status === OrderStatus.CONFIRMED;
+    }
+
+    isCancelled(): boolean {
+        return this.params.status === OrderStatus.CANCELLED;
     }
 }

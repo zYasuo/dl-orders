@@ -9,7 +9,7 @@ export interface IAuthLogs {
     createdAt: Date;
 }
 
-export class AuthLogs implements IAuthLogs {
+export class AuthLogsEntity implements IAuthLogs {
     constructor(
         public readonly id: string,
         public readonly userId: string,
@@ -21,16 +21,8 @@ export class AuthLogs implements IAuthLogs {
         public readonly createdAt: Date,
     ) {}
 
-    static create(data: IAuthLogs): AuthLogs {
+    static create(data: IAuthLogs): AuthLogsEntity {
         const { id, userId, loginAttempts, lastLoginAttempt, lastLoginAttemptIp, lastLoginAttemptSuccess, lockedUntil, createdAt } = data;
-        return new AuthLogs(id, userId, loginAttempts, lastLoginAttempt, lastLoginAttemptIp, lastLoginAttemptSuccess, lockedUntil, createdAt);
-    }
-
-    isLocked(): boolean {
-        return this.lockedUntil ? this.lockedUntil > new Date() : false;
-    }
-
-    shouldLockAfterFailure(maxAttempts: number): boolean {
-        return this.loginAttempts + 1 >= maxAttempts;
+        return new AuthLogsEntity(id, userId, loginAttempts, lastLoginAttempt, lastLoginAttemptIp, lastLoginAttemptSuccess, lockedUntil, createdAt);
     }
 }

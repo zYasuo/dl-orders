@@ -1,6 +1,6 @@
 import { Prisma } from '.prisma/payment-client';
 import { Injectable } from '@nestjs/common';
-import { Payment, PaymentStatus } from '../../../../domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../../../domain/entities/payment.entity';
 import { IPaymentRepositoryPort } from '../../../../domain/ports/payment-repository.port';
 import { ICreatePayment, IUpdatePaymentStatus } from '../../../../domain/types/payment-repository.types';
 import { DbService } from '../../../db/db.service';
@@ -11,7 +11,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         super();
     }
 
-    async create(input: ICreatePayment): Promise<Payment | null> {
+    async create(input: ICreatePayment): Promise<PaymentEntity | null> {
         try {
             const row = await this.db.payment.create({
                 data: {
@@ -32,7 +32,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         }
     }
 
-    async findByOrderId(orderId: string): Promise<Payment | null> {
+    async findByOrderId(orderId: string): Promise<PaymentEntity | null> {
         const row = await this.db.payment.findUnique({ where: { orderId } });
 
         if (!row) return null;
@@ -40,7 +40,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         return this.toDomain(row);
     }
 
-    async findByExternalId(externalId: string): Promise<Payment | null> {
+    async findByExternalId(externalId: string): Promise<PaymentEntity | null> {
         const row = await this.db.payment.findUnique({ where: { externalId } });
 
         if (!row) return null;
@@ -48,7 +48,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         return this.toDomain(row);
     }
 
-    async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<Payment | null> {
+    async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
         const updateData: Record<string, unknown> = { status: data.status };
 
         if (data.externalId !== undefined) updateData.externalId = data.externalId;
@@ -65,7 +65,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         return this.toDomain(row);
     }
 
-    async updateStatusIfPending(id: string, data: IUpdatePaymentStatus): Promise<Payment | null> {
+    async updateStatusIfPending(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
         const updateData: Record<string, unknown> = { status: data.status };
 
         if (data.externalId !== undefined) updateData.externalId = data.externalId;
@@ -95,8 +95,8 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         gatewayResponse: unknown;
         createdAt: Date;
         updatedAt: Date;
-    }): Payment {
-        return new Payment({
+    }): PaymentEntity {
+        return new PaymentEntity({
             id: row.id,
             orderId: row.orderId,
             externalId: row.externalId,

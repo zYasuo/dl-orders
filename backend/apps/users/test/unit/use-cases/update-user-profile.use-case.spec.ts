@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateUserProfileUseCase } from '../../../src/application/use-cases/update-user-profile.use-case';
-import { UserProfile } from '../../../src/domain/entities/user-profile.entity';
+import { UserProfileEntity } from '../../../src/domain/entities/user-profile.entity';
 import { IUserProfileRepositoryPort } from '../../../src/domain/ports/user-profile-repository.port';
 
 describe('UpdateUserProfileUseCase', () => {
@@ -9,7 +9,7 @@ describe('UpdateUserProfileUseCase', () => {
     let userProfileRepository: jest.Mocked<IUserProfileRepositoryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const updatedProfile = new UserProfile({
+    const updatedProfile = new UserProfileEntity({
         id: 'user-123',
         email: 'user@test.com',
         name: 'Updated Name',

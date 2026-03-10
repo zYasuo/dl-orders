@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { INotificationStatus, Notification } from '../../domain/entities/notification.entity';
+import { INotificationStatus, NotificationEntity } from '../../domain/entities/notification.entity';
 import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
 import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
 import { INotificationRepositoryPort } from '../../domain/ports/notification-repository.port';
@@ -16,7 +16,7 @@ export class SendNotificationEmailUseCase {
         private readonly userNotificationsPort: IUserNotificationsPort,
     ) {}
 
-    async execute(notification: Notification): Promise<void> {
+    async execute(notification: NotificationEntity): Promise<void> {
         const { recipient, title, content, sourceEventId, userId } = notification;
         const orderId = sourceEventId;
         const timestamp = new Date().toISOString();

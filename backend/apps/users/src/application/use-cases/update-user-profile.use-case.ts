@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { UserProfile } from '../../domain/entities/user-profile.entity';
+import type { UserProfileEntity } from '../../domain/entities/user-profile.entity';
 import { IUserProfileRepositoryPort } from '../../domain/ports/user-profile-repository.port';
 import type { TUpdateUserProfileDto } from '../dto/update-user-profile.dto';
 
@@ -7,7 +7,7 @@ import type { TUpdateUserProfileDto } from '../dto/update-user-profile.dto';
 export class UpdateUserProfileUseCase {
     constructor(private readonly userProfileRepository: IUserProfileRepositoryPort) {}
 
-    async execute(userId: string, input: TUpdateUserProfileDto): Promise<UserProfile> {
+    async execute(userId: string, input: TUpdateUserProfileDto): Promise<UserProfileEntity> {
         const { name } = input;
 
         const profile = await this.userProfileRepository.update(userId, {

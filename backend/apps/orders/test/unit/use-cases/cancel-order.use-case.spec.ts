@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelOrderUseCase } from '../../../src/application/use-cases/cancel-order.use-case';
-import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
@@ -13,7 +13,21 @@ describe('CancelOrderUseCase', () => {
     let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const cancelledOrder = new Order({
+    const pendingOrder = new OrderEntity({
+        id: 'order-1',
+        description: 'test order',
+        status: OrderStatus.PENDING,
+        productId: 'product-123',
+        quantity: 2,
+        createdAt,
+        updatedAt: createdAt,
+        recipient: 'test@test.com',
+        productName: 'Product A',
+        productDescription: 'Description A',
+        unitPrice: 99.9,
+        totalPrice: 199.8,
+    });
+    const cancelledOrder = new OrderEntity({
         id: 'order-1',
         description: 'test order',
         status: OrderStatus.CANCELLED,
@@ -33,7 +47,7 @@ describe('CancelOrderUseCase', () => {
 
         ordersRepository = {
             create: jest.fn(),
-            findById: jest.fn(),
+            findById: jest.fn().mockResolvedValue(pendingOrder),
             updateStatus: jest.fn().mockResolvedValue(cancelledOrder),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
@@ -87,10 +101,11 @@ describe('CancelOrderUseCase', () => {
         });
 
         it('throws NotFoundException when order does not exist', async () => {
-            ordersRepository.updateStatus.mockResolvedValueOnce(null);
+            ordersRepository.findById.mockResolvedValueOnce(null);
 
             await expect(sut.execute({ orderId: 'non-existent', reason: 'test' })).rejects.toThrow(NotFoundException);
 
+            expect(ordersRepository.updateStatus).not.toHaveBeenCalled();
             expect(orderAuditLog.log).not.toHaveBeenCalled();
         });
 

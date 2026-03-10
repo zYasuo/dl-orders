@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
-import { OtpCode } from '../../../../domain/entities/otp-code.entity';
+import { OtpCodeEntity } from '../../../../domain/entities/otp-code.entity';
 import { IOtpRepositoryPort } from '../../../../domain/ports/otp-repository.port';
 import { TCreateOtp } from '../../../../domain/types/otp-repository.types';
 
@@ -10,7 +10,7 @@ export class OtpRepository extends IOtpRepositoryPort {
         super();
     }
 
-    async create(data: TCreateOtp): Promise<OtpCode | null> {
+    async create(data: TCreateOtp): Promise<OtpCodeEntity | null> {
         const row = await this.db.otpCode.create({
             data: {
                 code: data.code,
@@ -18,7 +18,7 @@ export class OtpRepository extends IOtpRepositoryPort {
                 expiresAt: data.expiresAt,
             },
         });
-        return new OtpCode({
+        return new OtpCodeEntity({
             id: row.id,
             code: row.code,
             userId: row.userId,
@@ -28,13 +28,13 @@ export class OtpRepository extends IOtpRepositoryPort {
         });
     }
 
-    async findLatestByUserId(userId: string): Promise<OtpCode | null> {
+    async findLatestByUserId(userId: string): Promise<OtpCodeEntity | null> {
         const row = await this.db.otpCode.findFirst({
             where: { userId },
             orderBy: { createdAt: 'desc' },
         });
         if (!row) return null;
-        return new OtpCode({
+        return new OtpCodeEntity({
             id: row.id,
             code: row.code,
             userId: row.userId,

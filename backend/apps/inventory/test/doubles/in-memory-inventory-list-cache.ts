@@ -1,14 +1,14 @@
-import { Inventory } from '../../src/domain/entities/inventory.entity';
+import { InventoryEntity } from '../../src/domain/entities/inventory.entity';
 import { IInventoryListCachePort } from '../../src/domain/ports/inventory-list-cache.port';
 
 export class InMemoryInventoryListCache extends IInventoryListCachePort {
-    private items: Inventory[] | null = null;
+    private items: InventoryEntity[] | null = null;
 
-    async get(): Promise<Inventory[] | null> {
+    async get(): Promise<InventoryEntity[] | null> {
         return this.items;
     }
 
-    async set(items: Inventory[], _ttlSeconds: number): Promise<void> {
+    async set(items: InventoryEntity[], _ttlSeconds: number): Promise<void> {
         this.items = items;
     }
 

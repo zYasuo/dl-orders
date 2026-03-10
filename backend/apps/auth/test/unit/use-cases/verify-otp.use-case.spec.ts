@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
-import { OtpCode } from '../../../src/domain/entities/otp-code.entity';
-import { User } from '../../../src/domain/entities/user.entity';
+import { OtpCodeEntity } from '../../../src/domain/entities/otp-code.entity';
+import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
@@ -21,7 +21,7 @@ describe('VerifyOtpUseCase', () => {
     const futureExpiry = new Date(Date.now() + 10 * 60 * 1000);
     const pastExpiry = new Date(Date.now() - 60 * 1000);
 
-    const fakeUser = new User({
+    const fakeUser = new UserEntity({
         id: 'user-123',
         emailEncrypted: 'enc-user@test.com',
         emailLookupHash: 'user@test.com',
@@ -32,7 +32,7 @@ describe('VerifyOtpUseCase', () => {
         updatedAt: createdAt,
     });
 
-    const verifiedUserInstance = new User({
+    const verifiedUserInstance = new UserEntity({
         id: fakeUser.id,
         emailEncrypted: fakeUser.emailEncrypted,
         emailLookupHash: fakeUser.emailLookupHash,
@@ -43,7 +43,7 @@ describe('VerifyOtpUseCase', () => {
         updatedAt: createdAt,
     });
 
-    const validOtp = new OtpCode({
+    const validOtp = new OtpCodeEntity({
         id: 'otp-1',
         code: '123456',
         userId: fakeUser.id,
@@ -52,7 +52,7 @@ describe('VerifyOtpUseCase', () => {
         createdAt,
     });
 
-    const usedOtp = new OtpCode({
+    const usedOtp = new OtpCodeEntity({
         id: 'otp-1',
         code: '123456',
         userId: fakeUser.id,
@@ -61,7 +61,7 @@ describe('VerifyOtpUseCase', () => {
         createdAt,
     });
 
-    const expiredOtp = new OtpCode({
+    const expiredOtp = new OtpCodeEntity({
         id: 'otp-1',
         code: '123456',
         userId: fakeUser.id,

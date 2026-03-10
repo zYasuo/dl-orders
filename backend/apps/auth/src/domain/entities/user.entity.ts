@@ -9,8 +9,28 @@ export type TUserParams = {
     readonly updatedAt: Date;
 };
 
-export class User {
+export class UserEntity {
     constructor(private params: TUserParams) {}
+
+    static create(params: {
+        emailEncrypted: string;
+        emailLookupHash: string;
+        passwordHash: string;
+        name?: string | null;
+    }): UserEntity {
+        
+        const now = new Date();
+        return new UserEntity({
+            id: crypto.randomUUID(),
+            emailEncrypted: params.emailEncrypted,
+            emailLookupHash: params.emailLookupHash,
+            passwordHash: params.passwordHash,
+            name: params.name ?? null,
+            emailVerified: false,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
 
     get id() {
         return this.params.id;

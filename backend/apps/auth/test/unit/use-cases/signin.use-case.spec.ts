@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
-import { User } from '../../../src/domain/entities/user.entity';
+import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
@@ -17,7 +17,7 @@ describe('SigninUseCase', () => {
     let validateAuthAttempt: jest.Mocked<ValidateAuthAttemptUseCase>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const verifiedUser = new User({
+    const verifiedUser = new UserEntity({
         id: 'user-123',
         emailEncrypted: 'enc-user@test.com',
         emailLookupHash: 'user@test.com',
@@ -28,7 +28,7 @@ describe('SigninUseCase', () => {
         updatedAt: createdAt,
     });
 
-    const unverifiedUser = new User({
+    const unverifiedUser = new UserEntity({
         id: 'user-123',
         emailEncrypted: 'enc-user@test.com',
         emailLookupHash: 'user@test.com',

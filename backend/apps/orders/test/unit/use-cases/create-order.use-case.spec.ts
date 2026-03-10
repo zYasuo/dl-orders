@@ -1,7 +1,7 @@
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
-import { Order, OrderStatus } from '../../../src/domain/entities/order.entity';
+import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
 import { IProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
@@ -18,7 +18,7 @@ describe('CreateOrderUseCase', () => {
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeProduct = { name: 'Product A', description: 'Description A', price: 99.9 };
-    const fakeOrder = new Order({
+    const fakeOrder = new OrderEntity({
         id: 'id-123',
         description: 'test order',
         status: OrderStatus.PENDING,
@@ -184,7 +184,7 @@ describe('CreateOrderUseCase', () => {
 
         it('calculates totalPrice as quantity * unitPrice when quantity > 1', async () => {
             const input = { productId: 'product-123', quantity: 3, description: 'order', recipient: 'test@test.com' };
-            const orderWithTotal = new Order({
+            const orderWithTotal = new OrderEntity({
                 id: fakeOrder.id,
                 productId: fakeOrder.productId,
                 quantity: 3,

@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllInventoryUseCase } from '../../../src/application/use-cases/find-all-invetory.use-case';
-import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
 import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('FindAllInventoryUseCase', () => {
     const fakeInventoryItems = [
-        new Inventory('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date()),
-        new Inventory('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date()),
+        new InventoryEntity('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date()),
+        new InventoryEntity('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date()),
     ];
 
     let sut: FindAllInventoryUseCase;

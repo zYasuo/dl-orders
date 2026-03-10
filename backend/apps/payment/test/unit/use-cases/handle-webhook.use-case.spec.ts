@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleWebhookUseCase } from '../../../src/application/use-cases/handle-webhook.use-case';
-import { Payment, PaymentStatus } from '../../../src/domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
 import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
 import { IPaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
 import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
@@ -15,7 +15,7 @@ describe('HandleWebhookUseCase', () => {
 
     const orderId = 'order-1';
     const externalId = 'mp-123';
-    const fakePayment = new Payment({
+    const fakePayment = new PaymentEntity({
         id: 'pay-1',
         orderId,
         externalId: null,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Inventory } from '../../../../domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../../domain/entities/inventory.entity';
 import { IInventoryListCachePort } from '../../../../domain/ports/inventory-list-cache.port';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
 import { RedisService } from '../../../redis/redis.service';
@@ -12,14 +12,14 @@ export class RedisInventoryListCacheAdapter extends IInventoryListCachePort {
         super();
     }
 
-    async get(): Promise<Inventory[] | null> {
+    async get(): Promise<InventoryEntity[] | null> {
         const client = this.redis.getClient();
         const raw = await client.get(LIST_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw) as Array<Record<string, unknown>>;
         return parsed.map(
             (p) =>
-                new Inventory(
+                new InventoryEntity(
                     p.id as string,
                     p.name as string,
                     p.quantity as number,
@@ -30,7 +30,7 @@ export class RedisInventoryListCacheAdapter extends IInventoryListCachePort {
         );
     }
 
-    async set(items: Inventory[], ttlSeconds: number): Promise<void> {
+    async set(items: InventoryEntity[], ttlSeconds: number): Promise<void> {
         const client = this.redis.getClient();
         const payload = items.map((i) => ({
             id: i.id,

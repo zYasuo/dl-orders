@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllInventoryUseCase } from '../../../src/application/use-cases/find-all-invetory.use-case';
-import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
 import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
@@ -11,8 +11,8 @@ describe('FindAllInventoryUseCase (integration)', () => {
     let repository: InMemoryInventoryRepository;
     let listCache: InMemoryInventoryListCache;
 
-    const item1 = new Inventory('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date());
-    const item2 = new Inventory('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date());
+    const item1 = new InventoryEntity('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date());
+    const item2 = new InventoryEntity('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date());
 
     beforeEach(async () => {
         repository = new InMemoryInventoryRepository();

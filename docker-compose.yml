@@ -268,7 +268,7 @@ services:
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=notification_queue
       - RESEND_API_KEY=${RESEND_API_KEY:-}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notificações <onboarding@resend.dev>}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notifications <onboarding@resend.dev>}
       - AWS_ENDPOINT=http://localstack:4566
       - AWS_REGION=us-east-1
       - DYNAMODB_AUDIT_TABLE=NotificationAuditLog

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
-import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
 import { IInventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
 import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
@@ -21,7 +21,7 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
 
     beforeEach(async () => {
         repository = new InMemoryInventoryRepository();
-        repository.seed(new Inventory(inventoryId, 'Product A', initialQuantity, productId, new Date(), new Date()));
+        repository.seed(new InventoryEntity(inventoryId, 'Product A', initialQuantity, productId, new Date(), new Date()));
         eventsPublisher = new FakeInventoryEventsPublisher();
         listCache = new InMemoryInventoryListCache();
         const reservationAuditLog: IReservationAuditLogPort = {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Inventory } from '../../domain/entities/inventory.entity';
+import { InventoryEntity } from '../../domain/entities/inventory.entity';
 import { IInventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
 
@@ -12,7 +12,7 @@ export class FindAllInventoryUseCase {
         private readonly listCache: IInventoryListCachePort,
     ) {}
 
-    async execute(): Promise<Inventory[]> {
+    async execute(): Promise<InventoryEntity[]> {
         const cached = await this.listCache.get();
         if (cached !== null) return cached;
 

@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
-import { AuthLogs } from '../../../src/domain/entities/auth-logs.entity';
+import { AuthLogsEntity } from '../../../src/domain/entities/auth-logs.entity';
 import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/auth-logs-repository.port';
 import { ILockoutStorePort } from '../../../src/domain/ports/lockout-store.port';
@@ -36,7 +36,7 @@ describe('ValidateAuthAttemptUseCase', () => {
                 .fn()
                 .mockImplementation((data) =>
                     Promise.resolve(
-                        new AuthLogs(
+                        new AuthLogsEntity(
                             'log-id',
                             data.userId,
                             data.loginAttempts,

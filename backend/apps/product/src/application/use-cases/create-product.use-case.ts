@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Product } from '../../domain/entities/product.entity';
+import { ProductEntity } from '../../domain/entities/product.entity';
 import { IProductCachePort } from '../../domain/ports/product-cache.port';
 import { IProductRepositoryPort } from '../../domain/ports/product-repository.port';
 import { ICreateProduct } from '../../domain/types/product-repository.types';
@@ -12,7 +12,7 @@ export class CreateProductUseCase {
         private readonly productCache: IProductCachePort,
     ) {}
 
-    async execute(input: TCreateProduct): Promise<Product> {
+    async execute(input: TCreateProduct): Promise<ProductEntity> {
         const { name, description, price } = input;
 
         const existingProduct = await this.productRepositoryPort.findByName(name);

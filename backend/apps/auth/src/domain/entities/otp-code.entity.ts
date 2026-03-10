@@ -7,7 +7,7 @@ export type TOtpCodeParams = {
     readonly createdAt: Date;
 };
 
-export class OtpCode {
+export class OtpCodeEntity {
     constructor(private params: TOtpCodeParams) {}
 
     get id() {

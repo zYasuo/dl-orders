@@ -1,19 +1,19 @@
-import { AuthLogs } from '../../src/domain/entities/auth-logs.entity';
+import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
 import { IAuthLogsRepositoryPort } from '../../src/domain/ports/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../src/domain/types/auth-logs-repository.types';
 
 export class InMemoryAuthLogsRepository extends IAuthLogsRepositoryPort {
-    private readonly logs = new Map<string, AuthLogs>();
+    private readonly logs = new Map<string, AuthLogsEntity>();
 
-    async findByUserId(userId: string): Promise<AuthLogs | null> {
+    async findByUserId(userId: string): Promise<AuthLogsEntity | null> {
         return this.logs.get(userId) ?? null;
     }
 
-    async upsert(data: TUpsertAuthLogs): Promise<AuthLogs> {
+    async upsert(data: TUpsertAuthLogs): Promise<AuthLogsEntity> {
         const existing = this.logs.get(data.userId);
         const id = existing?.id ?? crypto.randomUUID();
         const now = data.lastLoginAttempt;
-        const log = new AuthLogs(
+        const log = new AuthLogsEntity(
             id,
             data.userId,
             data.loginAttempts,

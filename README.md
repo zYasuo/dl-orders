@@ -16,7 +16,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 - **Zod** — request validation via a shared validation pipe
 - **API documentation** — each service exposes interactive OpenAPI docs at `/docs` (Scalar UI)
 - **Standardized error responses** — all HTTP errors return a consistent JSON body: `statusCode`, `error`, `message`, optional `details`, and `timestamp`
-- **Redis** — shared instance (port 6379) for cache/lockout/rate limit; Auth uses it first; keys are namespaced by service prefix (e.g. `auth:`)
+- **Redis** — shared instance (port 6379) for cache and lockout; Auth (lockout), Inventory (list cache), Product (by-id cache); keys namespaced by service prefix (`auth:`, `inventory:`, `product:`)
 
 ## Demo
 
@@ -44,9 +44,9 @@ flowchart LR
 ```
 
 - **Orders** — Creates orders (HTTP), publishes `order.creation_requested`. Listens for `inventory.reserved` (forwards to Payment), `inventory.reservation_failed` (cancel), `payment.approved` (confirm and publish `order.confirmed`), and `payment.failed` (cancel). Notification sends email when order is confirmed.
-- **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`.
+- **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`. Caches list of inventory items (Redis, key prefix `inventory:`).
 - **Payment** — Listens for `inventory.reserved` (from Orders). Creates Mercado Pago preference, stores checkout URL. Webhook receives approval/rejection; publishes `payment.approved` or `payment.failed` so Orders can confirm or cancel.
-- **Product** — HTTP-only catalog (e.g. create product); no messaging.
+- **Product** — HTTP-only catalog (e.g. create product); no messaging. Caches product by ID (Redis, key prefix `product:`).
 - **Notification** — Listens for `order.confirmed` (order confirmation email), `otp.send_requested` (OTP verification email), and `account.locked_notify` (account locked after failed logins email); uses Resend.
 - **Auth** — Signup (publishes `otp.send_requested` so notification sends OTP email), verify OTP, signin; issues JWT. After 3 failed signin attempts the account is locked for 5 minutes and Auth publishes `account.locked_notify` (notification sends the lockout email). Publishes `user.verified` when email is confirmed.
 - **Users** — Listens for `user.verified`, stores user profile. HTTP `GET/PATCH /users/me` protected by JWT.

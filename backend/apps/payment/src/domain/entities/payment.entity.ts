@@ -18,8 +18,28 @@ export interface IPaymentParams {
     readonly updatedAt: Date;
 }
 
-export class Payment {
+export class PaymentEntity {
     constructor(private params: IPaymentParams) {}
+
+    static create(params: {
+        orderId: string;
+        amount: number;
+        preferenceId?: string | null;
+        externalId?: string | null;
+    }): PaymentEntity {
+        const now = new Date();
+        return new PaymentEntity({
+            id: crypto.randomUUID(),
+            orderId: params.orderId,
+            amount: params.amount,
+            preferenceId: params.preferenceId ?? null,
+            externalId: params.externalId ?? null,
+            status: PaymentStatus.PENDING,
+            gatewayResponse: null,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
 
     get id() {
         return this.params.id;
@@ -55,5 +75,17 @@ export class Payment {
 
     get updatedAt() {
         return this.params.updatedAt;
+    }
+
+    isPending(): boolean {
+        return this.params.status === PaymentStatus.PENDING;
+    }
+
+    isApproved(): boolean {
+        return this.params.status === PaymentStatus.APPROVED;
+    }
+
+    isRejected(): boolean {
+        return this.params.status === PaymentStatus.REJECTED;
     }
 }

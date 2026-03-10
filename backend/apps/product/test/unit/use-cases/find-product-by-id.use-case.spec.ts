@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindProductByIdUseCase } from '../../../src/application/use-cases/find-product-by-id.use-case';
-import { Product } from '../../../src/domain/entities/product.entity';
+import { ProductEntity } from '../../../src/domain/entities/product.entity';
 import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
 import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 
@@ -11,7 +11,7 @@ describe('FindProductByIdUseCase', () => {
     let productCache: jest.Mocked<IProductCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeProduct = new Product('product-123', 'Product A', 'Description A', 99.9, createdAt, createdAt);
+    const fakeProduct = new ProductEntity('product-123', 'Product A', 'Description A', 99.9, createdAt, createdAt);
 
     beforeEach(async () => {
         jest.clearAllMocks();

@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleInventoryReservedUseCase } from '../../../src/application/use-cases/handle-inventory-reserved.use-case';
-import { Payment, PaymentStatus } from '../../../src/domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
 import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
 import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
 import { IPaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
@@ -16,7 +16,7 @@ describe('HandleInventoryReservedUseCase', () => {
 
     const orderId = 'order-1';
     const totalPrice = 99.9;
-    const fakePayment = new Payment({
+    const fakePayment = new PaymentEntity({
         id: 'pay-1',
         orderId,
         externalId: null,

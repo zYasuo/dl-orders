@@ -59,16 +59,18 @@ export class HandleWebhookUseCase {
                 return;
             }
 
+            if (!paymentRecord.isPending()) {
+                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
+                return;
+            }
+
             const updated = await this.paymentRepositoryPort.updateStatusIfPending(paymentRecord.id, {
                 status: PaymentStatus.APPROVED,
                 externalId,
                 gatewayResponse: { ...details },
             });
 
-            if (!updated) {
-                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
-                return;
-            }
+            if (!updated) return;
 
             await this.paymentAuditLogPort.log({
                 orderId: paymentRecord.orderId,
@@ -86,16 +88,18 @@ export class HandleWebhookUseCase {
 
             this.logger.log(`Payment approved. orderId=${paymentRecord.orderId} externalId=${externalId}`);
         } else {
+            if (!paymentRecord.isPending()) {
+                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
+                return;
+            }
+
             const updated = await this.paymentRepositoryPort.updateStatusIfPending(paymentRecord.id, {
                 status: PaymentStatus.REJECTED,
                 externalId,
                 gatewayResponse: { ...details },
             });
 
-            if (!updated) {
-                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
-                return;
-            }
+            if (!updated) return;
 
             await this.paymentAuditLogPort.log({
                 orderId: paymentRecord.orderId,

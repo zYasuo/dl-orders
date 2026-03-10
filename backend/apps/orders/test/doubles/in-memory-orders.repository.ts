@@ -1,38 +1,24 @@
-import { Order, OrderStatus } from '../../src/domain/entities/order.entity';
+import { OrderEntity, OrderStatus } from '../../src/domain/entities/order.entity';
 import { IOrdersRepositoryPort } from '../../src/domain/ports/orders-repository.port';
 import { ICreateOrder } from '../../src/domain/types/order-repository.types';
 
 export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
-    private readonly orders = new Map<string, Order>();
+    private readonly orders = new Map<string, OrderEntity>();
 
-    async create(input: ICreateOrder): Promise<Order> {
-        const now = new Date();
-        const order = new Order({
-            id: crypto.randomUUID(),
-            description: input.description,
-            productId: input.productId,
-            quantity: input.quantity,
-            status: OrderStatus.PENDING,
-            recipient: input.recipient,
-            productName: input.productName,
-            productDescription: input.productDescription,
-            unitPrice: input.unitPrice,
-            totalPrice: input.totalPrice,
-            createdAt: now,
-            updatedAt: now,
-        });
+    async create(input: ICreateOrder): Promise<OrderEntity> {
+        const order = OrderEntity.create(input);
         this.orders.set(order.id, order);
         return order;
     }
 
-    async findById(id: string): Promise<Order | null> {
+    async findById(id: string): Promise<OrderEntity | null> {
         return this.orders.get(id) ?? null;
     }
 
-    async updateStatus(id: string, status: string): Promise<Order | null> {
+    async updateStatus(id: string, status: string): Promise<OrderEntity | null> {
         const order = this.orders.get(id);
         if (!order) return null;
-        const updated = new Order({
+        const updated = new OrderEntity({
             id: order.id,
             description: order.description,
             productId: order.productId,

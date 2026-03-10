@@ -1,13 +1,14 @@
-import { OtpCode } from '../../src/domain/entities/otp-code.entity';
+import { OtpCodeEntity } from '../../src/domain/entities/otp-code.entity';
 import { IOtpRepositoryPort } from '../../src/domain/ports/otp-repository.port';
 import { TCreateOtp } from '../../src/domain/types/otp-repository.types';
 
 export class InMemoryOtpRepository extends IOtpRepositoryPort {
-    private readonly otps: OtpCode[] = [];
+    private readonly otps: OtpCodeEntity[] = [];
 
-    async create(data: TCreateOtp): Promise<OtpCode | null> {
+    async create(data: TCreateOtp): Promise<OtpCodeEntity | null> {
         const now = new Date();
-        const otp = new OtpCode({
+
+        const otp = new OtpCodeEntity({
             id: crypto.randomUUID(),
             code: data.code,
             userId: data.userId,
@@ -15,11 +16,12 @@ export class InMemoryOtpRepository extends IOtpRepositoryPort {
             used: false,
             createdAt: now,
         });
+
         this.otps.push(otp);
         return otp;
     }
 
-    async findLatestByUserId(userId: string): Promise<OtpCode | null> {
+    async findLatestByUserId(userId: string): Promise<OtpCodeEntity | null> {
         const byUser = this.otps.filter((o) => o.userId === userId).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         return byUser[0] ?? null;
     }
@@ -27,8 +29,10 @@ export class InMemoryOtpRepository extends IOtpRepositoryPort {
     async markUsed(id: string): Promise<void> {
         const idx = this.otps.findIndex((o) => o.id === id);
         if (idx === -1) return;
+
         const o = this.otps[idx];
-        this.otps[idx] = new OtpCode({
+        
+        this.otps[idx] = new OtpCodeEntity({
             id: o.id,
             code: o.code,
             userId: o.userId,

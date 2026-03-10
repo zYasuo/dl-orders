@@ -1,41 +1,27 @@
-import { INotificationStatus, INotificationType, Notification } from '../../src/domain/entities/notification.entity';
+import { INotificationStatus, INotificationType, NotificationEntity } from '../../src/domain/entities/notification.entity';
 import { INotificationRepositoryPort } from '../../src/domain/ports/notification-repository.port';
 import { ICreateNotification, IUpdateNotification } from '../../src/domain/types/notification-repository.types';
 
 export class InMemoryNotificationRepository extends INotificationRepositoryPort {
-    private readonly notifications = new Map<string, Notification>();
+    private readonly notifications = new Map<string, NotificationEntity>();
 
-    async create(params: ICreateNotification): Promise<Notification | null> {
-        const {
-            title,
-            content,
-            type,
-            sourceEventId,
-            recipientEmail,
-            userId,
-        } = params;
-        const now = new Date();
-        const notification = new Notification(
-            crypto.randomUUID(),
-            title,
-            content,
-            type as INotificationType,
-            INotificationStatus.PENDING,
-            sourceEventId,
-            recipientEmail,
-            userId,
-            null,
-            now,
-            now,
-        );
+    async create(params: ICreateNotification): Promise<NotificationEntity | null> {
+        const notification = NotificationEntity.create({
+            title: params.title,
+            content: params.content,
+            type: params.type as INotificationType,
+            sourceEventId: params.sourceEventId,
+            recipient: params.recipientEmail,
+            userId: params.userId,
+        });
         this.notifications.set(notification.id, notification);
         return notification;
     }
 
-    async update(id: string, data: IUpdateNotification): Promise<Notification | null> {
+    async update(id: string, data: IUpdateNotification): Promise<NotificationEntity | null> {
         const notification = this.notifications.get(id);
         if (!notification) return null;
-        const updated = new Notification(
+        const updated = new NotificationEntity(
             notification.id,
             notification.title,
             notification.content,
@@ -52,7 +38,7 @@ export class InMemoryNotificationRepository extends INotificationRepositoryPort 
         return updated;
     }
 
-    async delete(id: string): Promise<Notification | null> {
+    async delete(id: string): Promise<NotificationEntity | null> {
         const notification = this.notifications.get(id);
         if (!notification) return null;
         this.notifications.delete(id);

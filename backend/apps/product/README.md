@@ -9,6 +9,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 ## Ports
 
 - **IProductRepositoryPort** — Persist and load products (Postgres/Prisma).
+- **IProductCachePort** — Cache product by ID (Redis); invalidated on create.
 
 ## Inbound
 
@@ -16,11 +17,12 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (products via Prisma) only; no events, no DynamoDB.
+- **Persistence:** `persistence/sql/` (products via Prisma), `persistence/redis/` (product cache); no events, no DynamoDB.
 
 ## Data
 
 - **Postgres** — Products; connection via `DATABASE_URL` in `apps/product/.env`.
+- **Redis** — Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Keys use prefix `product:` (e.g. item by id).
 
 ## Run locally
 
@@ -36,4 +38,4 @@ Or from `backend/`:
 npm run start:dev:product
 ```
 
-Ensure Postgres is up and `apps/product/.env` has `DATABASE_URL`. Port 3003 if exposing HTTP.
+Ensure Redis and Postgres are up and `apps/product/.env` has `DATABASE_URL`, `REDIS_URL`. Copy from `apps/product/.env.example`. Port 3003 if exposing HTTP.

@@ -6,11 +6,11 @@ export type TUserProfileParams = {
     readonly updatedAt: Date;
 };
 
-export class UserProfile {
+export class UserProfileEntity {
     constructor(private params: TUserProfileParams) {}
 
-    static create(params: TUserProfileParams): UserProfile {
-        return new UserProfile(params);
+    static create(params: TUserProfileParams): UserProfileEntity {
+        return new UserProfileEntity(params);
     }
 
     get id() {

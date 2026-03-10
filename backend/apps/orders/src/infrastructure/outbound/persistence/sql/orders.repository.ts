@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '.prisma/orders-client';
 import { DbService } from '../../../db/db.service';
-import { Order, OrderStatus } from '../../../../domain/entities/order.entity';
+import { OrderEntity, OrderStatus } from '../../../../domain/entities/order.entity';
 import { IOrdersRepositoryPort } from '../../../../domain/ports/orders-repository.port';
 import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 
@@ -9,7 +9,7 @@ import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 export class OrdersRepository extends IOrdersRepositoryPort {
     constructor(private readonly db: DbService) { super(); }
 
-    async create(input: ICreateOrder): Promise<Order | null> {
+    async create(input: ICreateOrder): Promise<OrderEntity | null> {
         const order = await this.db.order.create({
             data: {
                 productId: input.productId,
@@ -23,7 +23,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
             },
         });
         if (!order) return null;
-        return new Order({
+        return new OrderEntity({
             id: order.id,
             productId: order.productId,
             quantity: order.quantity,
@@ -39,9 +39,9 @@ export class OrdersRepository extends IOrdersRepositoryPort {
         });
     }
 
-    async findById(id: string): Promise<Order | null> {
+    async findById(id: string): Promise<OrderEntity | null> {
         const item = await this.db.order.findUnique({ where: { id } });
-        return item ? new Order({
+        return item ? new OrderEntity({
             id: item.id,
             productId: item.productId,
             quantity: item.quantity,
@@ -57,14 +57,14 @@ export class OrdersRepository extends IOrdersRepositoryPort {
         }) : null;
     }
 
-    async updateStatus(id: string, status: string): Promise<Order | null> {
+    async updateStatus(id: string, status: string): Promise<OrderEntity | null> {
         try {
             const item = await this.db.order.update({
                 where: { id },
                 data: { status: status as any },
             });
 
-            return new Order({
+            return new OrderEntity({
                 id: item.id,
                 productId: item.productId,
                 quantity: item.quantity,

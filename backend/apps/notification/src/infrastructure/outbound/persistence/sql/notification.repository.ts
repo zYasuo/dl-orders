@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
 import {
-    Notification,
+    NotificationEntity,
     INotificationStatus,
     INotificationType,
 } from '../../../../domain/entities/notification.entity';
@@ -12,7 +12,7 @@ import { ICreateNotification, IUpdateNotification } from '../../../../domain/typ
 export class NotificationRepository extends INotificationRepositoryPort {
     constructor(private readonly db: DbService) { super(); }
 
-    async create(params: ICreateNotification): Promise<Notification | null> {
+    async create(params: ICreateNotification): Promise<NotificationEntity | null> {
         const { title, content, type, sourceEventId, recipientEmail, userId, productName, productDescription, totalPrice, quantity } = params;
         const row = await this.db.notification.create({
             data: {
@@ -28,7 +28,7 @@ export class NotificationRepository extends INotificationRepositoryPort {
                 quantity,
             },
         });
-        return new Notification(
+        return new NotificationEntity(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
             row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,
@@ -36,7 +36,7 @@ export class NotificationRepository extends INotificationRepositoryPort {
         );
     }
 
-    async update(id: string, data: IUpdateNotification): Promise<Notification | null> {
+    async update(id: string, data: IUpdateNotification): Promise<NotificationEntity | null> {
         const row = await this.db.notification.update({
             where: { id },
             data: {
@@ -45,7 +45,7 @@ export class NotificationRepository extends INotificationRepositoryPort {
                 ...(data.updatedAt != null && { updatedAt: data.updatedAt }),
             },
         });
-        return new Notification(
+        return new NotificationEntity(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
             row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,
@@ -53,9 +53,9 @@ export class NotificationRepository extends INotificationRepositoryPort {
         );
     }
 
-    async delete(id: string): Promise<Notification | null> {
+    async delete(id: string): Promise<NotificationEntity | null> {
         const row = await this.db.notification.delete({ where: { id } });
-        return new Notification(
+        return new NotificationEntity(
             row.id, row.title, row.content,
             row.type as INotificationType, row.status as INotificationStatus,
             row.sourceEventId, row.recipientEmail, row.userId, row.sentAt,

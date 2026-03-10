@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthLogs } from '../../../../domain/entities/auth-logs.entity';
+import { AuthLogsEntity } from '../../../../domain/entities/auth-logs.entity';
 import { IAuthLogsRepositoryPort } from '../../../../domain/ports/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../../../domain/types/auth-logs-repository.types';
 import { DbService } from '../../../db/db.service';
@@ -10,14 +10,14 @@ export class AuthLogsRepository extends IAuthLogsRepositoryPort {
         super();
     }
 
-    async findByUserId(userId: string): Promise<AuthLogs | null> {
+    async findByUserId(userId: string): Promise<AuthLogsEntity | null> {
         const row = await this.db.authLogs.findUnique({
             where: { userId },
         });
 
         if (!row) return null;
 
-        return new AuthLogs(
+        return new AuthLogsEntity(
             row.id,
             row.userId,
             row.loginAttempts,
@@ -29,7 +29,7 @@ export class AuthLogsRepository extends IAuthLogsRepositoryPort {
         );
     }
 
-    async upsert(data: TUpsertAuthLogs): Promise<AuthLogs> {
+    async upsert(data: TUpsertAuthLogs): Promise<AuthLogsEntity> {
         const row = await this.db.authLogs.upsert({
             where: { userId: data.userId },
             create: {
@@ -49,7 +49,7 @@ export class AuthLogsRepository extends IAuthLogsRepositoryPort {
             },
         });
 
-        return new AuthLogs(
+        return new AuthLogsEntity(
             row.id,
             row.userId,
             row.loginAttempts,

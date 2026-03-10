@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateNotificationUseCase } from '../../../src/application/use-cases/create-notification.use-case';
-import { INotificationStatus, INotificationType, Notification } from '../../../src/domain/entities/notification.entity';
+import { INotificationStatus, INotificationType, NotificationEntity } from '../../../src/domain/entities/notification.entity';
 import { INotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
 import { ICreateNotification } from '../../../src/domain/types/notification-repository.types';
 
@@ -9,7 +9,7 @@ describe('CreateNotificationUseCase', () => {
     let notificationRepository: jest.Mocked<INotificationRepositoryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeNotification = new Notification(
+    const fakeNotification = new NotificationEntity(
         'notif-1',
         'Pedido confirmado',
         'Seu pedido foi confirmado.',
