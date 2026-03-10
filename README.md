@@ -8,8 +8,8 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 
 ## Tech highlights
 
-- **NestJS monorepo** — one repo, six apps: orders, inventory, product, notification, auth, users
-- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, order confirmed, OTP send requested, user verified)
+- **NestJS monorepo** — one repo, seven apps: orders, inventory, product, notification, auth, users, payment
+- **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, payment approved/failed, order confirmed, OTP send requested, user verified)
 - **Hexagonal architecture** per app — domain (entities, ports), application (use cases), infrastructure (HTTP, messaging, persistence)
 - **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
@@ -32,14 +32,18 @@ flowchart LR
     Orders -->|"order.creation_requested"| Inventory
     Inventory -->|"inventory.reserved"| Orders
     Inventory -->|"inventory.reservation_failed"| Orders
+    Orders -->|"inventory.reserved"| Payment
+    Payment -->|"payment.approved"| Orders
+    Payment -->|"payment.failed"| Orders
     Orders -->|"order.confirmed"| Notification
     Auth -->|"otp.send_requested"| Notification
     Auth -->|"user.verified"| Users
     Product[Product]
 ```
 
-- **Orders** — Creates orders (HTTP), publishes `order.creation_requested`. Listens for `inventory.reserved` (confirm) and `inventory.reservation_failed` (cancel), then publishes `order.confirmed` so notification can send email.
+- **Orders** — Creates orders (HTTP), publishes `order.creation_requested`. Listens for `inventory.reserved` (forwards to Payment), `inventory.reservation_failed` (cancel), `payment.approved` (confirm and publish `order.confirmed`), and `payment.failed` (cancel). Notification sends email when order is confirmed.
 - **Inventory** — Listens for `order.creation_requested`, reserves stock, publishes `inventory.reserved` or `inventory.reservation_failed`.
+- **Payment** — Listens for `inventory.reserved` (from Orders). Creates Mercado Pago preference, stores checkout URL. Webhook receives approval/rejection; publishes `payment.approved` or `payment.failed` so Orders can confirm or cancel.
 - **Product** — HTTP-only catalog (e.g. create product); no messaging.
 - **Notification** — Listens for `order.confirmed` (sends order confirmation email) and `otp.send_requested` (sends OTP verification email); uses Resend.
 - **Auth** — Signup (publishes `otp.send_requested` so notification sends OTP email), verify OTP, signin; issues JWT. Publishes `user.verified` when email is confirmed.
@@ -66,7 +70,7 @@ flowchart LR
 
 - **Root** — npm workspace; only `backend` is a workspace member. Scripts: Docker, dev, build, test, lint.
 - **backend/** — NestJS monorepo:
-  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users` (each with its own `main.ts`, Prisma schema, optional Dockerfile).
+  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`, Prisma schema, optional Dockerfile).
   - **libs/shared** — constants, event types, validation.
   - **scripts/** — e.g. DynamoDB table init for local/CI.
 
@@ -101,7 +105,7 @@ flowchart LR
    npm run prisma:orders:push -w backend
    ```
 
-   Repeat for `inventory`, `product`, `notification`, `auth`, `users` (see `backend/package.json` scripts).
+   Repeat for `inventory`, `product`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts).
 
 4. **Env**  
    Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`). Copy from `.env.example` if present.
@@ -122,22 +126,24 @@ flowchart LR
    npm run start:dev:notification
    npm run start:dev:auth
    npm run start:dev:users
+   npm run start:dev:payment
    ```
 
-   Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006).
+   Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006), payment (3007).
 
 ## API documentation
 
 Each microservice serves interactive API docs (Scalar) at **`/docs`**:
 
-| Service     | Port | Docs URL                |
-|------------|------|-------------------------|
-| Orders     | 3001 | http://localhost:3001/docs |
-| Inventory  | 3002 | http://localhost:3002/docs |
-| Product    | 3003 | http://localhost:3003/docs |
+| Service      | Port | Docs URL                   |
+|--------------|------|----------------------------|
+| Orders       | 3001 | http://localhost:3001/docs |
+| Inventory    | 3002 | http://localhost:3002/docs |
+| Product      | 3003 | http://localhost:3003/docs |
 | Notification | 3004 | http://localhost:3004/docs |
-| Auth       | 3005 | http://localhost:3005/docs |
-| Users      | 3006 | http://localhost:3006/docs |
+| Auth         | 3005 | http://localhost:3005/docs |
+| Users        | 3006 | http://localhost:3006/docs |
+| Payment      | 3007 | http://localhost:3007/docs |
 
 Start the app you need, then open the URL above in a browser to explore routes, request/response schemas, and try requests. The Users API uses Bearer (JWT) auth; get a token from Auth (`/auth/signin` or `/auth/verify-otp`) and use it in the Scalar UI.
 
@@ -159,4 +165,4 @@ Start the app you need, then open the URL above in a browser to explore routes, 
 
 ---
 
-For more detail per service, see the READMEs in `backend/apps/orders`, `backend/apps/inventory`, `backend/apps/product`, `backend/apps/notification`, `backend/apps/auth`, and `backend/apps/users`.
+For more detail per service, see the READMEs in `backend/apps/orders`, `backend/apps/inventory`, `backend/apps/product`, `backend/apps/notification`, `backend/apps/auth`, `backend/apps/users`, and `backend/apps/payment`.
