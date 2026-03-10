@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { OtpCodeEntity } from '../../domain/entities/otp-code.entity';
 import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
 import { IOtpRepositoryPort } from '../../domain/ports/otp-repository.port';
@@ -44,7 +45,7 @@ export class SignupUseCase {
             throw new Error('Failed to create user');
         }
 
-        const code = this.generateOtpCode();
+        const code = OtpCodeEntity.generateCode();
         const expiresInMinutes = parseInt(process.env.OTP_EXPIRES_IN_MINUTES ?? '10', 10);
         const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
         const otpData: TCreateOtp = { code, userId: user.id, expiresAt };
@@ -59,9 +60,5 @@ export class SignupUseCase {
         });
 
         return { userId: user.id, email: plainEmail };
-    }
-
-    private generateOtpCode(): string {
-        return Math.floor(100000 + Math.random() * 900000).toString();
     }
 }

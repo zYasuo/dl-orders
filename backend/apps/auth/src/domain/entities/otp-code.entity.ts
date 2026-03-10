@@ -1,3 +1,5 @@
+import * as crypto from 'node:crypto';
+
 export type TOtpCodeParams = {
     readonly id: string;
     readonly code: string;
@@ -31,5 +33,9 @@ export class OtpCodeEntity {
 
     isExpired(): boolean {
         return new Date() > this.params.expiresAt;
+    }
+
+    static generateCode(): string {
+        return crypto.randomInt(100_000, 1_000_000).toString();
     }
 }
