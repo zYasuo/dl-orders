@@ -37,6 +37,7 @@ export class SigninUseCase {
         if (!valid) {
             const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
             await this.validateAuthAttempt.registerFailedAttempt(user.id, ip ?? null, plainEmail);
+            
             throw new BadRequestException('Authentication Error');
         }
 
