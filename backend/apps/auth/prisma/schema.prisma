@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String
-  name          String?
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  otpCodes      OtpCode[]
+  id               String   @id @default(uuid())
+  emailEncrypted   String   @map("email_encrypted")
+  emailLookupHash  String   @unique @map("email_lookup_hash")
+  passwordHash     String
+  name             String?
+  emailVerified    Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  otpCodes         OtpCode[]
   @@map("users")
 }
 

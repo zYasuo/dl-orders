@@ -2,11 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
 import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
+import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
-import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher';
 
 describe('SigninUseCase (integration)', () => {
     let sut: SigninUseCase;
@@ -22,6 +24,7 @@ describe('SigninUseCase (integration)', () => {
             providers: [
                 SigninUseCase,
                 { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
+                { provide: IEmailEncryptedSecurity, useClass: FakeEmailEncryptedSecurity },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IJwtPort, useValue: jwtPort },
             ],
@@ -35,7 +38,8 @@ describe('SigninUseCase (integration)', () => {
             const password = 'password123';
             const hash = await new Argon2PasswordHasher().hash(password);
             const user = await authUserRepository.create({
-                email: 'user@test.com',
+                emailEncrypted: 'user@test.com',
+                emailLookupHash: 'user@test.com',
                 passwordHash: hash,
                 name: 'User',
             });
@@ -54,7 +58,12 @@ describe('SigninUseCase (integration)', () => {
         it('throws BadRequestException when email is not verified', async () => {
             const password = 'password123';
             const hash = await new Argon2PasswordHasher().hash(password);
-            await authUserRepository.create({ email: 'user@test.com', passwordHash: hash, name: 'User' });
+            await authUserRepository.create({
+                emailEncrypted: 'user@test.com',
+                emailLookupHash: 'user@test.com',
+                passwordHash: hash,
+                name: 'User',
+            });
 
             await expect(sut.execute({ email: 'user@test.com', password })).rejects.toThrow(BadRequestException);
             await expect(sut.execute({ email: 'user@test.com', password })).rejects.toThrow(/Email not verified/);
@@ -62,7 +71,12 @@ describe('SigninUseCase (integration)', () => {
 
         it('throws BadRequestException when password is invalid', async () => {
             const hash = await new Argon2PasswordHasher().hash('correct');
-            const user = await authUserRepository.create({ email: 'user@test.com', passwordHash: hash, name: 'User' });
+            const user = await authUserRepository.create({
+                emailEncrypted: 'user@test.com',
+                emailLookupHash: 'user@test.com',
+                passwordHash: hash,
+                name: 'User',
+            });
             await authUserRepository.markEmailVerified(user!.id);
 
             await expect(sut.execute({ email: 'user@test.com', password: 'wrong' })).rejects.toThrow(BadRequestException);

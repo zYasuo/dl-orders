@@ -5,11 +5,10 @@ import { IPasswordHasherPort } from '../../../domain/ports/password-hasher.port'
 @Injectable()
 export class Argon2PasswordHasher extends IPasswordHasherPort {
     async hash(plain: string): Promise<string> {
-        
         const hashConfig = {
             memoryCost: 19456,
             timeCost: 2,
-            parallelism: 1,
+            parallelism: 4,
         };
 
         return argon2.hash(plain, hashConfig);

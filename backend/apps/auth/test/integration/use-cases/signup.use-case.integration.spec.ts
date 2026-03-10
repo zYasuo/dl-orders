@@ -2,10 +2,12 @@ import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
 import { IOtpSendRequestedPublisherPort } from '../../../src/domain/ports/otp-send-requested-publisher.port';
 import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
-import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher';
+import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeOtpSendRequestedPublisher } from '../../doubles/fake-otp-send-requested.publisher';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
 import { InMemoryOtpRepository } from '../../doubles/in-memory-otp.repository';
@@ -27,6 +29,7 @@ describe('SignupUseCase (integration)', () => {
             providers: [
                 SignupUseCase,
                 { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
+                { provide: IEmailEncryptedSecurity, useClass: FakeEmailEncryptedSecurity },
                 { provide: IOtpRepositoryPort, useValue: otpRepository },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IOtpSendRequestedPublisherPort, useValue: otpSendRequestedPublisher },
@@ -45,7 +48,7 @@ describe('SignupUseCase (integration)', () => {
             expect(result.email).toBe(input.email);
             expect(result.userId).toBeDefined();
 
-            const user = await authUserRepository.findByEmail(input.email);
+            const user = await authUserRepository.findByEmailLookupHash(input.email);
             expect(user).not.toBeNull();
             expect(user!.name).toBe(input.name);
             expect(user!.emailVerified).toBe(false);

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../domain/ports/jwt.port';
 import { IOtpRepositoryPort } from '../../domain/ports/otp-repository.port';
 import { IUserVerifiedPublisherPort } from '../../domain/ports/user-verified-publisher.port';
@@ -9,13 +10,16 @@ import { TVerifyOtp } from '../dto/verify-otp.dto';
 export class VerifyOtpUseCase {
     constructor(
         private readonly authUserRepository: IAuthUserRepositoryPort,
+        private readonly emailEncrypted: IEmailEncryptedSecurity,
         private readonly otpRepository: IOtpRepositoryPort,
         private readonly jwtPort: IJwtPort,
         private readonly userVerifiedPublisher: IUserVerifiedPublisherPort,
     ) {}
 
     async execute(input: TVerifyOtp): Promise<{ accessToken: string }> {
-        const user = await this.authUserRepository.findByEmail(input.email);
+        const emailLookupHash = await this.emailEncrypted.getLookupHash(input.email);
+        const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
+
         if (!user) {
             throw new BadRequestException('Invalid email or code');
         }
@@ -24,26 +28,31 @@ export class VerifyOtpUseCase {
         if (!otp || otp.code !== input.code) {
             throw new BadRequestException('Invalid email or code');
         }
+
         if (otp.used) {
             throw new BadRequestException('Code already used');
         }
+
         if (otp.isExpired()) {
             throw new BadRequestException('Code expired');
         }
 
         await this.otpRepository.markUsed(otp.id);
         const verifiedUser = await this.authUserRepository.markEmailVerified(user.id);
+
         if (verifiedUser) {
+            const plainEmail = await this.emailEncrypted.decrypt(verifiedUser.emailEncrypted);
             await this.userVerifiedPublisher.publish({
                 userId: verifiedUser.id,
-                email: verifiedUser.email,
+                email: plainEmail,
                 name: verifiedUser.name,
             });
         }
 
+        const decryptedEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
         const accessToken = await this.jwtPort.sign({
             sub: user.id,
-            email: user.email,
+            email: decryptedEmail,
         });
 
         return { accessToken };

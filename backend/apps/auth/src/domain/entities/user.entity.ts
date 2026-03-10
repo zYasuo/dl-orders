@@ -1,6 +1,7 @@
 export type TUserParams = {
     readonly id: string;
-    readonly email: string;
+    readonly emailEncrypted: string;
+    readonly emailLookupHash: string;
     readonly passwordHash: string;
     readonly name: string | null;
     emailVerified: boolean;
@@ -14,8 +15,11 @@ export class User {
     get id() {
         return this.params.id;
     }
-    get email() {
-        return this.params.email;
+    get emailEncrypted() {
+        return this.params.emailEncrypted;
+    }
+    get emailLookupHash() {
+        return this.params.emailLookupHash;
     }
     get passwordHash() {
         return this.params.passwordHash;

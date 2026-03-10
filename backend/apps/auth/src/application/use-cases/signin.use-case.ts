@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../domain/ports/jwt.port';
 import { IPasswordHasherPort } from '../../domain/ports/password-hasher.port';
 import { TSignin } from '../dto/signin.dto';
@@ -8,14 +9,15 @@ import { TSignin } from '../dto/signin.dto';
 export class SigninUseCase {
     constructor(
         private readonly authUserRepository: IAuthUserRepositoryPort,
+        private readonly emailEncrypted: IEmailEncryptedSecurity,
         private readonly passwordHasher: IPasswordHasherPort,
         private readonly jwtPort: IJwtPort,
     ) {}
 
     async execute(input: TSignin): Promise<{ accessToken: string }> {
         const { email, password } = input;
-
-        const user = await this.authUserRepository.findByEmail(email);
+        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
+        const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 
         if (!user) {
             throw new BadRequestException('Invalid email or password');
@@ -30,9 +32,10 @@ export class SigninUseCase {
             throw new BadRequestException('Invalid email or password');
         }
 
+        const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
         const accessToken = await this.jwtPort.sign({
             sub: user.id,
-            email: user.email,
+            email: plainEmail,
         });
 
         return { accessToken };

@@ -1,5 +1,6 @@
 export type TCreateAuthUser = {
-    email: string;
+    emailEncrypted: string;
+    emailLookupHash: string;
     passwordHash: string;
     name?: string | null;
 };

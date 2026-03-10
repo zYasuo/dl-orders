@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
 import { IOtpRepositoryPort } from '../../domain/ports/otp-repository.port';
 import { IOtpSendRequestedPublisherPort } from '../../domain/ports/otp-send-requested-publisher.port';
 import { IPasswordHasherPort } from '../../domain/ports/password-hasher.port';
@@ -11,6 +12,7 @@ import { TSignup } from '../dto/signup.dto';
 export class SignupUseCase {
     constructor(
         private readonly authUserRepository: IAuthUserRepositoryPort,
+        private readonly emailEncrypted: IEmailEncryptedSecurity,
         private readonly otpRepository: IOtpRepositoryPort,
         private readonly passwordHasher: IPasswordHasherPort,
         private readonly otpSendRequestedPublisher: IOtpSendRequestedPublisherPort,
@@ -18,16 +20,19 @@ export class SignupUseCase {
 
     async execute(input: TSignup): Promise<{ userId: string; email: string }> {
         const { email, password, name } = input;
-        const existing = await this.authUserRepository.findByEmail(email);
+        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
+        const existing = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 
         if (existing) {
             throw new ConflictException('Email already registered');
         }
 
+        const emailEncrypted = await this.emailEncrypted.encrypt(email);
         const passwordHash = await this.passwordHasher.hash(password);
 
         const createData: TCreateAuthUser = {
-            email,
+            emailEncrypted,
+            emailLookupHash,
             passwordHash,
             name: name ?? null,
         };
@@ -45,13 +50,14 @@ export class SignupUseCase {
 
         await this.otpRepository.create(otpData);
 
+        const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
         await this.otpSendRequestedPublisher.publish({
-            email,
+            email: plainEmail,
             code,
             expiresInMinutes,
         });
 
-        return { userId: user.id, email: user.email };
+        return { userId: user.id, email: plainEmail };
     }
 
     private generateOtpCode(): string {

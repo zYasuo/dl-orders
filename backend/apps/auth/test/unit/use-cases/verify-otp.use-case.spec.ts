@@ -4,6 +4,7 @@ import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.
 import { OtpCode } from '../../../src/domain/entities/otp-code.entity';
 import { User } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
 import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
 import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/user-verified-publisher.port';
@@ -11,6 +12,7 @@ import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/user-verif
 describe('VerifyOtpUseCase', () => {
     let sut: VerifyOtpUseCase;
     let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
+    let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
     let otpRepository: jest.Mocked<IOtpRepositoryPort>;
     let jwtPort: jest.Mocked<IJwtPort>;
     let userVerifiedPublisher: jest.Mocked<IUserVerifiedPublisherPort>;
@@ -21,7 +23,8 @@ describe('VerifyOtpUseCase', () => {
 
     const fakeUser = new User({
         id: 'user-123',
-        email: 'user@test.com',
+        emailEncrypted: 'enc-user@test.com',
+        emailLookupHash: 'user@test.com',
         passwordHash: 'hashed',
         name: 'User Name',
         emailVerified: false,
@@ -31,7 +34,8 @@ describe('VerifyOtpUseCase', () => {
 
     const verifiedUserInstance = new User({
         id: fakeUser.id,
-        email: fakeUser.email,
+        emailEncrypted: fakeUser.emailEncrypted,
+        emailLookupHash: fakeUser.emailLookupHash,
         passwordHash: fakeUser.passwordHash,
         name: fakeUser.name,
         emailVerified: true,
@@ -70,9 +74,15 @@ describe('VerifyOtpUseCase', () => {
         jest.clearAllMocks();
         authUserRepository = {
             create: jest.fn(),
-            findByEmail: jest.fn().mockResolvedValue(fakeUser),
+            findByEmailLookupHash: jest.fn().mockResolvedValue(fakeUser),
             markEmailVerified: jest.fn().mockResolvedValue(verifiedUserInstance),
         } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+
+        emailEncrypted = {
+            encrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
+            decrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
+            getLookupHash: jest.fn().mockImplementation((v: string) => Promise.resolve(v.toLowerCase().trim())),
+        } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
 
         otpRepository = {
             create: jest.fn(),
@@ -93,6 +103,7 @@ describe('VerifyOtpUseCase', () => {
             providers: [
                 VerifyOtpUseCase,
                 { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
+                { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
                 { provide: IOtpRepositoryPort, useValue: otpRepository },
                 { provide: IJwtPort, useValue: jwtPort },
                 { provide: IUserVerifiedPublisherPort, useValue: userVerifiedPublisher },
@@ -108,21 +119,22 @@ describe('VerifyOtpUseCase', () => {
 
             const result = await sut.execute(input);
 
-            expect(authUserRepository.findByEmail).toHaveBeenCalledWith(input.email);
+            expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
+            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
             expect(otpRepository.findLatestByUserId).toHaveBeenCalledWith(fakeUser.id);
             expect(otpRepository.markUsed).toHaveBeenCalledWith(validOtp.id);
             expect(authUserRepository.markEmailVerified).toHaveBeenCalledWith(fakeUser.id);
             expect(userVerifiedPublisher.publish).toHaveBeenCalledWith({
                 userId: verifiedUserInstance.id,
-                email: verifiedUserInstance.email,
+                email: verifiedUserInstance.emailEncrypted,
                 name: verifiedUserInstance.name,
             });
-            expect(jwtPort.sign).toHaveBeenCalledWith({ sub: fakeUser.id, email: fakeUser.email });
+            expect(jwtPort.sign).toHaveBeenCalledWith({ sub: fakeUser.id, email: fakeUser.emailEncrypted });
             expect(result).toEqual({ accessToken: 'jwt-token' });
         });
 
         it('throws BadRequestException when user is not found', async () => {
-            authUserRepository.findByEmail.mockResolvedValueOnce(null);
+            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(null);
             const input = { email: 'unknown@test.com', code: '123456' };
 
             await expect(sut.execute(input)).rejects.toThrow(/Invalid email or code/);

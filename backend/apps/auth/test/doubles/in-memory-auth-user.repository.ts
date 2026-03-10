@@ -6,24 +6,27 @@ export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {
     private readonly users = new Map<string, User>();
 
     async create(data: TCreateAuthUser): Promise<User | null> {
+        const existing = Array.from(this.users.values()).find(
+            (u) => u.emailLookupHash === data.emailLookupHash,
+        );
+        if (existing) return null;
         const now = new Date();
         const user = new User({
             id: crypto.randomUUID(),
-            email: data.email,
+            emailEncrypted: data.emailEncrypted,
+            emailLookupHash: data.emailLookupHash,
             passwordHash: data.passwordHash,
             name: data.name ?? null,
             emailVerified: false,
             createdAt: now,
             updatedAt: now,
         });
-        const byEmail = Array.from(this.users.values()).find((u) => u.email === data.email);
-        if (byEmail) return null;
         this.users.set(user.id, user);
         return user;
     }
 
-    async findByEmail(email: string): Promise<User | null> {
-        return Array.from(this.users.values()).find((u) => u.email === email) ?? null;
+    async findByEmailLookupHash(emailLookupHash: string): Promise<User | null> {
+        return Array.from(this.users.values()).find((u) => u.emailLookupHash === emailLookupHash) ?? null;
     }
 
     async markEmailVerified(id: string): Promise<User | null> {
@@ -31,7 +34,8 @@ export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {
         if (!user) return null;
         const updated = new User({
             id: user.id,
-            email: user.email,
+            emailEncrypted: user.emailEncrypted,
+            emailLookupHash: user.emailLookupHash,
             passwordHash: user.passwordHash,
             name: user.name,
             emailVerified: true,

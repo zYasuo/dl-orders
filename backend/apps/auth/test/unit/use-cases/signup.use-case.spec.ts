@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
 import { User } from '../../../src/domain/entities/user.entity';
 import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
 import { IOtpSendRequestedPublisherPort } from '../../../src/domain/ports/otp-send-requested-publisher.port';
 import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
@@ -10,6 +11,7 @@ import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.p
 describe('SignupUseCase', () => {
     let sut: SignupUseCase;
     let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
+    let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
     let otpRepository: jest.Mocked<IOtpRepositoryPort>;
     let passwordHasher: jest.Mocked<IPasswordHasherPort>;
     let otpSendRequestedPublisher: jest.Mocked<IOtpSendRequestedPublisherPort>;
@@ -17,7 +19,8 @@ describe('SignupUseCase', () => {
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeUser = new User({
         id: 'user-123',
-        email: 'user@test.com',
+        emailEncrypted: 'enc-user@test.com',
+        emailLookupHash: 'user@test.com',
         passwordHash: 'hashed',
         name: 'User Name',
         emailVerified: false,
@@ -29,9 +32,15 @@ describe('SignupUseCase', () => {
         jest.clearAllMocks();
         authUserRepository = {
             create: jest.fn().mockResolvedValue(fakeUser),
-            findByEmail: jest.fn().mockResolvedValue(null),
+            findByEmailLookupHash: jest.fn().mockResolvedValue(null),
             markEmailVerified: jest.fn(),
         } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+
+        emailEncrypted = {
+            encrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
+            decrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
+            getLookupHash: jest.fn().mockImplementation((v: string) => Promise.resolve(v.toLowerCase().trim())),
+        } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
 
         otpRepository = {
             create: jest.fn().mockResolvedValue(undefined),
@@ -52,6 +61,7 @@ describe('SignupUseCase', () => {
             providers: [
                 SignupUseCase,
                 { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
+                { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
                 { provide: IOtpRepositoryPort, useValue: otpRepository },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IOtpSendRequestedPublisherPort, useValue: otpSendRequestedPublisher },
@@ -67,30 +77,37 @@ describe('SignupUseCase', () => {
 
             const result = await sut.execute(input);
 
-            expect(authUserRepository.findByEmail).toHaveBeenCalledWith(input.email);
+            expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
+            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
+            expect(emailEncrypted.encrypt).toHaveBeenCalledWith(input.email);
             expect(passwordHasher.hash).toHaveBeenCalledWith(input.password);
             expect(authUserRepository.create).toHaveBeenCalledWith({
-                email: input.email,
+                emailEncrypted: input.email,
+                emailLookupHash: input.email,
                 passwordHash: 'hashed-password',
                 name: input.name,
             });
+            
             expect(otpRepository.create).toHaveBeenCalledTimes(1);
             expect(otpRepository.create).toHaveBeenCalledWith({
                 code: expect.any(String),
                 userId: fakeUser.id,
                 expiresAt: expect.any(Date),
             });
+
             expect(otpSendRequestedPublisher.publish).toHaveBeenCalledTimes(1);
             expect(otpSendRequestedPublisher.publish).toHaveBeenCalledWith({
-                email: input.email,
+                email: fakeUser.emailEncrypted,
                 code: expect.any(String),
                 expiresInMinutes: expect.any(Number),
             });
-            expect(result).toEqual({ userId: fakeUser.id, email: fakeUser.email });
+
+            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(fakeUser.emailEncrypted);
+            expect(result).toEqual({ userId: fakeUser.id, email: fakeUser.emailEncrypted });
         });
 
         it('throws ConflictException when email is already registered', async () => {
-            authUserRepository.findByEmail.mockResolvedValueOnce(fakeUser);
+            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(fakeUser);
             const input = { email: 'user@test.com', password: 'password123', name: 'User' };
 
             await expect(sut.execute(input)).rejects.toThrow(/Email already registered/);
@@ -115,7 +132,8 @@ describe('SignupUseCase', () => {
             await sut.execute(input);
 
             expect(authUserRepository.create).toHaveBeenCalledWith({
-                email: input.email,
+                emailEncrypted: input.email,
+                emailLookupHash: input.email,
                 passwordHash: 'hashed-password',
                 name: null,
             });
