@@ -1,53 +1,52 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { IAccountLockedNotifyPublisherPort } from '../../domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from '../../domain/ports/auth-logs-repository.port';
-import { LOCKOUT_MINUTES, MAX_LOGIN_ATTEMPTS, lockoutEndFromNow, minutesRemainingUntil } from '../../utils/lockout.utils';
+import { ILockoutStorePort } from '../../domain/ports/lockout-store.port';
+import { LOCKOUT_MINUTES, lockoutEndFromNow, minutesRemainingUntil } from '../../utils/lockout.utils';
 
 @Injectable()
 export class ValidateAuthAttemptUseCase {
     constructor(
+        private readonly lockoutStore: ILockoutStorePort,
         private readonly authLogsRepository: IAuthLogsRepositoryPort,
         private readonly accountLockedNotifyPublisher: IAccountLockedNotifyPublisherPort,
     ) {}
 
     async validateBeforeLogin(userId: string): Promise<void> {
-        const authLogs = await this.authLogsRepository.findByUserId(userId);
+        const locked = await this.lockoutStore.isLocked(userId);
+        if (!locked) return;
 
-        if (authLogs?.isLocked() && authLogs.lockedUntil) {
-            const minutesLeft = minutesRemainingUntil(authLogs.lockedUntil);
+        const lockedUntil = await this.lockoutStore.getLockedUntil(userId);
+        const minutesLeft = lockedUntil ? minutesRemainingUntil(lockedUntil) : 0;
 
-            throw new ForbiddenException(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`);
-        }
+        throw new ForbiddenException(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`);
     }
 
     async registerFailedAttempt(userId: string, ip: string | null, email: string): Promise<void> {
-        const existing = await this.authLogsRepository.findByUserId(userId);
         const now = new Date();
-
-        const nextAttempts = (existing?.loginAttempts ?? 0) + 1;
-        const shouldLock = nextAttempts >= MAX_LOGIN_ATTEMPTS;
-
-        const lockedUntil = shouldLock ? lockoutEndFromNow(LOCKOUT_MINUTES) : null;
-
-        await this.authLogsRepository.upsert({
-            userId,
-            loginAttempts: shouldLock ? 0 : nextAttempts,
-            lastLoginAttempt: now,
-            lastLoginAttemptIp: ip ?? null,
-            lastLoginAttemptSuccess: false,
-            lockedUntil: lockedUntil ?? undefined,
-        });
+        const { attempts, shouldLock } = await this.lockoutStore.incrementFailedAttempts(userId);
 
         if (shouldLock) {
+            await this.lockoutStore.setLocked(userId, LOCKOUT_MINUTES);
             await this.accountLockedNotifyPublisher.publish({
                 email,
                 lockedUntilMinutes: LOCKOUT_MINUTES,
             });
         }
+
+        await this.authLogsRepository.upsert({
+            userId,
+            loginAttempts: shouldLock ? 0 : attempts,
+            lastLoginAttempt: now,
+            lastLoginAttemptIp: ip ?? null,
+            lastLoginAttemptSuccess: false,
+            lockedUntil: shouldLock ? lockoutEndFromNow(LOCKOUT_MINUTES) : undefined,
+        });
     }
 
     async registerSuccessfulLogin(userId: string, ip: string | null): Promise<void> {
         const now = new Date();
+        await this.lockoutStore.resetOnSuccess(userId);
         await this.authLogsRepository.upsert({
             userId,
             loginAttempts: 0,

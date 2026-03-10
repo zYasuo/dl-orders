@@ -7,6 +7,7 @@ import { ValidateAuthAttemptUseCase } from './application/use-cases/validate-aut
 import { VerifyOtpUseCase } from './application/use-cases/verify-otp.use-case';
 import { IAccountLockedNotifyPublisherPort } from './domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from './domain/ports/auth-logs-repository.port';
+import { ILockoutStorePort } from './domain/ports/lockout-store.port';
 import { IAuthUserRepositoryPort } from './domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from './domain/ports/email-encrypted.security';
 import { IJwtPort } from './domain/ports/jwt.port';
@@ -19,6 +20,7 @@ import { AuthController } from './infrastructure/inbound/http/auth.controller';
 import { AccountLockedNotifyRabbitMqPublisher } from './infrastructure/outbound/messaging/account-locked-notify.publisher';
 import { OtpSendRequestedRabbitMqPublisher } from './infrastructure/outbound/messaging/otp-send-requested.publisher';
 import { UserVerifiedRabbitMqPublisher } from './infrastructure/outbound/messaging/user-verified.publisher';
+import { RedisLockoutStoreAdapter } from './infrastructure/outbound/persistence/redis/redis-lockout-store.adapter';
 import { AuthLogsRepository } from './infrastructure/outbound/persistence/sql/auth-logs.repository';
 import { AuthUserRepository } from './infrastructure/outbound/persistence/sql/auth-user.repository';
 import { OtpRepository } from './infrastructure/outbound/persistence/sql/otp.repository';
@@ -46,6 +48,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
         VerifyOtpUseCase,
         ValidateAuthAttemptUseCase,
         { provide: IAuthUserRepositoryPort, useClass: AuthUserRepository },
+        { provide: ILockoutStorePort, useClass: RedisLockoutStoreAdapter },
         { provide: IAuthLogsRepositoryPort, useClass: AuthLogsRepository },
         { provide: IOtpRepositoryPort, useClass: OtpRepository },
         { provide: IAccountLockedNotifyPublisherPort, useClass: AccountLockedNotifyRabbitMqPublisher },

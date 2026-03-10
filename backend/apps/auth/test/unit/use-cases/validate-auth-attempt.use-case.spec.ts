@@ -4,10 +4,12 @@ import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/v
 import { AuthLogs } from '../../../src/domain/entities/auth-logs.entity';
 import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/auth-logs-repository.port';
+import { ILockoutStorePort } from '../../../src/domain/ports/lockout-store.port';
 import { addMinutesToDate } from '../../../src/utils/lockout.utils';
 
 describe('ValidateAuthAttemptUseCase', () => {
     let sut: ValidateAuthAttemptUseCase;
+    let lockoutStore: jest.Mocked<ILockoutStorePort>;
     let authLogsRepository: jest.Mocked<IAuthLogsRepositoryPort>;
     let accountLockedNotifyPublisher: jest.Mocked<IAccountLockedNotifyPublisherPort>;
 
@@ -18,6 +20,15 @@ describe('ValidateAuthAttemptUseCase', () => {
     beforeEach(async () => {
         jest.clearAllMocks();
         jest.useFakeTimers({ now: now.getTime() });
+
+        lockoutStore = {
+            isLocked: jest.fn().mockResolvedValue(false),
+            getLockedUntil: jest.fn().mockResolvedValue(null),
+            getFailedAttempts: jest.fn().mockResolvedValue(0),
+            incrementFailedAttempts: jest.fn().mockResolvedValue({ attempts: 1, shouldLock: false }),
+            setLocked: jest.fn().mockResolvedValue(undefined),
+            resetOnSuccess: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<ILockoutStorePort>;
 
         authLogsRepository = {
             findByUserId: jest.fn().mockResolvedValue(null),
@@ -46,6 +57,7 @@ describe('ValidateAuthAttemptUseCase', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ValidateAuthAttemptUseCase,
+                { provide: ILockoutStorePort, useValue: lockoutStore },
                 { provide: IAuthLogsRepositoryPort, useValue: authLogsRepository },
                 {
                     provide: IAccountLockedNotifyPublisherPort,
@@ -62,36 +74,34 @@ describe('ValidateAuthAttemptUseCase', () => {
     });
 
     describe('validateBeforeLogin', () => {
-        it('does nothing when user has no auth logs', async () => {
-            authLogsRepository.findByUserId.mockResolvedValueOnce(null);
+        it('does nothing when account is not locked', async () => {
+            lockoutStore.isLocked.mockResolvedValueOnce(false);
 
             await expect(sut.validateBeforeLogin(userId)).resolves.not.toThrow();
-            expect(authLogsRepository.findByUserId).toHaveBeenCalledWith(userId);
-        });
-
-        it('does nothing when auth logs exist but account is not locked', async () => {
-            const pastLock = new Date(now.getTime() - 60000);
-            const log = new AuthLogs('id', userId, 2, now, null, false, pastLock, now);
-            authLogsRepository.findByUserId.mockResolvedValueOnce(log);
-
-            await expect(sut.validateBeforeLogin(userId)).resolves.not.toThrow();
+            expect(lockoutStore.isLocked).toHaveBeenCalledWith(userId);
         });
 
         it('throws ForbiddenException when account is locked', async () => {
             const lockedUntil = addMinutesToDate(now, 5);
-            const log = new AuthLogs('id', userId, 3, now, null, false, lockedUntil, now);
-            authLogsRepository.findByUserId.mockResolvedValue(log);
+            lockoutStore.isLocked.mockResolvedValue(true);
+            lockoutStore.getLockedUntil.mockResolvedValue(lockedUntil);
 
             await expect(sut.validateBeforeLogin(userId)).rejects.toThrow(ForbiddenException);
             await expect(sut.validateBeforeLogin(userId)).rejects.toThrow(/Account temporarily locked.*Try again in \d+ minute/);
+            expect(lockoutStore.isLocked).toHaveBeenCalledWith(userId);
+            expect(lockoutStore.getLockedUntil).toHaveBeenCalledWith(userId);
         });
     });
 
     describe('registerFailedAttempt', () => {
-        it('upserts with incremented attempts when under max', async () => {
+        it('increments attempts, upserts audit and does not lock when under max', async () => {
+            lockoutStore.incrementFailedAttempts.mockResolvedValueOnce({ attempts: 1, shouldLock: false });
+
             await sut.registerFailedAttempt(userId, '192.168.1.1', email);
 
-            expect(authLogsRepository.findByUserId).toHaveBeenCalledWith(userId);
+            expect(lockoutStore.incrementFailedAttempts).toHaveBeenCalledWith(userId);
+            expect(lockoutStore.setLocked).not.toHaveBeenCalled();
+            expect(accountLockedNotifyPublisher.publish).not.toHaveBeenCalled();
             expect(authLogsRepository.upsert).toHaveBeenCalledWith(
                 expect.objectContaining({
                     userId,
@@ -101,15 +111,20 @@ describe('ValidateAuthAttemptUseCase', () => {
                     lockedUntil: undefined,
                 }),
             );
-            expect(accountLockedNotifyPublisher.publish).not.toHaveBeenCalled();
         });
 
-        it('upserts and publishes when attempts reach max (lockout)', async () => {
-            const existing = new AuthLogs('id', userId, 2, now, null, false, null, now);
-            authLogsRepository.findByUserId.mockResolvedValueOnce(existing);
+        it('sets lockout and publishes when attempts reach max', async () => {
+            lockoutStore.incrementFailedAttempts.mockResolvedValueOnce({ attempts: 3, shouldLock: true });
 
             await sut.registerFailedAttempt(userId, null, email);
 
+            expect(lockoutStore.incrementFailedAttempts).toHaveBeenCalledWith(userId);
+            expect(lockoutStore.setLocked).toHaveBeenCalledWith(userId, 5);
+            expect(accountLockedNotifyPublisher.publish).toHaveBeenCalledTimes(1);
+            expect(accountLockedNotifyPublisher.publish).toHaveBeenCalledWith({
+                email,
+                lockedUntilMinutes: 5,
+            });
             expect(authLogsRepository.upsert).toHaveBeenCalledWith(
                 expect.objectContaining({
                     userId,
@@ -118,18 +133,14 @@ describe('ValidateAuthAttemptUseCase', () => {
                     lockedUntil: expect.any(Date),
                 }),
             );
-            expect(accountLockedNotifyPublisher.publish).toHaveBeenCalledTimes(1);
-            expect(accountLockedNotifyPublisher.publish).toHaveBeenCalledWith({
-                email,
-                lockedUntilMinutes: 5,
-            });
         });
     });
 
     describe('registerSuccessfulLogin', () => {
-        it('upserts with zero attempts and success true', async () => {
+        it('resets lockout and upserts audit with success', async () => {
             await sut.registerSuccessfulLogin(userId, '10.0.0.1');
 
+            expect(lockoutStore.resetOnSuccess).toHaveBeenCalledWith(userId);
             expect(authLogsRepository.upsert).toHaveBeenCalledWith(
                 expect.objectContaining({
                     userId,
