@@ -2,11 +2,13 @@ import { BadRequestException, InternalServerErrorException } from '@nestjs/commo
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateProductUseCase } from '../../../src/application/use-cases/create-product.use-case';
 import { Product } from '../../../src/domain/entities/product.entity';
+import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
 import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 
 describe('CreateProductUseCase', () => {
     let sut: CreateProductUseCase;
     let productRepository: jest.Mocked<IProductRepositoryPort>;
+    let productCache: jest.Mocked<IProductCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeProduct = new Product('product-123', 'Product A', 'Description A', 99.9, createdAt, createdAt);
@@ -21,8 +23,18 @@ describe('CreateProductUseCase', () => {
             update: jest.fn(),
         } as unknown as jest.Mocked<IProductRepositoryPort>;
 
+        productCache = {
+            getById: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<IProductCachePort>;
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [CreateProductUseCase, { provide: IProductRepositoryPort, useValue: productRepository }],
+            providers: [
+                CreateProductUseCase,
+                { provide: IProductRepositoryPort, useValue: productRepository },
+                { provide: IProductCachePort, useValue: productCache },
+            ],
         }).compile();
 
         sut = module.get(CreateProductUseCase);
@@ -41,6 +53,7 @@ describe('CreateProductUseCase', () => {
                 price: input.price,
             });
             expect(result).toEqual(fakeProduct);
+            expect(productCache.invalidate).toHaveBeenCalledWith('product-123');
         });
 
         it('throws BadRequestException when product name already exists', async () => {

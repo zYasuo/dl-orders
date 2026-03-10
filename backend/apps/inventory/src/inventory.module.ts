@@ -4,6 +4,7 @@ import { CreateInventoryUseCase } from './application/use-cases/create-inventory
 import { FindAllInventoryUseCase } from './application/use-cases/find-all-invetory.use-case';
 import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
 import { IInventoryEventsPublisherPort } from './domain/ports/inventory-events-publisher.port';
+import { IInventoryListCachePort } from './domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from './domain/ports/inventory-repository.port';
 import { IReservationAuditLogPort } from './domain/ports/reservation-audit-log.port';
 import { DbModule } from './infrastructure/db/db.module';
@@ -11,8 +12,10 @@ import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { InventoryController } from './infrastructure/inbound/http/inventory.controller';
 import { OrderCreationRequestedConsumer } from './infrastructure/inbound/messaging/order-creation-requested.consumer';
 import { InventoryRabbitMqPublisher } from './infrastructure/outbound/messaging/inventory-events.publisher';
+import { RedisInventoryListCacheAdapter } from './infrastructure/outbound/persistence/redis/redis-inventory-list-cache.adapter';
 import { DynamoDBReservationAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/reservation-audit-log.repository';
 import { InventoryRepository } from './infrastructure/outbound/persistence/sql/inventory.repository';
+import { RedisModule } from './infrastructure/redis/redis.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 
 @Module({
@@ -23,6 +26,7 @@ import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
         }),
         DbModule,
         RabbitMQModule,
+        RedisModule,
         DynamoDBModule.forRoot(),
     ],
     controllers: [InventoryController, OrderCreationRequestedConsumer],
@@ -30,6 +34,7 @@ import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
         CreateInventoryUseCase,
         HandleOrderCreationRequestedUseCase,
         FindAllInventoryUseCase,
+        { provide: IInventoryListCachePort, useClass: RedisInventoryListCacheAdapter },
         { provide: IInventoryRepositoryPort, useClass: InventoryRepository },
         { provide: IInventoryEventsPublisherPort, useClass: InventoryRabbitMqPublisher },
         { provide: IReservationAuditLogPort, useClass: DynamoDBReservationAuditLogRepository },

@@ -39,9 +39,11 @@ export class RedisLockoutStoreAdapter extends ILockoutStorePort {
         const client = this.redis.getClient();
         const key = LOCKOUT_ATTEMPTS_KEY + userId;
         const attempts = await client.incr(key);
+
         if (attempts === 1) {
             await client.expire(key, ATTEMPTS_WINDOW_SECONDS);
         }
+        
         return {
             attempts,
             shouldLock: attempts >= MAX_LOGIN_ATTEMPTS,
@@ -52,9 +54,11 @@ export class RedisLockoutStoreAdapter extends ILockoutStorePort {
         const client = this.redis.getClient();
         const untilKey = LOCKOUT_UNTIL_KEY + userId;
         const attemptsKey = LOCKOUT_ATTEMPTS_KEY + userId;
+
         const until = new Date(Date.now() + minutes * 60 * 1000);
         const ttlSeconds = minutes * 60;
         await client.setex(untilKey, ttlSeconds, until.toISOString());
+
         await client.del(attemptsKey);
     }
 

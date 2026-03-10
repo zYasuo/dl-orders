@@ -1,6 +1,7 @@
 import { OrderCreationRequestedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { IInventoryEventsPublisherPort } from '../../domain/ports/inventory-events-publisher.port';
+import { IInventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
 import { IReservationAuditLogPort } from '../../domain/ports/reservation-audit-log.port';
 
@@ -10,6 +11,7 @@ export class HandleOrderCreationRequestedUseCase {
         private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
         private readonly inventoryEventsPublisherPort: IInventoryEventsPublisherPort,
         private readonly reservationAuditLogPort: IReservationAuditLogPort,
+        private readonly listCache: IInventoryListCachePort,
     ) {}
 
     async execute(event: OrderCreationRequestedEvent): Promise<void> {
@@ -69,5 +71,6 @@ export class HandleOrderCreationRequestedUseCase {
             productId,
             quantity,
         });
+        await this.listCache.invalidate();
     }
 }

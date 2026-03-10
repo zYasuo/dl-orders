@@ -1,18 +1,26 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateProductUseCase } from '../../../src/application/use-cases/create-product.use-case';
+import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
 import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
+import { InMemoryProductCache } from '../../doubles/in-memory-product-cache';
 import { InMemoryProductRepository } from '../../doubles/in-memory-product.repository';
 
 describe('CreateProductUseCase (integration)', () => {
     let sut: CreateProductUseCase;
     let productRepository: InMemoryProductRepository;
+    let productCache: InMemoryProductCache;
 
     beforeEach(async () => {
         productRepository = new InMemoryProductRepository();
+        productCache = new InMemoryProductCache();
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [CreateProductUseCase, { provide: IProductRepositoryPort, useValue: productRepository }],
+            providers: [
+                CreateProductUseCase,
+                { provide: IProductRepositoryPort, useValue: productRepository },
+                { provide: IProductCachePort, useValue: productCache },
+            ],
         }).compile();
 
         sut = module.get(CreateProductUseCase);
@@ -47,8 +55,13 @@ describe('CreateProductUseCase (integration)', () => {
                 findByName: async () => null,
                 update: async () => null,
             };
+            const cache = new InMemoryProductCache();
             const module = await Test.createTestingModule({
-                providers: [CreateProductUseCase, { provide: IProductRepositoryPort, useValue: failingRepo }],
+                providers: [
+                    CreateProductUseCase,
+                    { provide: IProductRepositoryPort, useValue: failingRepo },
+                    { provide: IProductCachePort, useValue: cache },
+                ],
             }).compile();
             const useCase = module.get(CreateProductUseCase);
 

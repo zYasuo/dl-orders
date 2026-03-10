@@ -1,12 +1,16 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Inventory } from '../../domain/entities/inventory.entity';
+import { IInventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
 import { ICreateInventory } from '../../domain/types/inventory-repository.types';
 import { TCreateInventory } from '../dto/create-inventory.schema';
 
 @Injectable()
 export class CreateInventoryUseCase {
-    constructor(private readonly inventoryRepositoryPort: IInventoryRepositoryPort) {}
+    constructor(
+        private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
+        private readonly listCache: IInventoryListCachePort,
+    ) {}
 
     async execute(input: TCreateInventory): Promise<Inventory> {
         const { productId, name, quantity } = input;
@@ -29,6 +33,7 @@ export class CreateInventoryUseCase {
             throw new InternalServerErrorException('Failed to create inventory');
         }
 
+        await this.listCache.invalidate();
         return created;
     }
 }

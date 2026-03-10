@@ -2,11 +2,13 @@ import { BadRequestException, InternalServerErrorException } from '@nestjs/commo
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateInventoryUseCase } from '../../../src/application/use-cases/create-inventory.use-case';
 import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('CreateInventoryUseCase', () => {
     let sut: CreateInventoryUseCase;
     let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
+    let listCache: jest.Mocked<IInventoryListCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeInventory = new Inventory('inventory-123', 'Warehouse 1', 10, 'product-123', createdAt, createdAt);
@@ -22,10 +24,17 @@ describe('CreateInventoryUseCase', () => {
             delete: jest.fn(),
         } as unknown as jest.Mocked<IInventoryRepositoryPort>;
 
+        listCache = {
+            get: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<IInventoryListCachePort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreateInventoryUseCase,
                 { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
+                { provide: IInventoryListCachePort, useValue: listCache },
             ],
         }).compile();
 
@@ -46,6 +55,7 @@ describe('CreateInventoryUseCase', () => {
                 quantity: input.quantity,
             });
             expect(result).toEqual(fakeInventory);
+            expect(listCache.invalidate).toHaveBeenCalledTimes(1);
         });
 
         it('throws BadRequestException when inventory already exists for product', async () => {

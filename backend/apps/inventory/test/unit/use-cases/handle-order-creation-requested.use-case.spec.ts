@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
 import { Inventory } from '../../../src/domain/entities/inventory.entity';
 import { IInventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
+import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 import { IReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
 
@@ -10,6 +11,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
     let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
     let eventsPublisher: jest.Mocked<IInventoryEventsPublisherPort>;
     let reservationAuditLog: jest.Mocked<IReservationAuditLogPort>;
+    let listCache: jest.Mocked<IInventoryListCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeInventory = new Inventory('inv-1', 'Warehouse', 10, 'product-123', createdAt, createdAt);
@@ -36,12 +38,19 @@ describe('HandleOrderCreationRequestedUseCase', () => {
             getByOrderId: jest.fn().mockResolvedValue([]),
         } as unknown as jest.Mocked<IReservationAuditLogPort>;
 
+        listCache = {
+            get: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<IInventoryListCachePort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 HandleOrderCreationRequestedUseCase,
                 { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
                 { provide: IInventoryEventsPublisherPort, useValue: eventsPublisher },
                 { provide: IReservationAuditLogPort, useValue: reservationAuditLog },
+                { provide: IInventoryListCachePort, useValue: listCache },
             ],
         }).compile();
 
@@ -84,6 +93,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                 quantity: 3,
             });
             expect(eventsPublisher.publishInventoryReservationFailed).not.toHaveBeenCalled();
+            expect(listCache.invalidate).toHaveBeenCalledTimes(1);
         });
 
         it('publishes reservation_failed when no inventory for product', async () => {

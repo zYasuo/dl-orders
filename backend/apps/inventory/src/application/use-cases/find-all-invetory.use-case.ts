@@ -1,12 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { Inventory } from '../../domain/entities/inventory.entity';
+import { IInventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
+
+const LIST_CACHE_TTL_SECONDS = 60;
 
 @Injectable()
 export class FindAllInventoryUseCase {
-    constructor(private readonly inventoryRepositoryPort: IInventoryRepositoryPort) {}
+    constructor(
+        private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
+        private readonly listCache: IInventoryListCachePort,
+    ) {}
 
     async execute(): Promise<Inventory[]> {
-        return this.inventoryRepositoryPort.findAll();
+        const cached = await this.listCache.get();
+        if (cached !== null) return cached;
+
+        const items = await this.inventoryRepositoryPort.findAll();
+        await this.listCache.set(items, LIST_CACHE_TTL_SECONDS);
+        
+        return items;
     }
 }

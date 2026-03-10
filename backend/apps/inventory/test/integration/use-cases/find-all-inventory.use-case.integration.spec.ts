@@ -1,12 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllInventoryUseCase } from '../../../src/application/use-cases/find-all-invetory.use-case';
 import { Inventory } from '../../../src/domain/entities/inventory.entity';
+import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
 describe('FindAllInventoryUseCase (integration)', () => {
     let sut: FindAllInventoryUseCase;
     let repository: InMemoryInventoryRepository;
+    let listCache: InMemoryInventoryListCache;
 
     const item1 = new Inventory('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date());
     const item2 = new Inventory('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date());
@@ -15,9 +18,14 @@ describe('FindAllInventoryUseCase (integration)', () => {
         repository = new InMemoryInventoryRepository();
         repository.seed(item1);
         repository.seed(item2);
+        listCache = new InMemoryInventoryListCache();
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FindAllInventoryUseCase, { provide: IInventoryRepositoryPort, useValue: repository }],
+            providers: [
+                FindAllInventoryUseCase,
+                { provide: IInventoryRepositoryPort, useValue: repository },
+                { provide: IInventoryListCachePort, useValue: listCache },
+            ],
         }).compile();
 
         sut = module.get(FindAllInventoryUseCase);
@@ -31,8 +39,13 @@ describe('FindAllInventoryUseCase (integration)', () => {
 
     it('should return empty array when no inventory items exist', async () => {
         const emptyRepository = new InMemoryInventoryRepository();
+        const emptyCache = new InMemoryInventoryListCache();
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FindAllInventoryUseCase, { provide: IInventoryRepositoryPort, useValue: emptyRepository }],
+            providers: [
+                FindAllInventoryUseCase,
+                { provide: IInventoryRepositoryPort, useValue: emptyRepository },
+                { provide: IInventoryListCachePort, useValue: emptyCache },
+            ],
         }).compile();
         const useCase = module.get(FindAllInventoryUseCase);
 

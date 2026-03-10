@@ -220,6 +220,7 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres-inventory:5432/dl_inventory_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=inventory_queue
+      - REDIS_URL=redis://redis:6379
       - AWS_ENDPOINT=http://localstack:4566
       - AWS_REGION=us-east-1
       - DYNAMODB_AUDIT_TABLE=ReservationAuditLog
@@ -227,6 +228,8 @@ services:
       postgres-inventory:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       localstack:
         condition: service_started
@@ -243,8 +246,11 @@ services:
     environment:
       - PORT=3003
       - DATABASE_URL=postgresql://postgres:postgres@postgres-product:5432/dl_product_svc
+      - REDIS_URL=redis://redis:6379
     depends_on:
       postgres-product:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - dl-orders-network
