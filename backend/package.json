@@ -54,7 +54,8 @@
     "prisma:payment:migrate": "cd apps/payment/prisma && prisma migrate dev",
     "prisma:generate:all": "npm run prisma:orders:generate && npm run prisma:inventory:generate && npm run prisma:notification:generate && npm run prisma:auth:generate && npm run prisma:users:generate && npm run prisma:payment:generate",
     "prisma:push:all": "npm run prisma:orders:push && npm run prisma:inventory:push && npm run prisma:notification:push && npm run prisma:auth:push && npm run prisma:users:push && npm run prisma:payment:push",
-    "db:push:all": "npm run prisma:push:all"
+    "db:push:all": "npm run prisma:push:all",
+    "seed:product": "ts-node -r tsconfig-paths/register apps/product/scripts/seed-products-from-json.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

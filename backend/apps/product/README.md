@@ -39,3 +39,23 @@ npm run start:dev:product
 ```
 
 Ensure Redis and MongoDB are up and `apps/product/.env` has `MONGODB_URI`, `REDIS_URL`. Copy from `apps/product/.env.example`. Port 3003 if exposing HTTP.
+
+## Seed (populate DB from JSON)
+
+To populate the `products` collection from a JSON file (e.g. CSV exported as an array of objects):
+
+1. Place the JSON file on disk (e.g. `C:\Users\...\Downloads\csvjson.json`).
+2. From the `backend/` folder, run:
+
+```bash
+set SEED_JSON_PATH=C:\Users\dansi\Downloads\csvjson.json
+npm run seed:product
+```
+
+On PowerShell:
+
+```powershell
+$env:SEED_JSON_PATH="C:\Users\dansi\Downloads\csvjson.json"; npm run seed:product
+```
+
+The script maps: `title` → `name`, `description` → `description`, `final_price` (or `initial_price`) → `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).
