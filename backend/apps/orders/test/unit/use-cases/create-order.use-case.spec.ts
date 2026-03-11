@@ -1,4 +1,4 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
@@ -40,6 +40,7 @@ describe('CreateOrderUseCase', () => {
             create: jest.fn().mockResolvedValue(fakeOrder),
             findById: jest.fn(),
             updateStatus: jest.fn(),
+            confirmIfPending: jest.fn(),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
         productCatalogPort = {
@@ -142,17 +143,6 @@ describe('CreateOrderUseCase', () => {
             await expect(sut.execute(input)).rejects.toThrow(new NotFoundException('Product not found'));
 
             expect(ordersRepository.create).not.toHaveBeenCalled();
-            expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
-        });
-
-        it('throws InternalServerErrorException when repository returns null', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
-            ordersRepository.create.mockResolvedValueOnce(null);
-
-            await expect(sut.execute(input)).rejects.toThrow(
-                new InternalServerErrorException('Failed to create order'),
-            );
-
             expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
         });
 

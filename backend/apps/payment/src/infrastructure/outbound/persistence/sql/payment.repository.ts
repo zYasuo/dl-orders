@@ -49,12 +49,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
     }
 
     async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
-        const updateData: Record<string, unknown> = { status: data.status };
-
-        if (data.externalId !== undefined) updateData.externalId = data.externalId;
-        if (data.preferenceId !== undefined) updateData.preferenceId = data.preferenceId;
-
-        if (data.gatewayResponse !== undefined) updateData.gatewayResponse = data.gatewayResponse;
+        const updateData = this.buildUpdateData(data);
 
         const row = await this.db.payment.update({
             where: { id },
@@ -66,12 +61,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
     }
 
     async updateStatusIfPending(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
-        const updateData: Record<string, unknown> = { status: data.status };
-
-        if (data.externalId !== undefined) updateData.externalId = data.externalId;
-        if (data.preferenceId !== undefined) updateData.preferenceId = data.preferenceId;
-
-        if (data.gatewayResponse !== undefined) updateData.gatewayResponse = data.gatewayResponse;
+        const updateData = this.buildUpdateData(data);
 
         const result = await this.db.payment.updateMany({
             where: { id, status: PaymentStatus.PENDING },
@@ -83,6 +73,14 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         const row = await this.db.payment.findUnique({ where: { id } });
         if (!row) return null;
         return this.toDomain(row);
+    }
+
+    private buildUpdateData(data: IUpdatePaymentStatus): Record<string, unknown> {
+        const updateData: Record<string, unknown> = { status: data.status };
+        if (data.externalId !== undefined) updateData.externalId = data.externalId;
+        if (data.preferenceId !== undefined) updateData.preferenceId = data.preferenceId;
+        if (data.gatewayResponse !== undefined) updateData.gatewayResponse = data.gatewayResponse;
+        return updateData;
     }
 
     private toDomain(row: {

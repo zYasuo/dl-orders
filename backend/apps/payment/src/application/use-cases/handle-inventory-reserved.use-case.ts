@@ -27,9 +27,17 @@ export class HandleInventoryReservedUseCase {
             throw new NotFoundException(`Order ${orderId} not found`);
         }
 
-        const existing = await this.paymentRepositoryPort.findByOrderId(orderId);
+        const payment = await this.paymentRepositoryPort.create({
+            orderId,
+            amount: orderDetails.totalPrice,
+        });
 
-        if (existing) {
+        if (!payment) {
+            this.logger.error(`Failed to create payment record. orderId=${orderId}`);
+            throw new Error('Failed to create payment');
+        }
+
+        if (payment.preferenceId) {
             this.logger.log(`Payment already exists for order, skipping. orderId=${orderId}`);
             return;
         }
@@ -41,33 +49,39 @@ export class HandleInventoryReservedUseCase {
             details: { amount: orderDetails.totalPrice },
         });
 
-        const payment = await this.paymentRepositoryPort.create({
-            orderId,
-            amount: orderDetails.totalPrice,
-        });
-
-        if (!payment) {
-            this.logger.error(`Failed to create payment record. orderId=${orderId}`);
-            throw new Error('Failed to create payment');
-        }
-
         const preference = await this.paymentGatewayPort.createPreference({
             orderId,
             amount: orderDetails.totalPrice,
             title: `Order ${orderId}`,
         });
 
-        await this.paymentRepositoryPort.updateStatus(payment.id, {
-            status: PaymentStatus.PENDING,
-            preferenceId: preference.preferenceId,
-            gatewayResponse: { initPoint: preference.initPoint },
-        });
+        const now = new Date();
+        const timestamp = now.toISOString();
 
-        await this.paymentAuditLogPort.log({
-            orderId,
-            action: 'PREFERENCE_CREATED',
-            timestamp: new Date().toISOString(),
-            details: { preferenceId: preference.preferenceId, paymentId: payment.id },
+        const results = await Promise.allSettled([
+
+            this.paymentRepositoryPort.updateStatus(payment.id, {
+                status: PaymentStatus.PENDING,
+                preferenceId: preference.preferenceId,
+                gatewayResponse: { initPoint: preference.initPoint },
+            }),
+            
+            this.paymentAuditLogPort.log({
+                orderId,
+                action: 'PREFERENCE_CREATED',
+                timestamp,
+                details: { preferenceId: preference.preferenceId, paymentId: payment.id },
+            }),
+        ]);
+
+        results.forEach((r) => {
+            if (r.status === 'rejected') {
+                this.logger.warn('Payment creation side-effect failed', {
+                    orderId,
+                    paymentId: payment.id,
+                    error: r.reason,
+                });
+            }
         });
 
         this.logger.log(`Payment preference created. orderId=${orderId} preferenceId=${preference.preferenceId}`);

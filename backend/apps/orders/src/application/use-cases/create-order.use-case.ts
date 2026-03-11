@@ -1,11 +1,11 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { OrderEntity } from '../../domain/entities/order.entity';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { ICreateOrder } from '../../domain/types/order-repository.types';
-import { calculeOrderTotalPrince } from '../../utils/calcule-order-total-prince.util';
 import { TCreateOrder } from '../dto/create-order.dto';
 
 @Injectable()
@@ -23,13 +23,15 @@ export class CreateOrderUseCase {
     async execute(input: TCreateOrder) {
         const { productId, quantity, description, recipient } = input;
 
+        this.logger.log(`Creating order for product ${productId}`);
+
         const product = await this.productCatalogPort.findById(productId);
 
         if (!product) {
             throw new NotFoundException('Product not found');
         }
 
-        const totalPrice = calculeOrderTotalPrince(quantity, product.price);
+        const totalPrice = OrderEntity.calculateTotalPrice(quantity, product.price);
 
         const createInput: ICreateOrder = {
             productId,
@@ -43,24 +45,22 @@ export class CreateOrderUseCase {
         };
         const order = await this.ordersRepositoryPort.create(createInput);
 
-        if (!order) {
-            throw new InternalServerErrorException('Failed to create order');
-        }
+        const now = new Date();
+        const timestamp = now.toISOString();
 
-        await this.orderAuditLogPort.log({
-            orderId: order.id,
-            action: 'ORDER_CREATED',
-            timestamp: new Date().toISOString(),
-            details: {
-                productId: order.productId,
-                quantity: order.quantity,
-                description: order.description,
-                recipient: order.recipient,
-            },
-        });
-
-        try {
-            await this.orderSummaryPort.put({
+        const results = await Promise.allSettled([
+            this.orderAuditLogPort.log({
+                orderId: order.id,
+                action: 'ORDER_CREATED',
+                timestamp,
+                details: {
+                    productId: order.productId,
+                    quantity: order.quantity,
+                    description: order.description,
+                    recipient: order.recipient,
+                },
+            }),
+            this.orderSummaryPort.put({
                 orderId: order.id,
                 status: order.status,
                 productId: order.productId,
@@ -68,24 +68,27 @@ export class CreateOrderUseCase {
                 description: order.description,
                 recipient: order.recipient,
                 createdAt: order.createdAt.toISOString(),
-                updatedAt: new Date().toISOString(),
-            });
-        } catch (err) {
-            this.logger.warn('Failed to update order summary read model', {
+                updatedAt: timestamp,
+            }),
+            this.orderEventsPublisherPort.publishOrderCreationRequested({
                 orderId: order.id,
-                err,
-            });
-        }
+                productId: order.productId,
+                productName: order.productName,
+                productDescription: order.productDescription,
+                totalPrice: order.totalPrice,
+                userId: order.recipient,
+                quantity: order.quantity,
+                recipientEmail: order.recipient,
+            }),
+        ]);
 
-        await this.orderEventsPublisherPort.publishOrderCreationRequested({
-            orderId: order.id,
-            productId: order.productId,
-            productName: order.productName,
-            productDescription: order.productDescription,
-            totalPrice: order.totalPrice,
-            userId: order.recipient,
-            quantity: order.quantity,
-            recipientEmail: order.recipient,
+        results.forEach((r) => {
+            if (r.status === 'rejected') {
+                this.logger.warn('Order creation side-effect failed', {
+                    orderId: order.id,
+                    error: r.reason,
+                });
+            }
         });
 
         return order;

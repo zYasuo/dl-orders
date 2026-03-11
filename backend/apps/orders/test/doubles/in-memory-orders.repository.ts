@@ -35,4 +35,10 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
         this.orders.set(id, updated);
         return updated;
     }
+
+    async confirmIfPending(orderId: string): Promise<OrderEntity | null> {
+        const order = this.orders.get(orderId);
+        if (!order || order.status !== OrderStatus.PENDING) return null;
+        return this.updateStatus(orderId, OrderStatus.CONFIRMED);
+    }
 }

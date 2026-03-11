@@ -19,22 +19,21 @@ export class SendNotificationEmailUseCase {
     async execute(notification: NotificationEntity): Promise<void> {
         const { recipient, title, content, sourceEventId, userId } = notification;
         const orderId = sourceEventId;
-        const timestamp = new Date().toISOString();
+        const now = new Date();
+        const timestamp = now.toISOString();
 
         const result = await this.emailSenderPort.send({ to: recipient, subject: title, html: content });
 
-        const now = new Date();
-
         if (result.success) {
-            await this.notificationAuditLogPort.log({
-                orderId,
-                action: 'NOTIFICATION_SENT',
-                timestamp,
-                details: { notificationId: notification.id, recipient },
-            });
+            await Promise.all([
+                this.notificationAuditLogPort.log({
+                    orderId,
+                    action: 'NOTIFICATION_SENT',
+                    timestamp,
+                    details: { notificationId: notification.id, recipient },
+                }),
 
-            try {
-                await this.userNotificationsPort.add({
+                this.userNotificationsPort.add({
                     userId,
                     timestamp,
                     notificationId: notification.id,
@@ -42,30 +41,18 @@ export class SendNotificationEmailUseCase {
                     title,
                     content,
                     read: false,
-                });
-            } catch (err) {
-                this.logger.warn('Failed to add user notification', {
+                }),
+            ]).catch((err) => {
+                this.logger.warn('Failed to process notification side-effects', {
                     notificationId: notification.id,
                     recipient,
                     err,
                 });
-            }
+            });
 
             await this.notificationRepositoryPort.update(notification.id, {
                 status: INotificationStatus.SENT,
                 sentAt: now,
-                updatedAt: now,
-            });
-        } else {
-            await this.notificationAuditLogPort.log({
-                orderId,
-                action: 'NOTIFICATION_FAILED',
-                timestamp,
-                details: { notificationId: notification.id, recipient, error: result.error },
-            });
-
-            await this.notificationRepositoryPort.update(notification.id, {
-                status: INotificationStatus.FAILED,
                 updatedAt: now,
             });
         }

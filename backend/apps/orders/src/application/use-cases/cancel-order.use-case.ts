@@ -17,27 +17,25 @@ export class CancelOrderUseCase {
     ) {}
 
     async execute(event: TCancelOrderEvent): Promise<void> {
-        const existing = await this.ordersRepositoryPort.findById(event.orderId);
-        if (!existing) {
-            throw new NotFoundException(`Order ${event.orderId} not found`);
+        const order = await this.ordersRepositoryPort.confirmIfPending(event.orderId);
+
+        if (!order) {
+           this.logger.warn(`Order ${event.orderId} already processed`);
+           return;
         }
-        if (!existing.isPending()) {
-            this.logger.warn(`Order ${event.orderId} is not pending, skipping cancel`);
-            return;
-        }
-
-        const order = await this.ordersRepositoryPort.updateStatus(event.orderId, OrderStatus.CANCELLED);
-        if (!order) return;
-
-        await this.orderAuditLogPort.log({
-            orderId: order.id,
-            action: 'ORDER_CANCELLED',
-            timestamp: new Date().toISOString(),
-            details: { reason: event.reason },
-        });
-
-        try {
-            await this.orderSummaryPort.put({
+    
+        const now = new Date();
+        const timestamp = now.toISOString();
+    
+        const results = await Promise.allSettled([
+            this.orderAuditLogPort.log({
+                orderId: order.id,
+                action: 'ORDER_CANCELLED',
+                timestamp,
+                details: { reason: event.reason },
+            }),
+    
+            this.orderSummaryPort.put({
                 orderId: order.id,
                 status: order.status,
                 productId: order.productId,
@@ -45,13 +43,17 @@ export class CancelOrderUseCase {
                 description: order.description,
                 recipient: order.recipient,
                 createdAt: order.createdAt.toISOString(),
-                updatedAt: new Date().toISOString(),
-            });
-        } catch (err) {
-            this.logger.warn('Failed to update order summary read model', {
-                orderId: order.id,
-                err,
-            });
-        }
+                updatedAt: timestamp,
+            }),
+        ]);
+    
+        results.forEach((r) => {
+            if (r.status === 'rejected') {
+                this.logger.warn('Order cancel side-effect failed', {
+                    orderId: order.id,
+                    error: r.reason,
+                });
+            }
+        });
     }
 }

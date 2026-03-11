@@ -88,4 +88,15 @@ export class PaymentEntity {
     isRejected(): boolean {
         return this.params.status === PaymentStatus.REJECTED;
     }
+
+    matchesAmount(receivedAmount: number, tolerance = 0.01): boolean {
+        return Math.abs(Number(receivedAmount) - this.params.amount) <= tolerance;
+    }
+
+    getInitPoint(): string | null {
+        const gr = this.params.gatewayResponse;
+        if (!gr || typeof gr !== 'object') return null;
+        const initPoint = (gr as Record<string, unknown>).initPoint;
+        return typeof initPoint === 'string' ? initPoint : null;
+    }
 }

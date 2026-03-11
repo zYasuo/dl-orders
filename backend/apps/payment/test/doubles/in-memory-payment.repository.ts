@@ -19,7 +19,7 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
 
     async create(input: ICreatePayment): Promise<PaymentEntity | null> {
         const existing = await this.findByOrderId(input.orderId);
-        if (existing) return null;
+        if (existing) return existing;
         const entity = PaymentEntity.create(input);
         this.payments.set(entity.id, {
             id: entity.id,

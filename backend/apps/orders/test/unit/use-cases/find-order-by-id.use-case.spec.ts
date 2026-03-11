@@ -2,13 +2,11 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
-import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('FindOrderByIdUseCase', () => {
     let sut: FindOrderByIdUseCase;
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
-    let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeOrder = new OrderEntity({
@@ -33,18 +31,13 @@ describe('FindOrderByIdUseCase', () => {
             create: jest.fn(),
             findById: jest.fn().mockResolvedValue(fakeOrder),
             updateStatus: jest.fn(),
+            confirmIfPending: jest.fn(),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
-
-        orderAuditLog = {
-            log: jest.fn().mockResolvedValue(undefined),
-            getByOrderId: jest.fn().mockResolvedValue([]),
-        } as unknown as jest.Mocked<IOrderAuditLogPort>;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 FindOrderByIdUseCase,
                 { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
             ],
         }).compile();
 
@@ -57,27 +50,13 @@ describe('FindOrderByIdUseCase', () => {
 
             expect(ordersRepository.findById).toHaveBeenCalledTimes(1);
             expect(ordersRepository.findById).toHaveBeenCalledWith('id-123');
-            expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
-            expect(orderAuditLog.log).toHaveBeenCalledWith({
-                orderId: fakeOrder.id,
-                action: 'ORDER_FOUND',
-                timestamp: expect.any(String),
-                details: {
-                    productId: fakeOrder.productId,
-                    quantity: fakeOrder.quantity,
-                    description: fakeOrder.description,
-                    recipient: fakeOrder.recipient,
-                },
-            });
             expect(result).toEqual(fakeOrder);
         });
 
         it('throws NotFoundException when order does not exist', async () => {
             ordersRepository.findById.mockResolvedValueOnce(null);
 
-            await expect(sut.execute('non-existent')).rejects.toThrow(new NotFoundException('Order not found'));
-
-            expect(orderAuditLog.log).not.toHaveBeenCalled();
+            await expect(sut.execute('non-existent')).rejects.toThrow(NotFoundException);
         });
 
         it('propagates error when repository throws', async () => {

@@ -20,14 +20,12 @@ export class FindPaymentByOrderIdUseCase {
             throw new NotFoundException(`Payment for order ${orderId} not found`);
         }
 
-        const gatewayResponse = payment.gatewayResponse as { initPoint?: string } | null;
-
         return {
             paymentId: payment.id,
             orderId: payment.orderId,
             status: payment.status,
             amount: payment.amount,
-            initPoint: gatewayResponse?.initPoint ?? null,
+            initPoint: payment.getInitPoint(),
         };
     }
 }

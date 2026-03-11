@@ -51,6 +51,7 @@ describe('ConfirmOrderUseCase', () => {
             create: jest.fn(),
             findById: jest.fn().mockResolvedValue(pendingOrder),
             updateStatus: jest.fn().mockResolvedValue(confirmedOrder),
+            confirmIfPending: jest.fn().mockResolvedValue(confirmedOrder),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
         orderEventsPublisher = {
@@ -88,7 +89,7 @@ describe('ConfirmOrderUseCase', () => {
 
             await sut.execute(event);
 
-            expect(ordersRepository.updateStatus).toHaveBeenCalledWith('order-1', OrderStatus.CONFIRMED);
+            expect(ordersRepository.confirmIfPending).toHaveBeenCalledWith('order-1');
             expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
             expect(orderAuditLog.log).toHaveBeenCalledWith({
                 orderId: confirmedOrder.id,
@@ -125,12 +126,12 @@ describe('ConfirmOrderUseCase', () => {
             expect(published.confirmedAt).toBeDefined();
         });
 
-        it('throws NotFoundException when order does not exist', async () => {
-            ordersRepository.findById.mockResolvedValueOnce(null);
+        it('returns without side effects when order is not pending or not found', async () => {
+            ordersRepository.confirmIfPending.mockResolvedValueOnce(null);
 
-            await expect(sut.execute({ orderId: 'non-existent' })).rejects.toThrow(NotFoundException);
+            await expect(sut.execute({ orderId: 'non-existent' })).resolves.toBeUndefined();
 
-            expect(ordersRepository.updateStatus).not.toHaveBeenCalled();
+            expect(ordersRepository.confirmIfPending).toHaveBeenCalledWith('non-existent');
             expect(orderAuditLog.log).not.toHaveBeenCalled();
             expect(orderEventsPublisher.publishOrderConfirmed).not.toHaveBeenCalled();
         });

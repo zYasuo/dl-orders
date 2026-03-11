@@ -22,7 +22,7 @@ export class HandleWebhookUseCase {
     ) {}
 
     async execute(payload: IWebhookPayload): Promise<void> {
-        if (payload.type !== 'payment') {
+        if (!payload.type?.includes('payment')) {
             this.logger.log(`Ignoring webhook type=${payload.type}`);
             return;
         }
@@ -49,18 +49,21 @@ export class HandleWebhookUseCase {
         const status = details.status?.toUpperCase?.() ?? details.status;
 
         if (status === 'APPROVED') {
-            const amountMismatch = Math.abs(Number(details.amount) - paymentRecord.amount) > 0.01;
-
-            if (amountMismatch) {
-                this.logger.warn(
-                    `Amount mismatch for payment. orderId=${paymentRecord.orderId} externalId=${externalId} ` +
-                        `expected=${paymentRecord.amount} received=${details.amount}`,
-                );
+            if (!paymentRecord.matchesAmount(details.amount)) {
+                this.logger.warn('Payment amount mismatch', {
+                    orderId: paymentRecord.orderId,
+                    externalId,
+                    expected: paymentRecord.amount,
+                    received: details.amount,
+                });
                 return;
             }
 
             if (!paymentRecord.isPending()) {
-                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
+                this.logger.log('Duplicate webhook ignored', {
+                    paymentId: paymentRecord.id,
+                    externalId,
+                });
                 return;
             }
 
@@ -70,26 +73,49 @@ export class HandleWebhookUseCase {
                 gatewayResponse: { ...details },
             });
 
-            if (!updated) return;
+            if (!updated) {
+                this.logger.log('Duplicate webhook ignored', {
+                    paymentId: paymentRecord.id,
+                    externalId,
+                });
+                return;
+            }
 
-            await this.paymentAuditLogPort.log({
-                orderId: paymentRecord.orderId,
-                action: 'PAYMENT_APPROVED',
-                timestamp: new Date().toISOString(),
-                details: { externalId, amount: details.amount },
-            });
+            const now = new Date();
+            const timestamp = now.toISOString();
 
-            await this.paymentEventsPublisherPort.publishPaymentApproved({
-                orderId: paymentRecord.orderId,
-                paymentId: externalId,
-                amount: details.amount,
-                paidAt: details.dateApproved ?? new Date().toISOString(),
+            const results = await Promise.allSettled([
+                this.paymentAuditLogPort.log({
+                    orderId: paymentRecord.orderId,
+                    action: 'PAYMENT_APPROVED',
+                    timestamp,
+                    details: { externalId, amount: details.amount },
+                }),
+                this.paymentEventsPublisherPort.publishPaymentApproved({
+                    orderId: paymentRecord.orderId,
+                    paymentId: externalId,
+                    amount: details.amount,
+                    paidAt: details.dateApproved ?? new Date().toISOString(),
+                }),
+            ]);
+
+            results.forEach((r) => {
+                if (r.status === 'rejected') {
+                    this.logger.warn('Payment approved side-effect failed', {
+                        orderId: paymentRecord.orderId,
+                        externalId,
+                        error: r.reason,
+                    });
+                }
             });
 
             this.logger.log(`Payment approved. orderId=${paymentRecord.orderId} externalId=${externalId}`);
         } else {
             if (!paymentRecord.isPending()) {
-                this.logger.log(`Payment already processed (idempotent). paymentId=${paymentRecord.id}`);
+                this.logger.log('Duplicate webhook ignored', {
+                    paymentId: paymentRecord.id,
+                    externalId,
+                });
                 return;
             }
 
@@ -99,22 +125,46 @@ export class HandleWebhookUseCase {
                 gatewayResponse: { ...details },
             });
 
-            if (!updated) return;
+            if (!updated) {
+                this.logger.log('Duplicate webhook ignored', {
+                    paymentId: paymentRecord.id,
+                    externalId,
+                });
+                return;
+            }
 
-            await this.paymentAuditLogPort.log({
-                orderId: paymentRecord.orderId,
-                action: 'PAYMENT_FAILED',
-                timestamp: new Date().toISOString(),
-                details: { externalId, reason: status },
+            const now = new Date();
+            const timestamp = now.toISOString();
+
+            const results = await Promise.allSettled([
+                this.paymentAuditLogPort.log({
+                    orderId: paymentRecord.orderId,
+                    action: 'PAYMENT_FAILED',
+                    timestamp,
+                    details: { externalId, reason: status },
+                }),
+                this.paymentEventsPublisherPort.publishPaymentFailed({
+                    orderId: paymentRecord.orderId,
+                    paymentId: externalId,
+                    reason: status,
+                }),
+            ]);
+
+            results.forEach((r) => {
+                if (r.status === 'rejected') {
+                    this.logger.warn('Payment failed side-effect failed', {
+                        orderId: paymentRecord.orderId,
+                        externalId,
+                        error: r.reason,
+                    });
+                }
             });
 
-            await this.paymentEventsPublisherPort.publishPaymentFailed({
+            this.logger.warn('Payment failed', {
                 orderId: paymentRecord.orderId,
-                paymentId: externalId,
+                externalId,
                 reason: status,
             });
-
-            this.logger.warn(`Payment failed. orderId=${paymentRecord.orderId} externalId=${externalId} reason=${status}`);
         }
     }
 }

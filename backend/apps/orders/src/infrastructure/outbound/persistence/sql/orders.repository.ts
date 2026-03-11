@@ -9,7 +9,7 @@ import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 export class OrdersRepository extends IOrdersRepositoryPort {
     constructor(private readonly db: DbService) { super(); }
 
-    async create(input: ICreateOrder): Promise<OrderEntity | null> {
+    async create(input: ICreateOrder): Promise<OrderEntity> {
         const order = await this.db.order.create({
             data: {
                 productId: input.productId,
@@ -22,7 +22,6 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 totalPrice: input.totalPrice,
             },
         });
-        if (!order) return null;
         return new OrderEntity({
             id: order.id,
             productId: order.productId,
@@ -82,5 +81,42 @@ export class OrdersRepository extends IOrdersRepositoryPort {
             if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') return null;
             throw e;
         }
+    }
+
+    async confirmIfPending(orderId: string): Promise<OrderEntity | null> {
+        const result = await this.db.order.updateMany({
+            where: {
+                id: orderId,
+                status: OrderStatus.PENDING,
+            },
+            data: {
+                status: OrderStatus.CONFIRMED,
+            },
+        });
+    
+        if (result.count === 0) {
+            return null;
+        }
+    
+        const item = await this.db.order.findUnique({
+            where: { id: orderId },
+        });
+    
+        if (!item) return null;
+    
+        return new OrderEntity({
+            id: item.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            description: item.description,
+            recipient: item.recipient,
+            productName: item.productName,
+            productDescription: item.productDescription,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            status: item.status as OrderStatus,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+        });
     }
 }

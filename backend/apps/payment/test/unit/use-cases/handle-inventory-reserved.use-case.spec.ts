@@ -71,7 +71,6 @@ describe('HandleInventoryReservedUseCase', () => {
         await sut.execute(event);
 
         expect(orderDetailsPort.getByOrderId).toHaveBeenCalledWith(orderId);
-        expect(paymentRepositoryPort.findByOrderId).toHaveBeenCalledWith(orderId);
         expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice });
         expect(paymentGatewayPort.createPreference).toHaveBeenCalledWith({
             orderId,
@@ -93,12 +92,23 @@ describe('HandleInventoryReservedUseCase', () => {
         expect(paymentRepositoryPort.create).not.toHaveBeenCalled();
     });
 
-    it('skips when payment already exists for order', async () => {
-        paymentRepositoryPort.findByOrderId.mockResolvedValueOnce(fakePayment);
+    it('skips when create returns existing payment with preferenceId', async () => {
+        const existingWithPreference = new PaymentEntity({
+            id: fakePayment.id,
+            orderId: fakePayment.orderId,
+            externalId: null,
+            preferenceId: 'pref-existing',
+            amount: totalPrice,
+            status: PaymentStatus.PENDING,
+            gatewayResponse: null,
+            createdAt: fakePayment.createdAt,
+            updatedAt: fakePayment.updatedAt,
+        });
+        paymentRepositoryPort.create.mockResolvedValueOnce(existingWithPreference);
 
         await sut.execute({ orderId, productId: 'p', quantity: 1 });
 
-        expect(paymentRepositoryPort.create).not.toHaveBeenCalled();
+        expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice });
         expect(paymentGatewayPort.createPreference).not.toHaveBeenCalled();
     });
 });
