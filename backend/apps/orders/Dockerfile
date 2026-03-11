@@ -17,4 +17,4 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-CMD ["node", "dist/apps/orders/main.js"]
+CMD ["node", "dist/apps/orders/apps/orders/src/main.js"]

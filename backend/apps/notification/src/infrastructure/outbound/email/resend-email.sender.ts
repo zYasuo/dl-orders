@@ -8,10 +8,15 @@ const resendFromEmail = process.env.RESEND_FROM_EMAIL ?? 'Notifications <onboard
 @Injectable()
 export class ResendEmailSender extends IEmailSenderPort {
     private readonly logger = new Logger(ResendEmailSender.name);
-    private readonly resend = new Resend(resendApiKey);
+    private readonly resend: Resend | null = resendApiKey ? new Resend(resendApiKey) : null;
 
     async send(params: { to: string; subject: string; html: string }): Promise<{ success: boolean; error?: string }> {
         const { to, subject, html } = params;
+
+        if (!this.resend) {
+            this.logger.warn('RESEND_API_KEY not set; email not sent', { to, subject });
+            return { success: false, error: 'RESEND_API_KEY not configured' };
+        }
 
         try {
             const { data, error } = await this.resend.emails.send({

@@ -229,6 +229,8 @@ services:
       context: ./backend
       dockerfile: apps/orders/Dockerfile
     container_name: orders-service
+    env_file:
+      - ./backend/apps/orders/.env
     ports:
       - "3001:3001"
     environment:
@@ -252,6 +254,8 @@ services:
       context: ./backend
       dockerfile: apps/inventory/Dockerfile
     container_name: inventory-service
+    env_file:
+      - ./backend/apps/inventory/.env
     ports:
       - "3002:3002"
     environment:
@@ -278,6 +282,8 @@ services:
       context: ./backend
       dockerfile: apps/product/Dockerfile
     container_name: product-service
+    env_file:
+      - ./backend/apps/product/.env
     ports:
       - "3003:3003"
     environment:
@@ -297,6 +303,8 @@ services:
       context: ./backend
       dockerfile: apps/notification/Dockerfile
     container_name: notification-service
+    env_file:
+      - ./backend/apps/notification/.env
     ports:
       - "3004:3004"
     environment:
@@ -304,8 +312,6 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres-notification:5432/dl_notification_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=notification_queue
-      - RESEND_API_KEY=${RESEND_API_KEY:-}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notifications <onboarding@resend.dev>}
       - MONGODB_URI=mongodb://mongo-notification:27017/dl_notification_audit
     depends_on:
       postgres-notification:
@@ -322,6 +328,8 @@ services:
       context: ./backend
       dockerfile: apps/auth/Dockerfile
     container_name: auth-service
+    env_file:
+      - ./backend/apps/auth/.env
     ports:
       - "3005:3005"
     environment:
@@ -330,8 +338,6 @@ services:
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - JWT_EXPIRES_IN=1d
       - OTP_EXPIRES_IN_MINUTES=10
-      - RESEND_API_KEY=${RESEND_API_KEY:-}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Auth <onboarding@resend.dev>}
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=auth_queue
       - REDIS_URL=redis://redis:6379
@@ -350,6 +356,8 @@ services:
       context: ./backend
       dockerfile: apps/users/Dockerfile
     container_name: users-service
+    env_file:
+      - ./backend/apps/users/.env
     ports:
       - "3006:3006"
     environment:
@@ -371,6 +379,8 @@ services:
       context: ./backend
       dockerfile: apps/payment/Dockerfile
     container_name: payment-service
+    env_file:
+      - ./backend/apps/payment/.env
     ports:
       - "3007:3007"
     environment:
