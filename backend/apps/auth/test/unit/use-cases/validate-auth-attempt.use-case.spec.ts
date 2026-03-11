@@ -75,20 +75,18 @@ describe('ValidateAuthAttemptUseCase', () => {
 
     describe('validateBeforeLogin', () => {
         it('does nothing when account is not locked', async () => {
-            lockoutStore.isLocked.mockResolvedValueOnce(false);
+            lockoutStore.getLockedUntil.mockResolvedValueOnce(null);
 
             await expect(sut.validateBeforeLogin(userId)).resolves.not.toThrow();
-            expect(lockoutStore.isLocked).toHaveBeenCalledWith(userId);
+            expect(lockoutStore.getLockedUntil).toHaveBeenCalledWith(userId);
         });
 
         it('throws ForbiddenException when account is locked', async () => {
             const lockedUntil = addMinutesToDate(now, 5);
-            lockoutStore.isLocked.mockResolvedValue(true);
             lockoutStore.getLockedUntil.mockResolvedValue(lockedUntil);
 
             await expect(sut.validateBeforeLogin(userId)).rejects.toThrow(ForbiddenException);
             await expect(sut.validateBeforeLogin(userId)).rejects.toThrow(/Account temporarily locked.*Try again in \d+ minute/);
-            expect(lockoutStore.isLocked).toHaveBeenCalledWith(userId);
             expect(lockoutStore.getLockedUntil).toHaveBeenCalledWith(userId);
         });
     });

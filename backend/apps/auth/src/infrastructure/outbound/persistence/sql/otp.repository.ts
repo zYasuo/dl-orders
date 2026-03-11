@@ -44,10 +44,20 @@ export class OtpRepository extends IOtpRepositoryPort {
         });
     }
 
-    async markUsed(id: string): Promise<void> {
-        await this.db.otpCode.update({
-            where: { id },
-            data: { used: true },
+    async markUsedIfUnused(otpId: string): Promise<boolean> {
+        const result = await this.db.otpCode.updateMany({
+            where: {
+                id: otpId,
+                used: false,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+            data: {
+                used: true,
+            },
         });
+    
+        return result.count === 1;
     }
 }

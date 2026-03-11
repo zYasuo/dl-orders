@@ -45,7 +45,7 @@ describe('SignupUseCase', () => {
         otpRepository = {
             create: jest.fn().mockResolvedValue(undefined),
             findLatestByUserId: jest.fn(),
-            markUsed: jest.fn(),
+            markUsedIfUnused: jest.fn(),
         } as unknown as jest.Mocked<IOtpRepositoryPort>;
 
         passwordHasher = {
@@ -78,12 +78,13 @@ describe('SignupUseCase', () => {
             const result = await sut.execute(input);
 
             expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
-            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
+            expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
+            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith('user@test.com');
             expect(emailEncrypted.encrypt).toHaveBeenCalledWith(input.email);
             expect(passwordHasher.hash).toHaveBeenCalledWith(input.password);
             expect(authUserRepository.create).toHaveBeenCalledWith({
                 emailEncrypted: input.email,
-                emailLookupHash: input.email,
+                emailLookupHash: 'user@test.com',
                 passwordHash: 'hashed-password',
                 name: input.name,
             });
@@ -97,13 +98,12 @@ describe('SignupUseCase', () => {
 
             expect(otpSendRequestedPublisher.publish).toHaveBeenCalledTimes(1);
             expect(otpSendRequestedPublisher.publish).toHaveBeenCalledWith({
-                email: fakeUser.emailEncrypted,
+                email: input.email,
                 code: expect.any(String),
                 expiresInMinutes: expect.any(Number),
             });
 
-            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(fakeUser.emailEncrypted);
-            expect(result).toEqual({ userId: fakeUser.id, email: fakeUser.emailEncrypted });
+            expect(result).toEqual({ userId: fakeUser.id, email: input.email });
         });
 
         it('throws ConflictException when email is already registered', async () => {

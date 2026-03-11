@@ -87,7 +87,7 @@ describe('VerifyOtpUseCase', () => {
         otpRepository = {
             create: jest.fn(),
             findLatestByUserId: jest.fn().mockResolvedValue(validOtp),
-            markUsed: jest.fn().mockResolvedValue(undefined),
+            markUsedIfUnused: jest.fn().mockResolvedValue(true),
         } as unknown as jest.Mocked<IOtpRepositoryPort>;
 
         jwtPort = {
@@ -122,14 +122,14 @@ describe('VerifyOtpUseCase', () => {
             expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
             expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
             expect(otpRepository.findLatestByUserId).toHaveBeenCalledWith(fakeUser.id);
-            expect(otpRepository.markUsed).toHaveBeenCalledWith(validOtp.id);
+            expect(otpRepository.markUsedIfUnused).toHaveBeenCalledWith(validOtp.id);
             expect(authUserRepository.markEmailVerified).toHaveBeenCalledWith(fakeUser.id);
             expect(userVerifiedPublisher.publish).toHaveBeenCalledWith({
                 userId: verifiedUserInstance.id,
-                email: verifiedUserInstance.emailEncrypted,
+                email: input.email,
                 name: verifiedUserInstance.name,
             });
-            expect(jwtPort.sign).toHaveBeenCalledWith({ sub: fakeUser.id, email: fakeUser.emailEncrypted });
+            expect(jwtPort.sign).toHaveBeenCalledWith({ sub: fakeUser.id, email: input.email });
             expect(result).toEqual({ accessToken: 'jwt-token' });
         });
 
@@ -149,7 +149,7 @@ describe('VerifyOtpUseCase', () => {
 
             await expect(sut.execute(input)).rejects.toThrow(/Invalid email or code/);
 
-            expect(otpRepository.markUsed).not.toHaveBeenCalled();
+            expect(otpRepository.markUsedIfUnused).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
@@ -158,17 +158,18 @@ describe('VerifyOtpUseCase', () => {
 
             await expect(sut.execute(input)).rejects.toThrow(/Invalid email or code/);
 
-            expect(otpRepository.markUsed).not.toHaveBeenCalled();
+            expect(otpRepository.markUsedIfUnused).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when code was already used', async () => {
             otpRepository.findLatestByUserId.mockResolvedValueOnce(usedOtp);
+            otpRepository.markUsedIfUnused.mockResolvedValueOnce(false);
             const input = { email: 'user@test.com', code: '123456' };
 
             await expect(sut.execute(input)).rejects.toThrow(/Code already used/);
 
-            expect(otpRepository.markUsed).not.toHaveBeenCalled();
+            expect(otpRepository.markUsedIfUnused).toHaveBeenCalledWith(usedOtp.id);
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
 
@@ -178,7 +179,7 @@ describe('VerifyOtpUseCase', () => {
 
             await expect(sut.execute(input)).rejects.toThrow(/Code expired/);
 
-            expect(otpRepository.markUsed).not.toHaveBeenCalled();
+            expect(otpRepository.markUsedIfUnused).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
         });
     });

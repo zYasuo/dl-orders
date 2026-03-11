@@ -15,13 +15,14 @@ export class CreateInventoryUseCase {
     async execute(input: TCreateInventory): Promise<InventoryEntity> {
         const { productId, name, quantity } = input;
 
-        const existingInventory = await this.inventoryRepositoryPort.findByProductId(productId);
+        const [existingInventory, existingByName] = await Promise.all([
+            this.inventoryRepositoryPort.findByProductId(productId),
+            this.inventoryRepositoryPort.findByName(name),
+        ]);
 
         if (existingInventory) {
             throw new BadRequestException('Inventory already exists for this product');
         }
-
-        const existingByName = await this.inventoryRepositoryPort.findByName(name);
         
         if (existingByName) {
             throw new BadRequestException('An inventory with this name already exists');

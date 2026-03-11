@@ -28,9 +28,11 @@ export class SignupUseCase {
         if (existing) {
             throw new ConflictException('Email already registered');
         }
-
-        const emailEncrypted = await this.emailEncrypted.encrypt(email);
-        const passwordHash = await this.passwordHasher.hash(password);
+        
+        const [emailEncrypted, passwordHash] = await Promise.all([
+            this.emailEncrypted.encrypt(email),
+            this.passwordHasher.hash(password),
+        ]);
 
         const createData: TCreateAuthUser = {
             emailEncrypted,
@@ -52,13 +54,12 @@ export class SignupUseCase {
 
         await this.otpRepository.create(otpData);
 
-        const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
         await this.otpSendRequestedPublisher.publish({
-            email: plainEmail,
+            email,
             code,
             expiresInMinutes,
         });
-
-        return { userId: user.id, email: plainEmail };
+        
+        return { userId: user.id, email };
     }
 }

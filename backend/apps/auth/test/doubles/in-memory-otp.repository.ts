@@ -26,12 +26,13 @@ export class InMemoryOtpRepository extends IOtpRepositoryPort {
         return byUser[0] ?? null;
     }
 
-    async markUsed(id: string): Promise<void> {
-        const idx = this.otps.findIndex((o) => o.id === id);
-        if (idx === -1) return;
+    async markUsedIfUnused(otpId: string): Promise<boolean> {
+        const idx = this.otps.findIndex((o) => o.id === otpId);
+        if (idx === -1) return false;
 
         const o = this.otps[idx];
-        
+        if (o.used || o.isExpired()) return false;
+
         this.otps[idx] = new OtpCodeEntity({
             id: o.id,
             code: o.code,
@@ -40,5 +41,6 @@ export class InMemoryOtpRepository extends IOtpRepositoryPort {
             used: true,
             createdAt: o.createdAt,
         });
+        return true;
     }
 }

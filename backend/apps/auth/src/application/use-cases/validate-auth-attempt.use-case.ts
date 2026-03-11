@@ -13,13 +13,15 @@ export class ValidateAuthAttemptUseCase {
     ) {}
 
     async validateBeforeLogin(userId: string): Promise<void> {
-        const locked = await this.lockoutStore.isLocked(userId);
-        if (!locked) return;
-
         const lockedUntil = await this.lockoutStore.getLockedUntil(userId);
-        const minutesLeft = lockedUntil ? minutesRemainingUntil(lockedUntil) : 0;
-
-        throw new ForbiddenException(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`);
+    
+        if (!lockedUntil) return;
+    
+        const minutesLeft = minutesRemainingUntil(lockedUntil);
+    
+        throw new ForbiddenException(
+            `Account temporarily locked. Try again in ${minutesLeft} minute(s).`
+        );
     }
 
     async registerFailedAttempt(userId: string, ip: string | null, email: string): Promise<void> {

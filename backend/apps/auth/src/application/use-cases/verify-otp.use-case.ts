@@ -19,42 +19,42 @@ export class VerifyOtpUseCase {
     async execute(input: TVerifyOtp): Promise<{ accessToken: string }> {
         const emailLookupHash = await this.emailEncrypted.getLookupHash(input.email);
         const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
-
+    
         if (!user) {
             throw new BadRequestException('Invalid email or code');
         }
-
+    
         const otp = await this.otpRepository.findLatestByUserId(user.id);
+    
         if (!otp || otp.code !== input.code) {
             throw new BadRequestException('Invalid email or code');
         }
-
-        if (otp.used) {
-            throw new BadRequestException('Code already used');
-        }
-
+    
         if (otp.isExpired()) {
             throw new BadRequestException('Code expired');
         }
-
-        await this.otpRepository.markUsed(otp.id);
+    
+        const marked = await this.otpRepository.markUsedIfUnused(otp.id);
+    
+        if (!marked) {
+            throw new BadRequestException('Code already used');
+        }
+    
         const verifiedUser = await this.authUserRepository.markEmailVerified(user.id);
-
+    
         if (verifiedUser) {
-            const plainEmail = await this.emailEncrypted.decrypt(verifiedUser.emailEncrypted);
             await this.userVerifiedPublisher.publish({
                 userId: verifiedUser.id,
-                email: plainEmail,
+                email: input.email,
                 name: verifiedUser.name,
             });
         }
-
-        const decryptedEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
+    
         const accessToken = await this.jwtPort.sign({
             sub: user.id,
-            email: decryptedEmail,
+            email: input.email,
         });
-
+    
         return { accessToken };
     }
 }

@@ -64,7 +64,6 @@ describe('CreateInventoryUseCase', () => {
             await expect(sut.execute({ productId: 'product-123', name: 'W', quantity: 10 })).rejects.toThrow(
                 new BadRequestException('Inventory already exists for this product'),
             );
-            expect(inventoryRepository.findByName).not.toHaveBeenCalled();
             expect(inventoryRepository.create).not.toHaveBeenCalled();
         });
 
