@@ -22,6 +22,7 @@ export class CreateInventoryUseCase {
         }
 
         const existingByName = await this.inventoryRepositoryPort.findByName(name);
+        
         if (existingByName) {
             throw new BadRequestException('An inventory with this name already exists');
         }
