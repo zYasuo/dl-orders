@@ -13,7 +13,7 @@ export class CreateProductUseCase {
     ) {}
 
     async execute(input: TCreateProduct): Promise<ProductEntity> {
-        const { name, description, price } = input;
+        const { name, description, price, imageUrl } = input;
 
         const existingProduct = await this.productRepositoryPort.findByName(name);
 
@@ -21,7 +21,7 @@ export class CreateProductUseCase {
             throw new BadRequestException('Product already exists');
         }
 
-        const createInput: ICreateProduct = { name, description, price };
+        const createInput: ICreateProduct = { name, description, price, imageUrl };
 
         const createdProduct = await this.productRepositoryPort.create(createInput);
 

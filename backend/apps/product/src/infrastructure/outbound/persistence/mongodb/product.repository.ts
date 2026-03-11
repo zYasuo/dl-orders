@@ -14,6 +14,7 @@ export class MongoProductRepository extends IProductRepositoryPort {
         name: string;
         description: string;
         price: number;
+        imageUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>(COLLECTION);
@@ -23,18 +24,20 @@ export class MongoProductRepository extends IProductRepositoryPort {
     }
 
     async create(params: ICreateProduct): Promise<ProductEntity | null> {
-        const { name, description, price } = params;
+        const { name, description, price, imageUrl } = params;
         const now = new Date();
         const id = crypto.randomUUID();
+        const image = imageUrl ?? null;
         await this.collection.insertOne({
             _id: id,
             name,
             description,
             price,
+            imageUrl: image,
             createdAt: now,
             updatedAt: now,
         });
-        return new ProductEntity(id, name, description, price, now, now);
+        return new ProductEntity(id, name, description, price, image, now, now);
     }
 
     async findById(id: string): Promise<ProductEntity | null> {
@@ -56,27 +59,30 @@ export class MongoProductRepository extends IProductRepositoryPort {
     }
 
     async update(id: string, data: IUpdateProduct): Promise<ProductEntity | null> {
-        const { name, description, price } = data;
+        const { name, description, price, imageUrl } = data;
         const now = new Date();
+        const update: Record<string, unknown> = { name, description, price, updatedAt: now };
+        if (imageUrl !== undefined) update.imageUrl = imageUrl ?? null;
         const result = await this.collection.findOneAndUpdate(
             { _id: id },
-            { $set: { name, description, price, updatedAt: now } },
+            { $set: update },
             { returnDocument: 'after' },
         );
         if (!result) return null;
         return this.toEntity(result);
     }
 
-    private toEntity(doc: { _id: string; name: string; description: string; price: number; createdAt: Date; updatedAt: Date }): ProductEntity {
+    private toEntity(doc: {
+        _id: string;
+        name: string;
+        description: string;
+        price: number;
+        imageUrl?: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }): ProductEntity {
         const { _id, name, description, price, createdAt, updatedAt } = doc;
-        
-        return new ProductEntity(
-            _id,
-            name,
-            description,
-            price,
-            createdAt,
-            updatedAt,
-        );
+        const imageUrl = doc.imageUrl ?? null;
+        return new ProductEntity(_id, name, description, price, imageUrl, createdAt, updatedAt);
     }
 }

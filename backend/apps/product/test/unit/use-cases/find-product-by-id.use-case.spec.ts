@@ -11,7 +11,7 @@ describe('FindProductByIdUseCase', () => {
     let productCache: jest.Mocked<IProductCachePort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
-    const fakeProduct = new ProductEntity('product-123', 'Product A', 'Description A', 99.9, createdAt, createdAt);
+    const fakeProduct = new ProductEntity('product-123', 'Product A', 'Description A', 99.9, null, createdAt, createdAt);
 
     beforeEach(async () => {
         jest.clearAllMocks();

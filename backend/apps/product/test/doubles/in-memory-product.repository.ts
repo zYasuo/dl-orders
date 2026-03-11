@@ -27,7 +27,16 @@ export class InMemoryProductRepository extends IProductRepositoryPort {
     async update(id: string, data: IUpdateProduct): Promise<ProductEntity | null> {
         const product = this.products.get(id);
         if (!product) return null;
-        const updated = new ProductEntity(product.id, data.name, data.description, data.price, product.createdAt, new Date());
+        const imageUrl = data.imageUrl !== undefined ? data.imageUrl : product.imageUrl;
+        const updated = new ProductEntity(
+            product.id,
+            data.name,
+            data.description,
+            data.price,
+            imageUrl ?? null,
+            product.createdAt,
+            new Date(),
+        );
         this.products.set(id, updated);
         return updated;
     }

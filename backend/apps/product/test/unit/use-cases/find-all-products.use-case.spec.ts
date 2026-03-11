@@ -11,8 +11,8 @@ describe('FindAllProductsUseCase', () => {
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
     const fakeProducts = [
-        new ProductEntity('id-1', 'Product A', 'Description A', 99.9, createdAt, createdAt),
-        new ProductEntity('id-2', 'Product B', 'Description B', 49.9, createdAt, createdAt),
+        new ProductEntity('id-1', 'Product A', 'Description A', 99.9, null, createdAt, createdAt),
+        new ProductEntity('id-2', 'Product B', 'Description B', 49.9, null, createdAt, createdAt),
     ];
 
     beforeEach(async () => {

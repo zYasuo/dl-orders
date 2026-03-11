@@ -30,6 +30,7 @@ interface ProductDoc {
     name: string;
     description: string;
     price: number;
+    imageUrl: string | null;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -40,6 +41,7 @@ interface JsonProduct {
     description?: string;
     initial_price?: number | null;
     final_price?: number | null;
+    image_url?: string | null;
     [key: string]: unknown;
 }
 
@@ -51,14 +53,7 @@ function parseDate(value: unknown): Date {
     return new Date();
 }
 
-function toProductDoc(item: JsonProduct, index: number): {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    createdAt: Date;
-    updatedAt: Date;
-} {
+function toProductDoc(item: JsonProduct, index: number): ProductDoc {
     const name = (item.title && String(item.title).trim()) || `Product ${index + 1}`;
     const description =
         (item.description && String(item.description).trim()) || name || 'No description';
@@ -68,12 +63,16 @@ function toProductDoc(item: JsonProduct, index: number): {
             : typeof item.initial_price === 'number' && !Number.isNaN(item.initial_price)
               ? item.initial_price
               : 0;
+    const rawImage = item.image_url;
+    const imageUrl =
+        typeof rawImage === 'string' && rawImage.trim().length > 0 ? rawImage.trim() : null;
     const now = parseDate(item.timestamp) || new Date();
     return {
         _id: crypto.randomUUID(),
         name: name.slice(0, 500),
         description: description.slice(0, 5000),
         price: Math.max(0, Math.min(1000000, price)),
+        imageUrl,
         createdAt: now,
         updatedAt: now,
     };

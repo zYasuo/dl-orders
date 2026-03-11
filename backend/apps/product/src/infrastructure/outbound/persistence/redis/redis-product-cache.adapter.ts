@@ -26,6 +26,7 @@ export class RedisProductCacheAdapter extends IProductCachePort {
             p.name as string,
             p.description as string,
             p.price as number,
+            (p.imageUrl as string | null) ?? null,
             new Date(p.createdAt as string),
             new Date(p.updatedAt as string),
         );
@@ -38,10 +39,10 @@ export class RedisProductCacheAdapter extends IProductCachePort {
             name: product.name,
             description: product.description,
             price: product.price,
+            imageUrl: product.imageUrl,
             createdAt: product.createdAt.toISOString(),
             updatedAt: product.updatedAt.toISOString(),
         };
-        
         await client.setex(key(product.id), ttlSeconds, JSON.stringify(payload));
     }
 
@@ -54,6 +55,7 @@ export class RedisProductCacheAdapter extends IProductCachePort {
                 name: product.name,
                 description: product.description,
                 price: product.price,
+                imageUrl: product.imageUrl,
                 createdAt: product.createdAt.toISOString(),
                 updatedAt: product.updatedAt.toISOString(),
             };
