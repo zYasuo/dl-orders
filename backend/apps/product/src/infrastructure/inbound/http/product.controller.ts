@@ -3,6 +3,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
 import { CreateProductDto, SCreateProduct, type TCreateProduct } from '../../../application/dto/create-product.schema';
 import { CreateProductUseCase } from '../../../application/use-cases/create-product.use-case';
+import { FindAllProductsUseCase } from '../../../application/use-cases/find-all-products.use-case';
 import { FindProductByIdUseCase } from '../../../application/use-cases/find-product-by-id.use-case';
 import { ProductEntity } from '../../../domain/entities/product.entity';
 
@@ -11,8 +12,16 @@ import { ProductEntity } from '../../../domain/entities/product.entity';
 export class ProductController {
     constructor(
         private readonly createProductUseCase: CreateProductUseCase,
+        private readonly findAllProductsUseCase: FindAllProductsUseCase,
         private readonly findProductByIdUseCase: FindProductByIdUseCase,
     ) {}
+
+    @Get()
+    @ApiOperation({ summary: 'List all products' })
+    @ApiResponse({ status: 200, description: 'Products list' })
+    async findAll(): Promise<ProductEntity[] | null> {
+        return this.findAllProductsUseCase.execute();
+    }
 
     @Post()
     @ApiOperation({ summary: 'Create product' })

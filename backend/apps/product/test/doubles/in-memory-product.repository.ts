@@ -19,6 +19,11 @@ export class InMemoryProductRepository extends IProductRepositoryPort {
         return Array.from(this.products.values()).find((p) => p.name === name) ?? null;
     }
 
+    async findAll(): Promise<ProductEntity[] | null> {
+        const list = Array.from(this.products.values());
+        return list.length ? list : null;
+    }
+
     async update(id: string, data: IUpdateProduct): Promise<ProductEntity | null> {
         const product = this.products.get(id);
         if (!product) return null;

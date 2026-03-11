@@ -49,6 +49,12 @@ export class MongoProductRepository extends IProductRepositoryPort {
         return this.toEntity(doc);
     }
 
+    async findAll(): Promise<ProductEntity[] | null> {
+        const docs = await this.collection.find({}).toArray();
+        if (!docs.length) return null;
+        return docs.map((doc) => this.toEntity(doc));
+    }
+
     async update(id: string, data: IUpdateProduct): Promise<ProductEntity | null> {
         const { name, description, price } = data;
         const now = new Date();

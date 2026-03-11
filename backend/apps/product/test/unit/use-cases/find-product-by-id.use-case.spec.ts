@@ -20,12 +20,15 @@ describe('FindProductByIdUseCase', () => {
             create: jest.fn(),
             findById: jest.fn().mockResolvedValue(fakeProduct),
             findByName: jest.fn(),
+            findAll: jest.fn(),
             update: jest.fn(),
         } as unknown as jest.Mocked<IProductRepositoryPort>;
 
         productCache = {
             getById: jest.fn().mockResolvedValue(null),
+            getAll: jest.fn(),
             set: jest.fn().mockResolvedValue(undefined),
+            setAll: jest.fn(),
             invalidate: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<IProductCachePort>;
 
