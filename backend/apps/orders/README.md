@@ -12,8 +12,8 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 - **IOrdersRepositoryPort** — Persist and load orders (Postgres/Prisma).
 - **IProductCatalogPort** — Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
 - **IOrderEventsPublisherPort** — Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
-- **IOrderAuditLogPort** — Append audit entries (DynamoDB).
-- **IOrderSummaryPort** — Read/write order summary read model (DynamoDB).
+- **IOrderAuditLogPort** — Append audit entries (MongoDB).
+- **IOrderSummaryPort** — Read/write order summary read model (MongoDB).
 
 ## Inbound
 
@@ -22,13 +22,13 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (orders via Prisma), `persistence/dynamodb/` (order audit log, order summary).
+- **Persistence:** `persistence/sql/` (orders via Prisma), `persistence/mongodb/` (order audit log, order summary).
 - **Events:** `order.creation_requested` (after create), `order.confirmed` (after confirm).
 
 ## Data
 
 - **Postgres** — Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
-- **DynamoDB** — Audit log (OrderAuditLog), order summaries (OrderSummaries); LocalStack in dev, config via AWS env vars.
+- **MongoDB** — Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
 
 ## Run locally
 
@@ -44,4 +44,4 @@ Or from `backend/`:
 npm run start:dev:orders
 ```
 
-Ensure RabbitMQ, Postgres, and LocalStack (if using DynamoDB) are up, and that `apps/orders/.env` has `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL` (e.g. `http://localhost:3003`), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.
+Ensure RabbitMQ, Postgres, and MongoDB are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL` (e.g. `http://localhost:3003`), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.

@@ -11,7 +11,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 - **NestJS monorepo** — one repo, seven apps: orders, inventory, product, notification, auth, users, payment
 - **RabbitMQ** — event-driven communication (order created, inventory reserved/failed, payment approved/failed, order confirmed, OTP send requested, user verified, account locked notify)
 - **Hexagonal architecture** per app — domain (entities, ports), application (use cases), infrastructure (HTTP, messaging, persistence)
-- **Database per service** — each app has its own Postgres (Prisma); orders, inventory, and notification use DynamoDB (LocalStack) for audit logs
+- **Database per service** — each app has its own Postgres (Prisma) except Product, which uses MongoDB. Orders, inventory, notification, and payment use MongoDB for audit logs and read models
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
 - **Zod** — request validation via a shared validation pipe
 - **API documentation** — each service exposes interactive OpenAPI docs at `/docs` (Scalar UI)
@@ -56,14 +56,14 @@ flowchart LR
 - **Hexagonal (ports & adapters)**  
   - **Domain:** entities and ports (repository, event publisher, audit log, etc.).  
   - **Application:** use cases and DTOs; no infra here.  
-  - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (persistence, messaging, email). Persistence adapters live under `infrastructure/outbound/persistence/`, split into **sql/** (Prisma/Postgres) and **dynamodb/** (DynamoDB) so it’s clear which store each repo uses.  
+  - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (persistence, messaging, email). Persistence adapters live under `infrastructure/outbound/persistence/`, split into **sql/** (Prisma/Postgres), **mongodb/** (MongoDB audit logs and Product catalog) so it’s clear which store each repo uses.  
   Wiring happens in the app module: ports bound to concrete implementations.
 
 - **Event-driven**  
   RabbitMQ with shared pattern names and event payloads in `backend/libs/shared` (`patterns.ts`, `queues.ts`, and event types under `orders/events`, `inventory/events`). Each app that needs messaging connects as a microservice and subscribes to the right patterns.
 
 - **Database per service**  
-  Separate Postgres DB per app (Prisma). Orders, inventory, and notification also write audit entries to DynamoDB (LocalStack in dev); tables are created via `docker/localstack/init-aws.sh` or `backend/scripts/init-dynamodb-tables.js`.
+  Separate Postgres DB per app (Prisma) for orders, inventory, notification, auth, users, payment. Product uses MongoDB for the catalog. Orders, inventory, notification, and payment write audit entries (and read models where applicable) to separate MongoDB instances; connection via `MONGODB_URI` per app.
 
 - **Shared library**  
   `@app/shared` exposes queue names, pattern names, event DTOs, and a Zod validation pipe so all apps stay aligned on contracts.
@@ -72,14 +72,13 @@ flowchart LR
 
 - **Root** — npm workspace; only `backend` is a workspace member. Scripts: Docker, dev, build, test, lint.
 - **backend/** — NestJS monorepo:
-  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`, Prisma schema, optional Dockerfile).
-  - **libs/shared** — constants, event types, validation.
-  - **scripts/** — e.g. DynamoDB table init for local/CI.
+  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`; most have Prisma schema for Postgres; Product uses MongoDB only; optional Dockerfile).
+  - **libs/shared** — constants, event types, validation, MongoDB module.
 
 ## Prerequisites
 
 - Node.js (LTS)
-- Docker and Docker Compose (for RabbitMQ, Redis, Postgres, LocalStack)
+- Docker and Docker Compose (for RabbitMQ, Redis, Postgres, MongoDB)
 
 ## Quick start
 
@@ -90,29 +89,22 @@ flowchart LR
    npm run docker:up
    ```
 
-   This brings up RabbitMQ (5672, 15672), Redis (6379), LocalStack (4566), and one Postgres per app.
+   This brings up RabbitMQ (5672, 15672), Redis (6379), five MongoDB instances (27017–27021), and one Postgres per app (except Product, which uses MongoDB only).
 
-2. **DynamoDB tables (audit)**  
-   If LocalStack init didn’t create them, from the repo root:
-
-   ```bash
-   cd backend && npm run dynamodb:init
-   ```
-
-3. **Prisma**  
-   Generate clients and push (or migrate) per app, e.g.:
+2. **Prisma**  
+   Generate clients and push (or migrate) per app (orders, inventory, notification, auth, users, payment). Product does not use Prisma. Example:
 
    ```bash
    npm run prisma:orders:generate -w backend
    npm run prisma:orders:push -w backend
    ```
 
-   Repeat for `inventory`, `product`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts).
+   Repeat for `inventory`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts). Product uses MongoDB only; set `MONGODB_URI` in its `.env`.
 
-4. **Env**  
-   Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`). Copy from `.env.example` if present.
+3. **Env**  
+   Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `MONGODB_URI` where applicable, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`). Copy from `.env.example` if present.
 
-5. **Run the apps**  
+4. **Run the apps**  
    From repo root, run one or all:
 
    ```bash
@@ -163,7 +155,7 @@ Start the app you need, then open the URL above in a browser to explore routes, 
 | `test:backend`   | Run tests                  |
 | `lint:backend`   | Lint and fix               |
 
-**From `backend/`** — See `package.json` for the full list: per-app `build:<app>`, `start:dev:<app>`, Prisma generate/push/migrate per app, and `dynamodb:init`.
+**From `backend/`** — See `package.json` for the full list: per-app `build:<app>`, `start:dev:<app>`, Prisma generate/push/migrate per app (except Product).
 
 ---
 

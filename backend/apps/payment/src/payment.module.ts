@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { JwtAuthGuard } from '@app/shared';
+import { JwtAuthGuard, MongoDBModule } from '@app/shared';
 import { HandleInventoryReservedUseCase } from './application/use-cases/handle-inventory-reserved.use-case';
 import { HandleWebhookUseCase } from './application/use-cases/handle-webhook.use-case';
 import { FindPaymentByOrderIdUseCase } from './application/use-cases/find-payment-by-order-id.use-case';
@@ -10,15 +10,14 @@ import { IPaymentGatewayPort } from './domain/ports/payment-gateway.port';
 import { IPaymentRepositoryPort } from './domain/ports/payment-repository.port';
 import { IOrderDetailsPort } from './domain/ports/order-details.port';
 import { DbModule } from './infrastructure/db/db.module';
-import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 import { PaymentController } from './infrastructure/inbound/http/payment.controller';
 import { WebhookSignatureService } from './infrastructure/inbound/http/webhook-signature.service';
 import { InventoryReservedConsumer } from './infrastructure/inbound/messaging/inventory-reserved.consumer';
 import { MercadoPagoGatewayAdapter } from './infrastructure/outbound/gateway/mercadopago-gateway.adapter';
 import { PaymentRabbitMqPublisher } from './infrastructure/outbound/messaging/payment-events.publisher';
+import { MongoPaymentAuditLogRepository } from './infrastructure/outbound/persistence/mongodb/payment-audit-log.repository';
 import { PaymentRepository } from './infrastructure/outbound/persistence/sql/payment.repository';
-import { DynamoDBPaymentAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/payment-audit-log.repository';
 import { OrdersHttpClient } from './infrastructure/outbound/http/orders-http.client';
 
 @Module({
@@ -29,7 +28,7 @@ import { OrdersHttpClient } from './infrastructure/outbound/http/orders-http.cli
         }),
         DbModule,
         RabbitMQModule,
-        DynamoDBModule.forRoot(),
+        MongoDBModule.forRoot(),
     ],
     controllers: [PaymentController, InventoryReservedConsumer],
     providers: [
@@ -41,7 +40,7 @@ import { OrdersHttpClient } from './infrastructure/outbound/http/orders-http.cli
         { provide: IPaymentRepositoryPort, useClass: PaymentRepository },
         { provide: IPaymentGatewayPort, useClass: MercadoPagoGatewayAdapter },
         { provide: IPaymentEventsPublisherPort, useClass: PaymentRabbitMqPublisher },
-        { provide: IPaymentAuditLogPort, useClass: DynamoDBPaymentAuditLogRepository },
+        { provide: IPaymentAuditLogPort, useClass: MongoPaymentAuditLogRepository },
         { provide: IOrderDetailsPort, useClass: OrdersHttpClient },
     ],
 })

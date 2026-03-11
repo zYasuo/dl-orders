@@ -29,18 +29,80 @@ services:
       timeout: 5s
       retries: 5
 
-  localstack:
-    image: localstack/localstack:latest
-    container_name: localstack
+  mongo-product:
+    image: mongo:7
+    container_name: dl-orders-mongo-product
     ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=dynamodb
-      - DEFAULT_REGION=us-east-1
+      - "27017:27017"
     volumes:
-      - ./docker/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - dl-orders-mongo-product-data:/data/db
     networks:
       - dl-orders-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-orders:
+    image: mongo:7
+    container_name: dl-orders-mongo-orders
+    ports:
+      - "27018:27017"
+    volumes:
+      - dl-orders-mongo-orders-data:/data/db
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-inventory:
+    image: mongo:7
+    container_name: dl-orders-mongo-inventory
+    ports:
+      - "27019:27017"
+    volumes:
+      - dl-orders-mongo-inventory-data:/data/db
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-notification:
+    image: mongo:7
+    container_name: dl-orders-mongo-notification
+    ports:
+      - "27020:27017"
+    volumes:
+      - dl-orders-mongo-notification-data:/data/db
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-payment:
+    image: mongo:7
+    container_name: dl-orders-mongo-payment
+    ports:
+      - "27021:27017"
+    volumes:
+      - dl-orders-mongo-payment-data:/data/db
+    networks:
+      - dl-orders-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   postgres-orders:
     image: postgres:17
@@ -74,26 +136,6 @@ services:
       - "5433:5432"
     volumes:
       - dl-orders-postgres-inventory-data:/var/lib/postgresql/data
-    networks:
-      - dl-orders-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  postgres-product:
-    image: postgres:17
-    container_name: dl-orders-postgres-product
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=dl_product_svc
-    ports:
-      - "5434:5432"
-    volumes:
-      - dl-orders-postgres-product-data:/var/lib/postgresql/data
     networks:
       - dl-orders-network
     healthcheck:
@@ -194,17 +236,14 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres-orders:5432/dl_orders_svc
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=orders_queue
-      - AWS_ENDPOINT=http://localstack:4566
-      - AWS_REGION=us-east-1
-      - DYNAMODB_AUDIT_TABLE=OrderAuditLog
-      - DYNAMODB_ORDER_SUMMARY_TABLE=OrderSummaries
+      - MONGODB_URI=mongodb://mongo-orders:27017/dl_orders_audit
     depends_on:
       postgres-orders:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      localstack:
-        condition: service_started
+      mongo-orders:
+        condition: service_healthy
     networks:
       - dl-orders-network
 
@@ -221,9 +260,7 @@ services:
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=inventory_queue
       - REDIS_URL=redis://redis:6379
-      - AWS_ENDPOINT=http://localstack:4566
-      - AWS_REGION=us-east-1
-      - DYNAMODB_AUDIT_TABLE=ReservationAuditLog
+      - MONGODB_URI=mongodb://mongo-inventory:27017/dl_inventory_audit
     depends_on:
       postgres-inventory:
         condition: service_healthy
@@ -231,8 +268,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      localstack:
-        condition: service_started
+      mongo-inventory:
+        condition: service_healthy
     networks:
       - dl-orders-network
 
@@ -245,10 +282,10 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - DATABASE_URL=postgresql://postgres:postgres@postgres-product:5432/dl_product_svc
+      - MONGODB_URI=mongodb://mongo-product:27017/dl_product_svc
       - REDIS_URL=redis://redis:6379
     depends_on:
-      postgres-product:
+      mongo-product:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -269,17 +306,14 @@ services:
       - QUEUE_NAME=notification_queue
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Notifications <onboarding@resend.dev>}
-      - AWS_ENDPOINT=http://localstack:4566
-      - AWS_REGION=us-east-1
-      - DYNAMODB_AUDIT_TABLE=NotificationAuditLog
-      - DYNAMODB_USER_NOTIFICATIONS_TABLE=UserNotifications
+      - MONGODB_URI=mongodb://mongo-notification:27017/dl_notification_audit
     depends_on:
       postgres-notification:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      localstack:
-        condition: service_started
+      mongo-notification:
+        condition: service_healthy
     networks:
       - dl-orders-network
 
@@ -346,25 +380,27 @@ services:
       - QUEUE_NAME=payment_queue
       - ORDERS_SERVICE_URL=http://orders-service:3001
       - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-}
-      - AWS_ENDPOINT=http://localstack:4566
-      - AWS_REGION=us-east-1
-      - DYNAMODB_AUDIT_TABLE=PaymentAuditLog
+      - MONGODB_URI=mongodb://mongo-payment:27017/dl_payment_audit
     depends_on:
       postgres-payment:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      localstack:
-        condition: service_started
+      mongo-payment:
+        condition: service_healthy
       orders-service:
         condition: service_started
     networks:
       - dl-orders-network
 
 volumes:
+  dl-orders-mongo-product-data:
+  dl-orders-mongo-orders-data:
+  dl-orders-mongo-inventory-data:
+  dl-orders-mongo-notification-data:
+  dl-orders-mongo-payment-data:
   dl-orders-postgres-orders-data:
   dl-orders-postgres-inventory-data:
-  dl-orders-postgres-product-data:
   dl-orders-postgres-notification-data:
   dl-orders-postgres-auth-data:
   dl-orders-postgres-users-data:

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
-import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { IEmailSenderPort } from './domain/ports/email-sender.port';
 import { INotificationAuditLogPort } from './domain/ports/notification-audit-log.port';
 import { INotificationRepositoryPort } from './domain/ports/notification-repository.port';
@@ -12,8 +12,8 @@ import { AccountLockedNotifyConsumer } from './infrastructure/inbound/messaging/
 import { OrderConfirmedConsumer } from './infrastructure/inbound/messaging/order-confirmed.consumer';
 import { OtpSendRequestedConsumer } from './infrastructure/inbound/messaging/otp-send-requested.consumer';
 import { ResendEmailSender } from './infrastructure/outbound/email/resend-email.sender';
-import { DynamoDBNotificationAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/notification-audit-log.repository';
-import { DynamoDBUserNotificationsRepository } from './infrastructure/outbound/persistence/dynamodb/user-notifications.repository';
+import { MongoNotificationAuditLogRepository } from './infrastructure/outbound/persistence/mongodb/notification-audit-log.repository';
+import { MongoUserNotificationsRepository } from './infrastructure/outbound/persistence/mongodb/user-notifications.repository';
 import { NotificationRepository } from './infrastructure/outbound/persistence/sql/notification.repository';
 import { OrderConfirmedTemplateAdapter } from './infrastructure/outbound/templates/order-confirmed-template.adapter';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
@@ -29,7 +29,7 @@ import { SendNotificationEmailUseCase } from './application/use-cases/send-notif
             isGlobal: true,
         }),
         DbModule,
-        DynamoDBModule.forRoot(),
+        MongoDBModule.forRoot(),
     ],
     controllers: [
         AccountLockedNotifyConsumer,
@@ -46,8 +46,8 @@ import { SendNotificationEmailUseCase } from './application/use-cases/send-notif
         { provide: INotificationRepositoryPort, useClass: NotificationRepository },
         { provide: INotificationTemplatePort, useClass: OrderConfirmedTemplateAdapter },
         { provide: IEmailSenderPort, useClass: ResendEmailSender },
-        { provide: INotificationAuditLogPort, useClass: DynamoDBNotificationAuditLogRepository },
-        { provide: IUserNotificationsPort, useClass: DynamoDBUserNotificationsRepository },
+        { provide: INotificationAuditLogPort, useClass: MongoNotificationAuditLogRepository },
+        { provide: IUserNotificationsPort, useClass: MongoUserNotificationsRepository },
     ],
 })
 export class NotificationModule {}

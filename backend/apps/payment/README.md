@@ -17,7 +17,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 - **IPaymentRepositoryPort** — Persist and load payments (Postgres/Prisma).
 - **IPaymentGatewayPort** — Mercado Pago SDK: create preference, get payment details.
 - **IPaymentEventsPublisherPort** — Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
-- **IPaymentAuditLogPort** — Append payment audit entries (DynamoDB).
+- **IPaymentAuditLogPort** — Append payment audit entries (MongoDB).
 - **IOrderDetailsPort** — Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
 
 ## Inbound
@@ -27,7 +27,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (payments via Prisma), `persistence/dynamodb/` (payment audit log).
+- **Persistence:** `persistence/sql/` (payments via Prisma), `persistence/mongodb/` (payment audit log).
 - **Gateway:** Mercado Pago (preference creation, payment lookup).
 - **Events:** `payment.approved`, `payment.failed` (consumed by orders).
 - **HTTP:** Orders service for order details.
@@ -35,7 +35,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 ## Data
 
 - **Postgres** — Payments (orderId, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
-- **DynamoDB** — Payment audit log (PaymentAuditLog); LocalStack in dev, config via `DYNAMODB_AUDIT_TABLE` and AWS env vars.
+- **MongoDB** — Payment audit log; connection via `MONGODB_URI` in `apps/payment/.env`.
 
 ## Credentials (Mercado Pago)
 

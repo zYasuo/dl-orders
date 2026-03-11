@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
-import { DynamoDBModule } from './infrastructure/dynamodb/dynamodb.module';
 import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
 import { IOrderAuditLogPort } from './domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from './domain/ports/order-events-publisher.port';
@@ -16,8 +16,8 @@ import { PaymentFailedConsumer } from './infrastructure/inbound/messaging/paymen
 import { OrdersRabbitMqPublisher } from './infrastructure/outbound/messaging/orders.publisher';
 import { ProductCatalogHttpClient } from './infrastructure/outbound/http/product-catalog.client';
 import { OrdersRepository } from './infrastructure/outbound/persistence/sql/orders.repository';
-import { DynamoDBOrderAuditLogRepository } from './infrastructure/outbound/persistence/dynamodb/order-audit-log.repository';
-import { DynamoDBOrderSummaryRepository } from './infrastructure/outbound/persistence/dynamodb/order-summary.repository';
+import { MongoOrderAuditLogRepository } from './infrastructure/outbound/persistence/mongodb/order-audit-log.repository';
+import { MongoOrderSummaryRepository } from './infrastructure/outbound/persistence/mongodb/order-summary.repository';
 import { CreateOrderUseCase } from './application/use-cases/create-order.use-case';
 import { FindOrderByIdUseCase } from './application/use-cases/find-order-by-id.use-case';
 import { ConfirmOrderUseCase } from './application/use-cases/confirm-order.use-case';
@@ -31,7 +31,7 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
         }),
         DbModule,
         RabbitMQModule,
-        DynamoDBModule.forRoot(),
+        MongoDBModule.forRoot(),
     ],
     controllers: [OrdersController, InventoryReservedConsumer, InventoryReservationFailedConsumer, PaymentApprovedConsumer, PaymentFailedConsumer],
     providers: [
@@ -42,8 +42,8 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
         { provide: IOrdersRepositoryPort, useClass: OrdersRepository },
         { provide: IProductCatalogPort, useClass: ProductCatalogHttpClient },
         { provide: IOrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
-        { provide: IOrderAuditLogPort, useClass: DynamoDBOrderAuditLogRepository },
-        { provide: IOrderSummaryPort, useClass: DynamoDBOrderSummaryRepository },
+        { provide: IOrderAuditLogPort, useClass: MongoOrderAuditLogRepository },
+        { provide: IOrderSummaryPort, useClass: MongoOrderSummaryRepository },
     ],
 })
 export class OrdersModule {}

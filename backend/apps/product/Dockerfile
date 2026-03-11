@@ -8,7 +8,6 @@ COPY tsconfig.json nest-cli.json ./
 COPY libs/ libs/
 COPY apps/product/ apps/product/
 
-RUN npx prisma generate --schema=apps/product/prisma/schema.prisma
 RUN npx nest build product
 
 FROM node:20-alpine AS runner

@@ -11,8 +11,8 @@ Sends notifications (e.g. email) when an order is confirmed. Listens for `order.
 
 - **INotificationRepositoryPort** — Persist notification records (Postgres/Prisma).
 - **IEmailSenderPort** — Send email (e.g. Resend adapter).
-- **INotificationAuditLogPort** — Append notification audit entries (DynamoDB).
-- **IUserNotificationsPort** — Read/write user notifications list (DynamoDB).
+- **INotificationAuditLogPort** — Append notification audit entries (MongoDB).
+- **IUserNotificationsPort** — Read/write user notifications list (MongoDB).
 
 ## Inbound
 
@@ -21,13 +21,13 @@ Sends notifications (e.g. email) when an order is confirmed. Listens for `order.
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (notifications via Prisma), `persistence/dynamodb/` (notification audit log, user notifications).
+- **Persistence:** `persistence/sql/` (notifications via Prisma), `persistence/mongodb/` (notification audit log, user notifications).
 - **Email:** Outbound email via Resend (or similar) using `IEmailSenderPort`.
 
 ## Data
 
 - **Postgres** — Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
-- **DynamoDB** — Notification audit log (NotificationAuditLog), user notifications (UserNotifications); LocalStack in dev.
+- **MongoDB** — Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
 
 ## Run locally
 
@@ -43,4 +43,4 @@ Or from `backend/`:
 npm run start:dev:notification
 ```
 
-Ensure RabbitMQ, Postgres, and LocalStack (if using DynamoDB) are up. Set `apps/notification/.env` with `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, and any email provider keys (e.g. Resend).
+Ensure RabbitMQ, Postgres, and MongoDB are up. Set `apps/notification/.env` with `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, and any email provider keys (e.g. Resend).
