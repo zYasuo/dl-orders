@@ -29,7 +29,7 @@ import { OtpRepository } from './infrastructure/outbound/persistence/sql/otp.rep
 import { Argon2PasswordHasher } from './infrastructure/outbound/security/argon2-password-hasher.security';
 import { EmailEncryptedSecurity } from './infrastructure/outbound/security/email-encrypted.security';
 import { JwtService } from './infrastructure/outbound/security/jwt.service';
-import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({

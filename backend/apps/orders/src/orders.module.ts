@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
-import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { IOrderAuditLogPort } from './domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from './domain/ports/order-events-publisher.port';
 import { IProductCatalogPort } from './domain/ports/product-catalog.port';

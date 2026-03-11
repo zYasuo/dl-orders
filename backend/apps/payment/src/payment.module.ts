@@ -10,7 +10,7 @@ import { IPaymentGatewayPort } from './domain/ports/payment-gateway.port';
 import { IPaymentRepositoryPort } from './domain/ports/payment-repository.port';
 import { IOrderDetailsPort } from './domain/ports/order-details.port';
 import { DbModule } from './infrastructure/db/db.module';
-import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { PaymentController } from './infrastructure/inbound/http/payment.controller';
 import { WebhookSignatureService } from './infrastructure/inbound/http/webhook-signature.service';
 import { InventoryReservedConsumer } from './infrastructure/inbound/messaging/inventory-reserved.consumer';

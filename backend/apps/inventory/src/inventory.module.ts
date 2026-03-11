@@ -16,7 +16,7 @@ import { MongoReservationAuditLogRepository } from './infrastructure/outbound/pe
 import { RedisInventoryListCacheAdapter } from './infrastructure/outbound/persistence/redis/redis-inventory-list-cache.adapter';
 import { InventoryRepository } from './infrastructure/outbound/persistence/sql/inventory.repository';
 import { RedisModule } from './infrastructure/redis/redis.module';
-import { RabbitMQModule } from './infrastructure/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 
 @Module({
     imports: [
