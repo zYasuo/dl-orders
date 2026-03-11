@@ -44,18 +44,21 @@ Ensure Redis and MongoDB are up and `apps/product/.env` has `MONGODB_URI`, `REDI
 
 To populate the `products` collection from a JSON file (e.g. CSV exported as an array of objects):
 
-1. Place the JSON file on disk (e.g. `C:\Users\...\Downloads\csvjson.json`).
+1. Place the JSON file in **`apps/product/scripts/seed-data/`** and name it `csvjson.json`, or keep it anywhere and pass the path.
 2. From the `backend/` folder, run:
 
+If the file is at `apps/product/scripts/seed-data/csvjson.json`, just run:
+
 ```bash
-set SEED_JSON_PATH=C:\Users\dansi\Downloads\csvjson.json
 npm run seed:product
 ```
 
-On PowerShell:
+Otherwise pass the path:
 
-```powershell
-$env:SEED_JSON_PATH="C:\Users\dansi\Downloads\csvjson.json"; npm run seed:product
+```bash
+npm run seed:product -- "C:\path\to\your.json"
 ```
+
+Or set `SEED_JSON_PATH` (PowerShell: `$env:SEED_JSON_PATH="C:\path\to\your.json"; npm run seed:product`).
 
 The script maps: `title` → `name`, `description` → `description`, `final_price` (or `initial_price`) → `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).

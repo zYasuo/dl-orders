@@ -81,13 +81,19 @@ function toProductDoc(item: JsonProduct, index: number): {
 
 async function main() {
     const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dl_product_svc';
-    const jsonPath = (process.argv[2] && process.argv[2].trim()) || process.env.SEED_JSON_PATH;
+    const defaultPath = path.resolve(__dirname, 'seed-data/csvjson.json');
+    const jsonPath =
+        (process.argv[2] && process.argv[2].trim()) ||
+        process.env.SEED_JSON_PATH ||
+        (fs.existsSync(defaultPath) ? defaultPath : undefined);
     const batchSize = parseInt(process.env.SEED_BATCH_SIZE || '500', 10);
     const limit = process.env.SEED_LIMIT ? parseInt(process.env.SEED_LIMIT, 10) : undefined;
 
     if (!jsonPath || !fs.existsSync(jsonPath)) {
-        console.error('Pass the JSON file path as argument or set SEED_JSON_PATH:');
-        console.error('  npm run seed:product -- "C:\\Users\\...\\Downloads\\csvjson.json"');
+        console.error('Pass the JSON file path as argument or set SEED_JSON_PATH.');
+        console.error('Or put your file in: apps/product/scripts/seed-data/csvjson.json');
+        console.error('  npm run seed:product   (uses seed-data/csvjson.json if present)');
+        console.error('  npm run seed:product -- "path/to/your.json"');
         if (jsonPath) console.error('File not found:', jsonPath);
         process.exit(1);
     }
