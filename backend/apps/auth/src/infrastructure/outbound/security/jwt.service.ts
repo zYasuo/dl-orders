@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
+import ms from 'ms';
 import { IJwtPort, TJwtPayload } from '../../../domain/ports/jwt.port';
 
 @Injectable()
@@ -12,6 +13,10 @@ export class JwtService extends IJwtPort {
         super();
         this.secret = configService.getOrThrow<string>('JWT_SECRET');
         this.expiresIn = configService.get<string>('JWT_EXPIRES_IN', '1d');
+    }
+
+    getExpiresInSeconds(): number {
+        return Math.floor(ms(this.expiresIn) / 1000);
     }
 
     async sign(payload: TJwtPayload): Promise<string> {

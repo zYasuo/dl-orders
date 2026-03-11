@@ -1,3 +1,5 @@
+const MS_PER_MINUTE = 60 * 1000;
+
 export interface IAuthLogs {
     id: string;
     userId: string;
@@ -10,6 +12,9 @@ export interface IAuthLogs {
 }
 
 export class AuthLogsEntity implements IAuthLogs {
+    static readonly MAX_LOGIN_ATTEMPTS = 3;
+    static readonly LOCKOUT_MINUTES = 5;
+
     constructor(
         public readonly id: string,
         public readonly userId: string,
@@ -24,5 +29,19 @@ export class AuthLogsEntity implements IAuthLogs {
     static create(data: IAuthLogs): AuthLogsEntity {
         const { id, userId, loginAttempts, lastLoginAttempt, lastLoginAttemptIp, lastLoginAttemptSuccess, lockedUntil, createdAt } = data;
         return new AuthLogsEntity(id, userId, loginAttempts, lastLoginAttempt, lastLoginAttemptIp, lastLoginAttemptSuccess, lockedUntil, createdAt);
+    }
+
+    static addMinutesToDate(date: Date, minutes: number): Date {
+        return new Date(date.getTime() + minutes * MS_PER_MINUTE);
+    }
+
+    static lockoutEndFromNow(minutes: number): Date {
+        return AuthLogsEntity.addMinutesToDate(new Date(), minutes);
+    }
+
+    static minutesRemainingUntil(until: Date, from: Date = new Date()): number {
+        const ms = until.getTime() - from.getTime();
+        if (ms <= 0) return 0;
+        return Math.ceil(ms / MS_PER_MINUTE);
     }
 }

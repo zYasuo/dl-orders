@@ -9,6 +9,7 @@ import { VerifyOtpUseCase } from './application/use-cases/verify-otp.use-case';
 import { IAccountLockedNotifyPublisherPort } from './domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from './domain/ports/auth-logs-repository.port';
 import { ILockoutStorePort } from './domain/ports/lockout-store.port';
+import { ISessionStorePort } from './domain/ports/session-store.port';
 import { IAuthUserRepositoryPort } from './domain/ports/auth-user-repository.port';
 import { IEmailEncryptedSecurity } from './domain/ports/email-encrypted.security';
 import { IJwtPort } from './domain/ports/jwt.port';
@@ -23,6 +24,7 @@ import { AccountLockedNotifyRabbitMqPublisher } from './infrastructure/outbound/
 import { OtpSendRequestedRabbitMqPublisher } from './infrastructure/outbound/messaging/otp-send-requested.publisher';
 import { UserVerifiedRabbitMqPublisher } from './infrastructure/outbound/messaging/user-verified.publisher';
 import { RedisLockoutStoreAdapter } from './infrastructure/outbound/persistence/redis/redis-lockout-store.adapter';
+import { RedisSessionStoreAdapter } from './infrastructure/outbound/persistence/redis/redis-session-store.adapter';
 import { AuthLogsRepository } from './infrastructure/outbound/persistence/sql/auth-logs.repository';
 import { AuthUserRepository } from './infrastructure/outbound/persistence/sql/auth-user.repository';
 import { OtpRepository } from './infrastructure/outbound/persistence/sql/otp.repository';
@@ -52,6 +54,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
         ValidateAuthAttemptUseCase,
         { provide: IAuthUserRepositoryPort, useClass: AuthUserRepository },
         { provide: ILockoutStorePort, useClass: RedisLockoutStoreAdapter },
+        { provide: ISessionStorePort, useClass: RedisSessionStoreAdapter },
         { provide: IAuthLogsRepositoryPort, useClass: AuthLogsRepository },
         { provide: IOtpRepositoryPort, useClass: OtpRepository },
         { provide: IAccountLockedNotifyPublisherPort, useClass: AccountLockedNotifyRabbitMqPublisher },

@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { IAccountLockedNotifyPublisherPort } from '../../domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from '../../domain/ports/auth-logs-repository.port';
 import { ILockoutStorePort } from '../../domain/ports/lockout-store.port';
-import { LOCKOUT_MINUTES, lockoutEndFromNow, minutesRemainingUntil } from '../../utils/lockout.utils';
+import { AuthLogsEntity } from '../../domain/entities/auth-logs.entity';
 
 @Injectable()
 export class ValidateAuthAttemptUseCase {
@@ -17,7 +17,7 @@ export class ValidateAuthAttemptUseCase {
     
         if (!lockedUntil) return;
     
-        const minutesLeft = minutesRemainingUntil(lockedUntil);
+        const minutesLeft = AuthLogsEntity.minutesRemainingUntil(lockedUntil);
     
         throw new ForbiddenException(
             `Account temporarily locked. Try again in ${minutesLeft} minute(s).`
@@ -29,10 +29,10 @@ export class ValidateAuthAttemptUseCase {
         const { attempts, shouldLock } = await this.lockoutStore.incrementFailedAttempts(userId);
 
         if (shouldLock) {
-            await this.lockoutStore.setLocked(userId, LOCKOUT_MINUTES);
+            await this.lockoutStore.setLocked(userId, AuthLogsEntity.LOCKOUT_MINUTES);
             await this.accountLockedNotifyPublisher.publish({
                 email,
-                lockedUntilMinutes: LOCKOUT_MINUTES,
+                lockedUntilMinutes: AuthLogsEntity.LOCKOUT_MINUTES,
             });
         }
 
@@ -42,7 +42,7 @@ export class ValidateAuthAttemptUseCase {
             lastLoginAttempt: now,
             lastLoginAttemptIp: ip ?? null,
             lastLoginAttemptSuccess: false,
-            lockedUntil: shouldLock ? lockoutEndFromNow(LOCKOUT_MINUTES) : undefined,
+            lockedUntil: shouldLock ? AuthLogsEntity.lockoutEndFromNow(AuthLogsEntity.LOCKOUT_MINUTES) : undefined,
         });
     }
 

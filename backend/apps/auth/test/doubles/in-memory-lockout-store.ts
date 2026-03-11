@@ -1,5 +1,5 @@
 import { ILockoutStorePort } from '../../src/domain/ports/lockout-store.port';
-import { MAX_LOGIN_ATTEMPTS } from '../../src/utils/lockout.utils';
+import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
 
 export class InMemoryLockoutStore extends ILockoutStorePort {
     private readonly attempts = new Map<string, number>();
@@ -24,7 +24,7 @@ export class InMemoryLockoutStore extends ILockoutStorePort {
         this.attempts.set(userId, next);
         return {
             attempts: next,
-            shouldLock: next >= MAX_LOGIN_ATTEMPTS,
+            shouldLock: next >= AuthLogsEntity.MAX_LOGIN_ATTEMPTS,
         };
     }
 

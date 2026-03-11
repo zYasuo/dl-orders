@@ -9,6 +9,7 @@ import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypt
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
 import { ILockoutStorePort } from '../../../src/domain/ports/lockout-store.port';
 import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
+import { ISessionStorePort } from '../../../src/domain/ports/session-store.port';
 import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
 import { FakeAccountLockedNotifyPublisher } from '../../doubles/fake-account-locked-notify.publisher';
 import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
@@ -16,6 +17,7 @@ import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { InMemoryAuthLogsRepository } from '../../doubles/in-memory-auth-logs.repository';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
 import { InMemoryLockoutStore } from '../../doubles/in-memory-lockout-store';
+import { InMemorySessionStore } from '../../doubles/in-memory-session-store';
 
 describe('SigninUseCase (integration)', () => {
     let sut: SigninUseCase;
@@ -24,10 +26,12 @@ describe('SigninUseCase (integration)', () => {
     let authLogsRepository: InMemoryAuthLogsRepository;
     let accountLockedNotifyPublisher: FakeAccountLockedNotifyPublisher;
     let jwtPort: FakeJwtPort;
+    let sessionStore: InMemorySessionStore;
 
     beforeEach(async () => {
         authUserRepository = new InMemoryAuthUserRepository();
         lockoutStore = new InMemoryLockoutStore();
+        sessionStore = new InMemorySessionStore();
         authLogsRepository = new InMemoryAuthLogsRepository();
         accountLockedNotifyPublisher = new FakeAccountLockedNotifyPublisher();
         jwtPort = new FakeJwtPort();
@@ -52,6 +56,7 @@ describe('SigninUseCase (integration)', () => {
                 { provide: IEmailEncryptedSecurity, useClass: FakeEmailEncryptedSecurity },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IJwtPort, useValue: jwtPort },
+                { provide: ISessionStorePort, useValue: sessionStore },
                 { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
             ],
         }).compile();

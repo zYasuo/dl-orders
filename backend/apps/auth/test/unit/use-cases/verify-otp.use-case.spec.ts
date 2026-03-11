@@ -93,6 +93,7 @@ describe('VerifyOtpUseCase', () => {
         jwtPort = {
             sign: jest.fn().mockResolvedValue('jwt-token'),
             verify: jest.fn(),
+            getExpiresInSeconds: jest.fn().mockReturnValue(86400),
         } as unknown as jest.Mocked<IJwtPort>;
 
         userVerifiedPublisher = {

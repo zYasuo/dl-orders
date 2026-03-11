@@ -7,6 +7,7 @@ import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-rep
 import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
 import { IJwtPort } from '../../../src/domain/ports/jwt.port';
 import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
+import { ISessionStorePort } from '../../../src/domain/ports/session-store.port';
 
 describe('SigninUseCase', () => {
     let sut: SigninUseCase;
@@ -14,6 +15,7 @@ describe('SigninUseCase', () => {
     let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
     let passwordHasher: jest.Mocked<IPasswordHasherPort>;
     let jwtPort: jest.Mocked<IJwtPort>;
+    let sessionStore: jest.Mocked<ISessionStorePort>;
     let validateAuthAttempt: jest.Mocked<ValidateAuthAttemptUseCase>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
@@ -61,7 +63,12 @@ describe('SigninUseCase', () => {
         jwtPort = {
             sign: jest.fn().mockResolvedValue('jwt-token'),
             verify: jest.fn(),
+            getExpiresInSeconds: jest.fn().mockReturnValue(86400),
         } as unknown as jest.Mocked<IJwtPort>;
+
+        sessionStore = {
+            set: jest.fn().mockResolvedValue(undefined),
+        } as unknown as jest.Mocked<ISessionStorePort>;
 
         validateAuthAttempt = {
             validateBeforeLogin: jest.fn().mockResolvedValue(undefined),
@@ -76,6 +83,7 @@ describe('SigninUseCase', () => {
                 { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
                 { provide: IPasswordHasherPort, useValue: passwordHasher },
                 { provide: IJwtPort, useValue: jwtPort },
+                { provide: ISessionStorePort, useValue: sessionStore },
                 { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
             ],
         }).compile();
@@ -112,10 +120,20 @@ describe('SigninUseCase', () => {
                 verifiedUser.emailEncrypted,
             );
 
-            expect(jwtPort.sign).toHaveBeenCalledWith({
-                sub: verifiedUser.id,
-                email: verifiedUser.emailEncrypted,
-            });
+            expect(jwtPort.sign).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sub: verifiedUser.id,
+                    email: verifiedUser.emailEncrypted,
+                    jti: expect.any(String),
+                }),
+            );
+
+            const signPayload = (jwtPort.sign as jest.Mock).mock.calls[0][0];
+            expect(sessionStore.set).toHaveBeenCalledWith(
+                signPayload.jti,
+                { sub: verifiedUser.id, email: verifiedUser.emailEncrypted },
+                86400,
+            );
 
             expect(result).toEqual({ accessToken: 'jwt-token' });
         });
@@ -129,6 +147,7 @@ describe('SigninUseCase', () => {
             await expect(sut.execute(input)).rejects.toThrow(ForbiddenException);
             expect(passwordHasher.compare).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
+            expect(sessionStore.set).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when user is not found', async () => {
@@ -140,6 +159,7 @@ describe('SigninUseCase', () => {
             expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
             expect(passwordHasher.compare).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
+            expect(sessionStore.set).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when email is not verified', async () => {
@@ -154,6 +174,7 @@ describe('SigninUseCase', () => {
             expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
             expect(passwordHasher.compare).not.toHaveBeenCalled();
             expect(jwtPort.sign).not.toHaveBeenCalled();
+            expect(sessionStore.set).not.toHaveBeenCalled();
         });
 
         it('throws BadRequestException when password is invalid and calls registerFailedAttempt', async () => {
@@ -168,8 +189,9 @@ describe('SigninUseCase', () => {
                 null,
                 'user@test.com',
             );
-            
+
             expect(jwtPort.sign).not.toHaveBeenCalled();
+            expect(sessionStore.set).not.toHaveBeenCalled();
         });
     });
 });

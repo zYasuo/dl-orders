@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ILockoutStorePort } from '../../../../domain/ports/lockout-store.port';
-import { MAX_LOGIN_ATTEMPTS } from '../../../../utils/lockout.utils';
+import { AuthLogsEntity } from '../../../../domain/entities/auth-logs.entity';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
 import { RedisService } from '../../../redis/redis.service';
 
@@ -46,7 +46,7 @@ export class RedisLockoutStoreAdapter extends ILockoutStorePort {
         
         return {
             attempts,
-            shouldLock: attempts >= MAX_LOGIN_ATTEMPTS,
+            shouldLock: attempts >= AuthLogsEntity.MAX_LOGIN_ATTEMPTS,
         };
     }
 

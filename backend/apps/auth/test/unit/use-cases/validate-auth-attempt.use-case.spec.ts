@@ -5,7 +5,6 @@ import { AuthLogsEntity } from '../../../src/domain/entities/auth-logs.entity';
 import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/account-locked-notify-publisher.port';
 import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/auth-logs-repository.port';
 import { ILockoutStorePort } from '../../../src/domain/ports/lockout-store.port';
-import { addMinutesToDate } from '../../../src/utils/lockout.utils';
 
 describe('ValidateAuthAttemptUseCase', () => {
     let sut: ValidateAuthAttemptUseCase;
@@ -82,7 +81,7 @@ describe('ValidateAuthAttemptUseCase', () => {
         });
 
         it('throws ForbiddenException when account is locked', async () => {
-            const lockedUntil = addMinutesToDate(now, 5);
+            const lockedUntil = AuthLogsEntity.addMinutesToDate(now, 5);
             lockoutStore.getLockedUntil.mockResolvedValue(lockedUntil);
 
             await expect(sut.validateBeforeLogin(userId)).rejects.toThrow(ForbiddenException);
