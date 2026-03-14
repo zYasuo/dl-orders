@@ -30,6 +30,7 @@ describe('FindOrderByIdUseCase (integration)', () => {
                 recipient: 'test@test.com',
                 productName: 'Product',
                 productDescription: 'Desc',
+                idempotencyKey: crypto.randomUUID(),
                 unitPrice: 10,
                 totalPrice: 10,
             });

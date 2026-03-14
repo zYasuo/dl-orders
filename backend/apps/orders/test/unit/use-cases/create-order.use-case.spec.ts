@@ -17,6 +17,7 @@ describe('CreateOrderUseCase', () => {
     let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
+    const idempotencyKey = crypto.randomUUID();
     const fakeProduct = { name: 'Product A', description: 'Description A', price: 99.9 };
     const fakeOrder = new OrderEntity({
         id: 'id-123',
@@ -29,6 +30,7 @@ describe('CreateOrderUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 99.9,
     });
@@ -41,6 +43,7 @@ describe('CreateOrderUseCase', () => {
             findById: jest.fn(),
             updateStatus: jest.fn(),
             confirmIfPending: jest.fn(),
+            findByIdempotencyKey: jest.fn().mockResolvedValue(null),
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
         productCatalogPort = {
@@ -79,7 +82,7 @@ describe('CreateOrderUseCase', () => {
 
     describe('execute', () => {
         it('fetches product, persists order with totalPrice = quantity * price, and publishes OrderCreationRequested', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'test order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 1, description: 'test order', recipient: 'test@test.com', idempotencyKey };
 
             const result = await sut.execute(input);
 
@@ -94,6 +97,7 @@ describe('CreateOrderUseCase', () => {
                 productDescription: 'Description A',
                 unitPrice: 99.9,
                 totalPrice: 99.9,
+                idempotencyKey,
             });
 
             expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
@@ -106,6 +110,7 @@ describe('CreateOrderUseCase', () => {
                     quantity: fakeOrder.quantity,
                     description: fakeOrder.description,
                     recipient: fakeOrder.recipient,
+                    idempotencyKey,
                 },
             });
 
@@ -119,6 +124,7 @@ describe('CreateOrderUseCase', () => {
                 recipient: fakeOrder.recipient,
                 createdAt: fakeOrder.createdAt.toISOString(),
                 updatedAt: expect.any(String),
+                idempotencyKey,
             });
 
             expect(orderEventsPublisher.publishOrderCreationRequested).toHaveBeenCalledTimes(1);
@@ -131,13 +137,14 @@ describe('CreateOrderUseCase', () => {
                 userId: 'test@test.com',
                 quantity: fakeOrder.quantity,
                 recipientEmail: 'test@test.com',
+                idempotencyKey,
             });
 
             expect(result).toEqual(fakeOrder);
         });
 
         it('throws NotFoundException when product does not exist', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com', idempotencyKey };
             productCatalogPort.findById.mockResolvedValueOnce(null);
 
             await expect(sut.execute(input)).rejects.toThrow(new NotFoundException('Product not found'));
@@ -147,7 +154,7 @@ describe('CreateOrderUseCase', () => {
         });
 
         it('does not publish event when repository throws', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com', idempotencyKey };
             ordersRepository.create.mockRejectedValueOnce(new Error('DB failed'));
 
             await expect(sut.execute(input)).rejects.toThrow('DB failed');
@@ -156,7 +163,7 @@ describe('CreateOrderUseCase', () => {
         });
 
         it('uses empty string for productDescription when product.description is null/undefined', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com', idempotencyKey };
             productCatalogPort.findById.mockResolvedValueOnce({
                 name: 'Product A',
                 description: null,
@@ -168,12 +175,13 @@ describe('CreateOrderUseCase', () => {
             expect(ordersRepository.create).toHaveBeenCalledWith(
                 expect.objectContaining({
                     productDescription: '',
+                    idempotencyKey,
                 }),
             );
         });
 
         it('calculates totalPrice as quantity * unitPrice when quantity > 1', async () => {
-            const input = { productId: 'product-123', quantity: 3, description: 'order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 3, description: 'order', recipient: 'test@test.com', idempotencyKey };
             const orderWithTotal = new OrderEntity({
                 id: fakeOrder.id,
                 productId: fakeOrder.productId,
@@ -182,6 +190,7 @@ describe('CreateOrderUseCase', () => {
                 recipient: fakeOrder.recipient,
                 productName: fakeOrder.productName,
                 productDescription: fakeOrder.productDescription,
+                idempotencyKey,
                 unitPrice: fakeOrder.unitPrice,
                 totalPrice: 299.7,
                 status: fakeOrder.status,
@@ -211,7 +220,7 @@ describe('CreateOrderUseCase', () => {
         });
 
         it('returns order and publishes event when orderSummary.put fails', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com' };
+            const input = { productId: 'product-123', quantity: 1, description: 'order', recipient: 'test@test.com', idempotencyKey };
             orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
 
             const result = await sut.execute(input);

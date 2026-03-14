@@ -5,6 +5,7 @@ export interface ICreateOrder {
     recipient: string;
     productName: string;
     productDescription: string;
+    idempotencyKey: string;
     unitPrice: number;
     totalPrice: number;
 }

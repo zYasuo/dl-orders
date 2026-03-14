@@ -27,6 +27,7 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
             recipient: order.recipient,
             productName: order.productName,
             productDescription: order.productDescription,
+            idempotencyKey: order.idempotencyKey,
             unitPrice: order.unitPrice,
             totalPrice: order.totalPrice,
             createdAt: order.createdAt,
@@ -40,5 +41,12 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
         const order = this.orders.get(orderId);
         if (!order || order.status !== OrderStatus.PENDING) return null;
         return this.updateStatus(orderId, OrderStatus.CONFIRMED);
+    }
+
+    async findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null> {
+        for (const order of this.orders.values()) {
+            if (order.idempotencyKey === idempotencyKey) return order;
+        }
+        return null;
     }
 }

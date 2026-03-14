@@ -21,7 +21,7 @@ export class CreateOrderUseCase {
     ) {}
 
     async execute(input: TCreateOrder) {
-        const { productId, quantity, description, recipient } = input;
+        const { productId, quantity, description, recipient, idempotencyKey } = input;
 
         this.logger.log(`Creating order for product ${productId}`);
 
@@ -33,7 +33,13 @@ export class CreateOrderUseCase {
 
         const totalPrice = OrderEntity.calculateTotalPrice(quantity, product.price);
 
-        const createInput: ICreateOrder = {
+        const existingOrder = await this.ordersRepositoryPort.findByIdempotencyKey(idempotencyKey);
+
+        if (existingOrder) {
+            return existingOrder;
+        }
+
+        const dataToCreateOrder: ICreateOrder = {
             productId,
             quantity,
             description,
@@ -42,8 +48,10 @@ export class CreateOrderUseCase {
             productDescription: product.description ?? '',
             unitPrice: product.price,
             totalPrice,
+            idempotencyKey,
         };
-        const order = await this.ordersRepositoryPort.create(createInput);
+        
+        const order = await this.ordersRepositoryPort.create(dataToCreateOrder);
 
         const now = new Date();
         const timestamp = now.toISOString();
@@ -58,14 +66,17 @@ export class CreateOrderUseCase {
                     quantity: order.quantity,
                     description: order.description,
                     recipient: order.recipient,
+                    idempotencyKey: order.idempotencyKey,
                 },
             }),
+            
             this.orderSummaryPort.put({
                 orderId: order.id,
                 status: order.status,
                 productId: order.productId,
                 quantity: order.quantity,
                 description: order.description,
+                idempotencyKey: order.idempotencyKey,
                 recipient: order.recipient,
                 createdAt: order.createdAt.toISOString(),
                 updatedAt: timestamp,
@@ -75,6 +86,7 @@ export class CreateOrderUseCase {
                 productId: order.productId,
                 productName: order.productName,
                 productDescription: order.productDescription,
+                idempotencyKey: order.idempotencyKey,
                 totalPrice: order.totalPrice,
                 userId: order.recipient,
                 quantity: order.quantity,

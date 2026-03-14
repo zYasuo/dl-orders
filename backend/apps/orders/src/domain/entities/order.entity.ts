@@ -12,6 +12,7 @@ export type TOrderParams = {
     readonly recipient: string;
     readonly productName: string;
     readonly productDescription: string;
+    readonly idempotencyKey: string;
     readonly unitPrice: number;
     readonly totalPrice: number;
     status: OrderStatus;
@@ -21,7 +22,6 @@ export type TOrderParams = {
 
 export class OrderEntity {
     constructor(private params: TOrderParams) {}
-
     
     static create(params: {
         productId: string;
@@ -30,10 +30,13 @@ export class OrderEntity {
         recipient: string;
         productName: string;
         productDescription: string;
+        idempotencyKey: string;
         unitPrice: number;
         totalPrice: number;
     }): OrderEntity {
+        
         const now = new Date();
+
         return new OrderEntity({
             id: crypto.randomUUID(),
             productId: params.productId,
@@ -42,6 +45,7 @@ export class OrderEntity {
             recipient: params.recipient,
             productName: params.productName,
             productDescription: params.productDescription,
+            idempotencyKey: params.idempotencyKey,
             unitPrice: params.unitPrice,
             totalPrice: params.totalPrice,
             status: OrderStatus.PENDING,
@@ -68,6 +72,10 @@ export class OrderEntity {
 
     get description() {
         return this.params.description;
+    }
+
+    get idempotencyKey() {
+        return this.params.idempotencyKey;
     }
     
     get recipient() {

@@ -7,7 +7,9 @@ import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 
 @Injectable()
 export class OrdersRepository extends IOrdersRepositoryPort {
-    constructor(private readonly db: DbService) { super(); }
+    constructor(private readonly db: DbService) {
+        super();
+    }
 
     async create(input: ICreateOrder): Promise<OrderEntity> {
         const order = await this.db.order.create({
@@ -20,8 +22,10 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 productDescription: input.productDescription,
                 unitPrice: input.unitPrice,
                 totalPrice: input.totalPrice,
+                idempotencyKey: input.idempotencyKey,
             },
         });
+        
         return new OrderEntity({
             id: order.id,
             productId: order.productId,
@@ -33,6 +37,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
             unitPrice: order.unitPrice,
             totalPrice: order.totalPrice,
             status: order.status as OrderStatus,
+            idempotencyKey: order.idempotencyKey,
             createdAt: order.createdAt,
             updatedAt: order.updatedAt,
         });
@@ -40,20 +45,23 @@ export class OrdersRepository extends IOrdersRepositoryPort {
 
     async findById(id: string): Promise<OrderEntity | null> {
         const item = await this.db.order.findUnique({ where: { id } });
-        return item ? new OrderEntity({
-            id: item.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            description: item.description,
-            recipient: item.recipient,
-            productName: item.productName,
-            productDescription: item.productDescription,
-            unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            status: item.status as OrderStatus,
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt,
-        }) : null;
+        return item
+            ? new OrderEntity({
+                  id: item.id,
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  description: item.description,
+                  recipient: item.recipient,
+                  productName: item.productName,
+                  productDescription: item.productDescription,
+                  unitPrice: item.unitPrice,
+                  totalPrice: item.totalPrice,
+                  status: item.status as OrderStatus,
+                  idempotencyKey: item.idempotencyKey,
+                  createdAt: item.createdAt,
+                  updatedAt: item.updatedAt,
+              })
+            : null;
     }
 
     async updateStatus(id: string, status: string): Promise<OrderEntity | null> {
@@ -74,6 +82,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 unitPrice: item.unitPrice,
                 totalPrice: item.totalPrice,
                 status: item.status as OrderStatus,
+                idempotencyKey: item.idempotencyKey,
                 createdAt: item.createdAt,
                 updatedAt: item.updatedAt,
             });
@@ -93,17 +102,17 @@ export class OrdersRepository extends IOrdersRepositoryPort {
                 status: OrderStatus.CONFIRMED,
             },
         });
-    
+
         if (result.count === 0) {
             return null;
         }
-    
+
         const item = await this.db.order.findUnique({
             where: { id: orderId },
         });
-    
+
         if (!item) return null;
-    
+
         return new OrderEntity({
             id: item.id,
             productId: item.productId,
@@ -115,6 +124,28 @@ export class OrdersRepository extends IOrdersRepositoryPort {
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
             status: item.status as OrderStatus,
+            idempotencyKey: item.idempotencyKey,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+        });
+    }
+
+    async findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null> {
+        const item = await this.db.order.findUnique({ where: { idempotencyKey } });
+        if (!item) return null;
+        
+        return new OrderEntity({
+            id: item.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            description: item.description,
+            recipient: item.recipient,
+            productName: item.productName,
+            productDescription: item.productDescription,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            status: item.status as OrderStatus,
+            idempotencyKey: item.idempotencyKey,
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
         });

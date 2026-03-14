@@ -13,6 +13,7 @@ describe('CancelOrderUseCase', () => {
     let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
+    const idempotencyKey = crypto.randomUUID();
     const pendingOrder = new OrderEntity({
         id: 'order-1',
         description: 'test order',
@@ -24,6 +25,7 @@ describe('CancelOrderUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 199.8,
     });
@@ -38,6 +40,7 @@ describe('CancelOrderUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 199.8,
     });
@@ -96,6 +99,7 @@ describe('CancelOrderUseCase', () => {
                 quantity: cancelledOrder.quantity,
                 description: cancelledOrder.description,
                 recipient: cancelledOrder.recipient,
+                idempotencyKey: cancelledOrder.idempotencyKey,
                 createdAt: cancelledOrder.createdAt.toISOString(),
                 updatedAt: expect.any(String),
             });

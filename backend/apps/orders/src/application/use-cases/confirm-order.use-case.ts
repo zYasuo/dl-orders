@@ -48,6 +48,7 @@ export class ConfirmOrderUseCase {
                 quantity: order.quantity,
                 description: order.description,
                 recipient: order.recipient,
+                idempotencyKey: order.idempotencyKey,
                 createdAt: order.createdAt.toISOString(),
                 updatedAt: timestamp,
             }),

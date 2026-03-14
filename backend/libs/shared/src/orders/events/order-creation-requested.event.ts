@@ -3,6 +3,7 @@ export interface OrderCreationRequestedEvent {
     productId: string;
     productName: string;
     productDescription: string;
+    idempotencyKey: string;
     totalPrice: number;
     userId: string;
     quantity: number;

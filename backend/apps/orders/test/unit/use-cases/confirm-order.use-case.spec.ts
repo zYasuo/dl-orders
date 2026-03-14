@@ -15,6 +15,7 @@ describe('ConfirmOrderUseCase', () => {
     let orderSummary: jest.Mocked<IOrderSummaryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
+    const idempotencyKey = crypto.randomUUID();
     const pendingOrder = new OrderEntity({
         id: 'order-1',
         description: 'test order',
@@ -26,6 +27,7 @@ describe('ConfirmOrderUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 199.8,
     });
@@ -40,6 +42,7 @@ describe('ConfirmOrderUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 199.8,
     });
@@ -110,6 +113,7 @@ describe('ConfirmOrderUseCase', () => {
                 quantity: confirmedOrder.quantity,
                 description: confirmedOrder.description,
                 recipient: confirmedOrder.recipient,
+                idempotencyKey: confirmedOrder.idempotencyKey,
                 createdAt: confirmedOrder.createdAt.toISOString(),
                 updatedAt: expect.any(String),
             });

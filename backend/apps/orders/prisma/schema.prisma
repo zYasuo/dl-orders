@@ -17,6 +17,7 @@ model Order {
   recipient          String
   productName        String   @default("") @map("product_name")
   productDescription String   @default("") @map("product_description")
+  idempotencyKey     String    @unique @map("idempotency_key")
   unitPrice          Float    @default(0) @map("unit_price")
   totalPrice         Float    @default(0) @map("total_price")
   createdAt          DateTime    @default(now()) @map("created_at")

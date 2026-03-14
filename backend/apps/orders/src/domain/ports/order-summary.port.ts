@@ -5,6 +5,7 @@ export type TOrderSummary = {
     quantity: number;
     description: string;
     recipient: string;
+    idempotencyKey: string;
     createdAt: string;
     updatedAt: string;
 };

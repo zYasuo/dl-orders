@@ -9,6 +9,7 @@ describe('FindOrderByIdUseCase', () => {
     let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
 
     const createdAt = new Date('2025-01-01T12:00:00Z');
+    const idempotencyKey = crypto.randomUUID();
     const fakeOrder = new OrderEntity({
         id: 'id-123',
         description: 'test order',
@@ -20,6 +21,7 @@ describe('FindOrderByIdUseCase', () => {
         recipient: 'test@test.com',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey,
         unitPrice: 99.9,
         totalPrice: 99.9,
     });

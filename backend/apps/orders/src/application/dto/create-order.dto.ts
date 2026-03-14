@@ -6,6 +6,7 @@ export const SCreateOrder = z.object({
     quantity: z.number().min(1, 'quantity is required'),
     description: z.string().min(1, 'description is required'),
     recipient: z.email('recipient must be a valid email'),
+    idempotencyKey: z.uuid('idempotencyKey must be a valid UUID'),
 });
 
 export type TCreateOrder = z.infer<typeof SCreateOrder>;
