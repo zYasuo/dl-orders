@@ -4,7 +4,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Role
 
-- **HTTP:** Create order, find by ID. On create, the service fetches the product from the product service (by `productId`) to get name, description, and price; it then stores `productName`, `productDescription`, `unitPrice`, and `totalPrice` (quantity × unit price) on the order and publishes `order.creation_requested` so inventory can reserve stock.
+- **HTTP:** Create order, find by ID. Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (by `productId`) to get name, description, and price; it then stores `productName`, `productDescription`, `unitPrice`, and `totalPrice` (quantity × unit price) on the order and publishes `order.creation_requested` so inventory can reserve stock.
 - **Events in:** Listens for `inventory.reserved` (confirm order) and `inventory.reservation_failed` (cancel order). On confirm, publishes `order.confirmed` (including real `totalPrice` and product data) for the notification service.
 
 ## Ports

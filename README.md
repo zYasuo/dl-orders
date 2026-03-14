@@ -68,6 +68,9 @@ flowchart LR
 - **Shared library**  
   `@app/shared` exposes queue names, pattern names, event DTOs, and a Zod validation pipe so all apps stay aligned on contracts.
 
+- **Idempotency**  
+  **Orders:** Create-order accepts an `idempotencyKey` (UUID). If the same key is sent again, the API returns the existing order instead of creating a duplicate. **Payment:** When handling `inventory.reserved`, Payment uses the order’s idempotency key (or orderId as fallback) so that duplicate events (e.g. retries or at-least-once delivery) do not create duplicate payment records or duplicate Mercado Pago preferences.
+
 ## Repo structure
 
 - **Root** — npm workspace; only `backend` is a workspace member. Scripts: Docker, dev, build, test, lint.

@@ -4,11 +4,11 @@ Creates payment preferences (Mercado Pago), receives webhooks, and publishes pay
 
 ## Flow in the system
 
-After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved` event to Payment. This service creates a Mercado Pago preference and stores the checkout URL. When the user pays (or payment fails), the Mercado Pago webhook triggers; Payment publishes `payment.approved` or `payment.failed`. **Orders** then confirms the order (and notifies) or cancels and returns stock.
+After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved` event to Payment. This service creates a Payment record and a Mercado Pago preference (or reuses the existing one if the same order was already processed—see **Idempotency** below). When the user pays (or payment fails), the Mercado Pago webhook triggers; Payment publishes `payment.approved` or `payment.failed`. **Orders** then confirms the order (and notifies) or cancels and returns stock.
 
 ## Role
 
-- **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service, creates a Payment record (PENDING), creates a Mercado Pago Preference with `external_reference = orderId`, and stores the checkout URL (`initPoint`).
+- **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service (including the order’s `idempotencyKey`), creates a Payment record (PENDING) or returns the existing one when the same idempotency key or orderId is used, then creates a Mercado Pago Preference (or skips if one already exists) and stores the checkout URL (`initPoint`).
 - **HTTP:** Webhook endpoint for Mercado Pago notifications (`POST /payments/webhook`); GET payment by order ID (`GET /payments/order/:orderId`, JWT required) to obtain the checkout link.
 - **Events out:** On webhook `approved` → `payment.approved` (orders confirms); on `rejected`/cancelled → `payment.failed` (orders cancels and returns stock).
 
@@ -32,9 +32,13 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 - **Events:** `payment.approved`, `payment.failed` (consumed by orders).
 - **HTTP:** Orders service for order details.
 
+## Idempotency
+
+The `inventory.reserved` event can be delivered more than once (e.g. at-least-once messaging or retries). Payment avoids duplicate records by using an **idempotency key** when creating a payment: it gets the key from the order details (orders service); if none is provided, it falls back to `orderId`. If a payment already exists for that key or for that order, the repository returns it and the use case skips creating a new preference. Result: one payment and one Mercado Pago preference per order even when the event is processed multiple times.
+
 ## Data
 
-- **Postgres** — Payments (orderId, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
+- **Postgres** — Payments (orderId, idempotencyKey, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
 - **MongoDB** — Payment audit log; connection via `MONGODB_URI` in `apps/payment/.env`.
 
 ## Credentials (Mercado Pago)
