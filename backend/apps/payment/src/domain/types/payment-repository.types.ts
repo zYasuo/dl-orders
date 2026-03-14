@@ -1,6 +1,7 @@
 export interface ICreatePayment {
     orderId: string;
     amount: number;
+    idempotencyKey?: string | null;
     preferenceId?: string | null;
     externalId?: string | null;
 }

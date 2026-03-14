@@ -17,6 +17,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
                 data: {
                     orderId: input.orderId,
                     amount: input.amount,
+                    idempotencyKey: input.idempotencyKey ?? null,
                     preferenceId: input.preferenceId ?? null,
                     externalId: input.externalId ?? null,
                 },
@@ -25,6 +26,10 @@ export class PaymentRepository extends IPaymentRepositoryPort {
             return this.toDomain(row);
         } catch (err) {
             if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+                if (input.idempotencyKey) {
+                    const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+                    if (existing) return existing;
+                }
                 const existing = await this.findByOrderId(input.orderId);
                 return existing;
             }
@@ -34,6 +39,14 @@ export class PaymentRepository extends IPaymentRepositoryPort {
 
     async findByOrderId(orderId: string): Promise<PaymentEntity | null> {
         const row = await this.db.payment.findUnique({ where: { orderId } });
+
+        if (!row) return null;
+
+        return this.toDomain(row);
+    }
+
+    async findByIdempotencyKey(idempotencyKey: string): Promise<PaymentEntity | null> {
+        const row = await this.db.payment.findUnique({ where: { idempotencyKey } });
 
         if (!row) return null;
 
@@ -86,6 +99,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
     private toDomain(row: {
         id: string;
         orderId: string;
+        idempotencyKey: string | null;
         externalId: string | null;
         preferenceId: string | null;
         amount: number;
@@ -97,6 +111,7 @@ export class PaymentRepository extends IPaymentRepositoryPort {
         return new PaymentEntity({
             id: row.id,
             orderId: row.orderId,
+            idempotencyKey: row.idempotencyKey,
             externalId: row.externalId,
             preferenceId: row.preferenceId,
             amount: row.amount,

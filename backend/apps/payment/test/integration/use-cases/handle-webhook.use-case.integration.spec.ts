@@ -43,6 +43,7 @@ describe('HandleWebhookUseCase (integration)', () => {
         const payment = new PaymentEntity({
             id: 'pay-1',
             orderId,
+            idempotencyKey: orderId,
             externalId: null,
             preferenceId: 'pref-1',
             amount: 99.9,
@@ -74,6 +75,7 @@ describe('HandleWebhookUseCase (integration)', () => {
         const payment = new PaymentEntity({
             id: 'pay-2',
             orderId,
+            idempotencyKey: orderId,
             externalId: null,
             preferenceId: 'pref-2',
             amount: 50,
@@ -105,6 +107,7 @@ describe('HandleWebhookUseCase (integration)', () => {
         const payment = new PaymentEntity({
             id: 'pay-3',
             orderId,
+            idempotencyKey: orderId,
             externalId,
             preferenceId: 'pref-3',
             amount: 10,

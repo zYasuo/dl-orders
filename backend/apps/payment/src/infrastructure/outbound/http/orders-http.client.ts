@@ -13,16 +13,19 @@ export class OrdersHttpClient extends IOrderDetailsPort {
 
     async getByOrderId(orderId: string): Promise<IOrderDetails | null> {
         const url = `${this.baseUrl}/api/v1/orders/${encodeURIComponent(orderId)}`;
-        const res = await fetch(url);
+        const response = await fetch(url);
 
-        if (res.status === 404) return null;
+        const { status, ok } = response;
 
-        if (!res.ok) {
-            throw new Error(`Orders service returned ${res.status}: ${await res.text()}`);
+        if (status === 404) return null;
+
+        if (!ok) {
+            throw new Error(`Orders service returned ${status}: ${await response.text()}`);
         }
 
-        const body = (await res.json()) as { id?: string; totalPrice?: number };
+        const body = (await response.json()) as { id?: string; totalPrice?: number; idempotencyKey?: string | null };
         const totalPrice = typeof body.totalPrice === 'number' ? body.totalPrice : undefined;
+
         if (totalPrice === undefined) {
             throw new Error('Orders service contract mismatch: expected totalPrice (number).');
         }
@@ -30,6 +33,7 @@ export class OrdersHttpClient extends IOrderDetailsPort {
         return {
             orderId: body.id ?? orderId,
             totalPrice,
+            idempotencyKey: typeof body.idempotencyKey === 'string' ? body.idempotencyKey : null,
         };
     }
 }

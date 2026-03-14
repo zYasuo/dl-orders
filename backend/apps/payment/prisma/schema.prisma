@@ -11,6 +11,7 @@ model Payment {
   id              String        @id @default(uuid())
   sequenceId      Int           @unique @default(autoincrement()) @map("sequence_id")
   orderId         String        @unique @map("order_id")
+  idempotencyKey  String?       @unique @map("idempotency_key")
   externalId      String?       @unique @map("external_id")
   preferenceId    String?       @unique @map("preference_id")
   amount          Float

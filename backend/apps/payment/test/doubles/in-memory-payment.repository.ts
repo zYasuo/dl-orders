@@ -5,6 +5,7 @@ import { ICreatePayment, IUpdatePaymentStatus } from '../../src/domain/types/pay
 type StoredPayment = {
     id: string;
     orderId: string;
+    idempotencyKey: string | null;
     externalId: string | null;
     preferenceId: string | null;
     amount: number;
@@ -18,12 +19,23 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
     private readonly payments = new Map<string, StoredPayment>();
 
     async create(input: ICreatePayment): Promise<PaymentEntity | null> {
-        const existing = await this.findByOrderId(input.orderId);
-        if (existing) return existing;
+        const { idempotencyKey, orderId } = input;
+
+        if (idempotencyKey) {
+
+            const byKey = await this.findByIdempotencyKey(idempotencyKey);
+            if (byKey) return byKey;
+
+        }
+        
+        const byOrderId = await this.findByOrderId(orderId);
+        if (byOrderId) return byOrderId;
+
         const entity = PaymentEntity.create(input);
         this.payments.set(entity.id, {
             id: entity.id,
             orderId: entity.orderId,
+            idempotencyKey: entity.idempotencyKey,
             externalId: entity.externalId,
             preferenceId: entity.preferenceId,
             amount: entity.amount,
@@ -37,6 +49,11 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
 
     async findByOrderId(orderId: string): Promise<PaymentEntity | null> {
         const stored = Array.from(this.payments.values()).find((p) => p.orderId === orderId);
+        return stored ? this.toDomain(stored) : null;
+    }
+
+    async findByIdempotencyKey(idempotencyKey: string): Promise<PaymentEntity | null> {
+        const stored = Array.from(this.payments.values()).find((p) => p.idempotencyKey === idempotencyKey);
         return stored ? this.toDomain(stored) : null;
     }
 
@@ -70,6 +87,7 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
         return new PaymentEntity({
             id: stored.id,
             orderId: stored.orderId,
+            idempotencyKey: stored.idempotencyKey,
             externalId: stored.externalId,
             preferenceId: stored.preferenceId,
             amount: stored.amount,
@@ -84,6 +102,7 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
         this.payments.set(payment.id, {
             id: payment.id,
             orderId: payment.orderId,
+            idempotencyKey: payment.idempotencyKey,
             externalId: payment.externalId,
             preferenceId: payment.preferenceId,
             amount: payment.amount,

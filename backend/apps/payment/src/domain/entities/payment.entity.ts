@@ -9,6 +9,7 @@ export enum PaymentStatus {
 export interface IPaymentParams {
     readonly id: string;
     readonly orderId: string;
+    readonly idempotencyKey: string | null;
     readonly externalId: string | null;
     readonly preferenceId: string | null;
     readonly amount: number;
@@ -24,6 +25,7 @@ export class PaymentEntity {
     static create(params: {
         orderId: string;
         amount: number;
+        idempotencyKey?: string | null;
         preferenceId?: string | null;
         externalId?: string | null;
     }): PaymentEntity {
@@ -32,6 +34,7 @@ export class PaymentEntity {
             id: crypto.randomUUID(),
             orderId: params.orderId,
             amount: params.amount,
+            idempotencyKey: params.idempotencyKey ?? null,
             preferenceId: params.preferenceId ?? null,
             externalId: params.externalId ?? null,
             status: PaymentStatus.PENDING,
@@ -47,6 +50,10 @@ export class PaymentEntity {
 
     get orderId() {
         return this.params.orderId;
+    }
+
+    get idempotencyKey() {
+        return this.params.idempotencyKey;
     }
 
     get externalId() {

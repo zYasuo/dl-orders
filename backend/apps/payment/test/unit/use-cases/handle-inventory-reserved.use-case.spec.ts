@@ -16,9 +16,11 @@ describe('HandleInventoryReservedUseCase', () => {
 
     const orderId = 'order-1';
     const totalPrice = 99.9;
+    const orderIdempotencyKey = 'order-idem-key-123';
     const fakePayment = new PaymentEntity({
         id: 'pay-1',
         orderId,
+        idempotencyKey: orderId,
         externalId: null,
         preferenceId: null,
         amount: totalPrice,
@@ -32,14 +34,16 @@ describe('HandleInventoryReservedUseCase', () => {
         jest.clearAllMocks();
 
         orderDetailsPort = {
-            getByOrderId: jest.fn().mockResolvedValue({ orderId, totalPrice }),
+            getByOrderId: jest.fn().mockResolvedValue({ orderId, totalPrice, idempotencyKey: orderIdempotencyKey }),
         } as unknown as jest.Mocked<IOrderDetailsPort>;
 
         paymentRepositoryPort = {
             create: jest.fn().mockResolvedValue(fakePayment),
             findByOrderId: jest.fn().mockResolvedValue(null),
+            findByIdempotencyKey: jest.fn().mockResolvedValue(null),
             findByExternalId: jest.fn(),
             updateStatus: jest.fn().mockResolvedValue(fakePayment),
+            updateStatusIfPending: jest.fn(),
         } as unknown as jest.Mocked<IPaymentRepositoryPort>;
 
         paymentGatewayPort = {
@@ -71,7 +75,7 @@ describe('HandleInventoryReservedUseCase', () => {
         await sut.execute(event);
 
         expect(orderDetailsPort.getByOrderId).toHaveBeenCalledWith(orderId);
-        expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice });
+        expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice, idempotencyKey: orderIdempotencyKey });
         expect(paymentGatewayPort.createPreference).toHaveBeenCalledWith({
             orderId,
             amount: totalPrice,
@@ -96,6 +100,7 @@ describe('HandleInventoryReservedUseCase', () => {
         const existingWithPreference = new PaymentEntity({
             id: fakePayment.id,
             orderId: fakePayment.orderId,
+            idempotencyKey: orderId,
             externalId: null,
             preferenceId: 'pref-existing',
             amount: totalPrice,
@@ -108,7 +113,7 @@ describe('HandleInventoryReservedUseCase', () => {
 
         await sut.execute({ orderId, productId: 'p', quantity: 1 });
 
-        expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice });
+        expect(paymentRepositoryPort.create).toHaveBeenCalledWith({ orderId, amount: totalPrice, idempotencyKey: orderIdempotencyKey });
         expect(paymentGatewayPort.createPreference).not.toHaveBeenCalled();
     });
 });

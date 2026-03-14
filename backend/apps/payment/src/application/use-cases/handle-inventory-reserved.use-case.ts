@@ -20,6 +20,9 @@ export class HandleInventoryReservedUseCase {
     async execute(event: InventoryReservedEvent): Promise<void> {
         const { orderId } = event;
 
+        const now = new Date();
+        const timestamp = now.toISOString();
+
         const orderDetails = await this.orderDetailsPort.getByOrderId(orderId);
 
         if (!orderDetails) {
@@ -30,6 +33,7 @@ export class HandleInventoryReservedUseCase {
         const payment = await this.paymentRepositoryPort.create({
             orderId,
             amount: orderDetails.totalPrice,
+            idempotencyKey: orderDetails.idempotencyKey ?? orderId,
         });
 
         if (!payment) {
@@ -42,10 +46,12 @@ export class HandleInventoryReservedUseCase {
             return;
         }
 
+
+
         await this.paymentAuditLogPort.log({
             orderId,
             action: 'PAYMENT_REQUESTED',
-            timestamp: new Date().toISOString(),
+            timestamp,
             details: { amount: orderDetails.totalPrice },
         });
 
@@ -55,8 +61,6 @@ export class HandleInventoryReservedUseCase {
             title: `Order ${orderId}`,
         });
 
-        const now = new Date();
-        const timestamp = now.toISOString();
 
         const results = await Promise.allSettled([
 

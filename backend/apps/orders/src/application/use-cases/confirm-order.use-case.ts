@@ -21,13 +21,13 @@ export class ConfirmOrderUseCase {
     async execute(event: TConfirmOrderEvent): Promise<void> {
         const order = await this.ordersRepositoryPort.confirmIfPending(event.orderId);
 
-        if (!order) {
-           this.logger.warn(`Order ${event.orderId} already processed`);
-           return;
-        }
-
         const now = new Date();
         const timestamp = now.toISOString();
+
+        if (!order) {
+            this.logger.warn(`Order ${event.orderId} already processed`);
+            return;
+        }
 
         const results = await Promise.allSettled([
             this.orderAuditLogPort.log({

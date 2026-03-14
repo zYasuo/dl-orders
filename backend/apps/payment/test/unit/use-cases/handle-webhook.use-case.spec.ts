@@ -18,6 +18,7 @@ describe('HandleWebhookUseCase', () => {
     const fakePayment = new PaymentEntity({
         id: 'pay-1',
         orderId,
+        idempotencyKey: null,
         externalId: null,
         preferenceId: 'pref-1',
         amount: 99.9,
@@ -33,6 +34,7 @@ describe('HandleWebhookUseCase', () => {
         paymentRepositoryPort = {
             create: jest.fn(),
             findByOrderId: jest.fn().mockResolvedValue(fakePayment),
+            findByIdempotencyKey: jest.fn().mockResolvedValue(null),
             findByExternalId: jest.fn().mockResolvedValue(null),
             updateStatus: jest.fn().mockResolvedValue(fakePayment),
             updateStatusIfPending: jest.fn().mockResolvedValue(fakePayment),

@@ -1,6 +1,7 @@
 export interface IOrderDetails {
     orderId: string;
     totalPrice: number;
+    idempotencyKey?: string | null;
 }
 
 export abstract class IOrderDetailsPort {
