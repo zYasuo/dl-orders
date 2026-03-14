@@ -6,8 +6,12 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
     private readonly orders = new Map<string, OrderEntity>();
 
     async create(input: ICreateOrder): Promise<OrderEntity> {
+        const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+        if (existing) return existing;
+
         const order = OrderEntity.create(input);
         this.orders.set(order.id, order);
+        
         return order;
     }
 

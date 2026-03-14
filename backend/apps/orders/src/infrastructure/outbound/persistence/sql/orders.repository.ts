@@ -12,35 +12,43 @@ export class OrdersRepository extends IOrdersRepositoryPort {
     }
 
     async create(input: ICreateOrder): Promise<OrderEntity> {
-        const order = await this.db.order.create({
-            data: {
-                productId: input.productId,
-                quantity: input.quantity,
-                description: input.description,
-                recipient: input.recipient,
-                productName: input.productName,
-                productDescription: input.productDescription,
-                unitPrice: input.unitPrice,
-                totalPrice: input.totalPrice,
-                idempotencyKey: input.idempotencyKey,
-            },
-        });
-        
-        return new OrderEntity({
-            id: order.id,
-            productId: order.productId,
-            quantity: order.quantity,
-            description: order.description,
-            recipient: order.recipient,
-            productName: order.productName,
-            productDescription: order.productDescription,
-            unitPrice: order.unitPrice,
-            totalPrice: order.totalPrice,
-            status: order.status as OrderStatus,
-            idempotencyKey: order.idempotencyKey,
-            createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
-        });
+        try {
+            const order = await this.db.order.create({
+                data: {
+                    productId: input.productId,
+                    quantity: input.quantity,
+                    description: input.description,
+                    recipient: input.recipient,
+                    productName: input.productName,
+                    productDescription: input.productDescription,
+                    unitPrice: input.unitPrice,
+                    totalPrice: input.totalPrice,
+                    idempotencyKey: input.idempotencyKey,
+                },
+            });
+
+            return new OrderEntity({
+                id: order.id,
+                productId: order.productId,
+                quantity: order.quantity,
+                description: order.description,
+                recipient: order.recipient,
+                productName: order.productName,
+                productDescription: order.productDescription,
+                unitPrice: order.unitPrice,
+                totalPrice: order.totalPrice,
+                status: order.status as OrderStatus,
+                idempotencyKey: order.idempotencyKey,
+                createdAt: order.createdAt,
+                updatedAt: order.updatedAt,
+            });
+        } catch (e) {
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+                const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+                if (existing) return existing;
+            }
+            throw e;
+        }
     }
 
     async findById(id: string): Promise<OrderEntity | null> {
@@ -68,7 +76,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
         try {
             const item = await this.db.order.update({
                 where: { id },
-                data: { status: status as any },
+                data: { status: status as OrderStatus },
             });
 
             return new OrderEntity({
@@ -133,7 +141,7 @@ export class OrdersRepository extends IOrdersRepositoryPort {
     async findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null> {
         const item = await this.db.order.findUnique({ where: { idempotencyKey } });
         if (!item) return null;
-        
+
         return new OrderEntity({
             id: item.id,
             productId: item.productId,

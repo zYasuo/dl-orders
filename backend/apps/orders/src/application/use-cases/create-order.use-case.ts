@@ -50,7 +50,7 @@ export class CreateOrderUseCase {
             totalPrice,
             idempotencyKey,
         };
-        
+
         const order = await this.ordersRepositoryPort.create(dataToCreateOrder);
 
         const now = new Date();
