@@ -33,6 +33,19 @@ model OtpCode {
   @@map("otp_codes")
 }
 
+model PasswordReset {
+  id        String   @id @default(uuid())
+  emailEncrypted   String   @map("email_encrypted")
+  emailLookupHash  String   @unique @map("email_lookup_hash")
+  token     String   @unique @map("token")
+  used      Boolean  @default(false) @map("used")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("password_resets")
+}
+
 model AuthLogs {
   id        String   @id @default(uuid())
   userId    String   @unique @map("user_id")

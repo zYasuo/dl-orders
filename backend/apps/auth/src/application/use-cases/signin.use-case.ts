@@ -49,15 +49,15 @@ export class SigninUseCase {
 
         await this.validateAuthAttempt.registerSuccessfulLogin(user.id, ip ?? null);
 
-        const jti = randomUUID();
+        const sessionID = randomUUID();
         const accessToken = await this.jwtPort.sign({
             sub: user.id,
             email: plainEmail,
-            jti,
+            jti: sessionID,
         });
 
         const ttlSeconds = this.jwtPort.getExpiresInSeconds();
-        await this.sessionStore.set(jti, { sub: user.id, email: plainEmail }, ttlSeconds);
+        await this.sessionStore.set(sessionID, { sub: user.id, email: plainEmail }, ttlSeconds);
 
         return { accessToken };
     }

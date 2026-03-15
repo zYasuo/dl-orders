@@ -5,6 +5,8 @@ export const PATTERNS = {
     ORDER_CONFIRMED: 'order.confirmed',
     USER_VERIFIED: 'user.verified',
     OTP_SEND_REQUESTED: 'otp.send_requested',
+    RESET_PASSWORD_LINK_SENT: 'reset_password.link_sent',
+    RESET_PASSWORD_LINK_REQUESTED: 'reset_password.link_requested',
     ACCOUNT_LOCKED_NOTIFY: 'account.locked_notify',
     PAYMENT_APPROVED: 'payment.approved',
     PAYMENT_FAILED: 'payment.failed',

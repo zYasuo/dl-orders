@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const SSignin = z.object({
     email: z.email('email must be valid'),
-    password: z.string().min(1, 'password is required'),
+    password: z.string().min(12, 'password must be at least 12 characters').max(64, 'password must be less than 64 characters'),
     ip: z.string().optional(),
 });
 

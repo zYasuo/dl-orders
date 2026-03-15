@@ -65,4 +65,15 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
             updatedAt: row.updatedAt,
         });
     }
+
+    async changePassword(id: string, password: string): Promise<boolean> {
+        const row = await this.db.user.update({
+            where: { id },
+            data: { passwordHash: password },
+        })
+        
+        if (!row) return false;
+        
+        return true;
+    }
 }

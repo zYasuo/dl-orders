@@ -29,6 +29,7 @@ export class ValidateAuthAttemptUseCase {
         const { attempts, shouldLock } = await this.lockoutStore.incrementFailedAttempts(userId);
 
         if (shouldLock) {
+            
             await this.lockoutStore.setLocked(userId, AuthLogsEntity.LOCKOUT_MINUTES);
             await this.accountLockedNotifyPublisher.publish({
                 email,
