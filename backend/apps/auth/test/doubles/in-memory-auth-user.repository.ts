@@ -34,4 +34,21 @@ export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {
         this.users.set(id, updated);
         return updated;
     }
+
+    async changePassword(id: string, passwordHash: string): Promise<boolean> {
+        const user = this.users.get(id);
+        if (!user) return false;
+        const updated = new UserEntity({
+            id: user.id,
+            emailEncrypted: user.emailEncrypted,
+            emailLookupHash: user.emailLookupHash,
+            passwordHash,
+            name: user.name,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt,
+            updatedAt: new Date(),
+        });
+        this.users.set(id, updated);
+        return true;
+    }
 }
