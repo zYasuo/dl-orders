@@ -1,4 +1,4 @@
-import { IJwtPort, TJwtPayload } from '../../src/domain/ports/jwt.port';
+import { IJwtPort, TJwtPayload } from '../../src/domain/ports/security/jwt.port';
 
 export class FakeJwtPort extends IJwtPort {
     private readonly tokenPrefix = 'fake-jwt-';

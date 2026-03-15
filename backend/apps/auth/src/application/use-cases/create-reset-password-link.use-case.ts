@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { IPasswordResetRepositoryPort } from 'apps/auth/src/domain/ports/password-reset-repository.port';
+import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
 import { TCreateResetPasswordLink } from '../dto/create-reset-password-link.dto';
-import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
 import { PasswordResetEntity } from '../../domain/entities/password-reset.entity';
 import { TCreatePasswordReset } from '../../domain/types/password-repository.type';
-import { IResetPasswordPublisherPort } from '../../domain/ports/reset-password-publisher.port';
+import { IResetPasswordPublisherPort } from '../../domain/ports/publishers/reset-password-publisher.port';
 
 @Injectable()
 export class CreateResetPasswordLinkUseCase {

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PATTERNS, AccountLockedNotifyEvent } from '@app/shared';
-import { IAccountLockedNotifyPublisherPort } from '../../../domain/ports/account-locked-notify-publisher.port';
+import { IAccountLockedNotifyPublisherPort } from '../../../domain/ports/publishers/account-locked-notify-publisher.port';
 
 @Injectable()
 export class AccountLockedNotifyRabbitMqPublisher extends IAccountLockedNotifyPublisherPort {

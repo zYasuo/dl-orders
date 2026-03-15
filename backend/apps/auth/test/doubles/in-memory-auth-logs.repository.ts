@@ -1,5 +1,5 @@
 import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
-import { IAuthLogsRepositoryPort } from '../../src/domain/ports/auth-logs-repository.port';
+import { IAuthLogsRepositoryPort } from '../../src/domain/ports/repositories/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../src/domain/types/auth-logs-repository.types';
 
 export class InMemoryAuthLogsRepository extends IAuthLogsRepositoryPort {

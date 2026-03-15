@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PATTERNS, OtpSendRequestedEvent } from '@app/shared';
-import { IOtpSendRequestedPublisherPort } from '../../../domain/ports/otp-send-requested-publisher.port';
+import { IOtpSendRequestedPublisherPort } from '../../../domain/ports/publishers/otp-send-requested-publisher.port';
 
 @Injectable()
 export class OtpSendRequestedRabbitMqPublisher extends IOtpSendRequestedPublisherPort {

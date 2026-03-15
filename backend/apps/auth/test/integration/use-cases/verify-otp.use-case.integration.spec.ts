@@ -1,11 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/jwt.port';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/user-verified-publisher.port';
+import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
+import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
 import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { FakeUserVerifiedPublisher } from '../../doubles/fake-user-verified.publisher';

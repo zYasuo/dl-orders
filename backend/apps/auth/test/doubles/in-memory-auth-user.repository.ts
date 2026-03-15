@@ -1,5 +1,5 @@
 import { UserEntity } from '../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../src/domain/ports/auth-user-repository.port';
+import { IAuthUserRepositoryPort } from '../../src/domain/ports/repositories/auth-user-repository.port';
 import { TCreateAuthUser } from '../../src/domain/types/auth-user-repository.types';
 
 export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {

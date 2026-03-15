@@ -1,7 +1,7 @@
 import {
     ISessionStorePort,
     TSessionData,
-} from '../../src/domain/ports/session-store.port';
+} from '../../src/domain/ports/stores/session-store.port';
 
 export class InMemorySessionStore extends ISessionStorePort {
     private readonly store = new Map<string, { data: TSessionData; ttl: number }>();

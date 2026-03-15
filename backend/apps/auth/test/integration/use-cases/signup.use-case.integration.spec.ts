@@ -1,11 +1,11 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
-import { IOtpSendRequestedPublisherPort } from '../../../src/domain/ports/otp-send-requested-publisher.port';
-import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
+import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
+import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { IOtpSendRequestedPublisherPort } from '../../../src/domain/ports/publishers/otp-send-requested-publisher.port';
+import { IPasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
 import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeOtpSendRequestedPublisher } from '../../doubles/fake-otp-send-requested.publisher';

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PATTERNS, UserVerifiedEvent } from '@app/shared';
-import { IUserVerifiedPublisherPort } from '../../../domain/ports/user-verified-publisher.port';
+import { IUserVerifiedPublisherPort } from '../../../domain/ports/publishers/user-verified-publisher.port';
 
 @Injectable()
 export class UserVerifiedRabbitMqPublisher extends IUserVerifiedPublisherPort {

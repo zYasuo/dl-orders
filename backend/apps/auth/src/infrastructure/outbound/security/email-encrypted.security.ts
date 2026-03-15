@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import type { EmailEncryptionConfig } from '../../../config/email-encryption.config';
-import { IEmailEncryptedSecurity } from '../../../domain/ports/email-encrypted.security';
+import { IEmailEncryptedSecurity } from '../../../domain/ports/security/email-encrypted.security';
 
 @Injectable()
 export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {

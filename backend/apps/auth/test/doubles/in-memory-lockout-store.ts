@@ -1,4 +1,4 @@
-import { ILockoutStorePort } from '../../src/domain/ports/lockout-store.port';
+import { ILockoutStorePort } from '../../src/domain/ports/stores/lockout-store.port';
 import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
 
 export class InMemoryLockoutStore extends ILockoutStorePort {

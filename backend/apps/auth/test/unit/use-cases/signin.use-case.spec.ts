@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/jwt.port';
-import { IPasswordHasherPort } from '../../../src/domain/ports/password-hasher.port';
-import { ISessionStorePort } from '../../../src/domain/ports/session-store.port';
+import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
+import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { IPasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
+import { ISessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
 
 describe('SigninUseCase', () => {
     let sut: SigninUseCase;

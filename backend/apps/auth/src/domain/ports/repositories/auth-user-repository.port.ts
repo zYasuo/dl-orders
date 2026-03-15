@@ -1,5 +1,5 @@
-import { UserEntity } from '../entities/user.entity';
-import { TCreateAuthUser } from '../types/auth-user-repository.types';
+import { UserEntity } from '../../entities/user.entity';
+import { TCreateAuthUser } from '../../types/auth-user-repository.types';
 
 export abstract class IAuthUserRepositoryPort {
     abstract create(data: TCreateAuthUser): Promise<UserEntity | null>;

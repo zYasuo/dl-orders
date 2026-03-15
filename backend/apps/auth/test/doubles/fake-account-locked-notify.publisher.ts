@@ -1,5 +1,5 @@
 import { AccountLockedNotifyEvent } from '@app/shared';
-import { IAccountLockedNotifyPublisherPort } from '../../src/domain/ports/account-locked-notify-publisher.port';
+import { IAccountLockedNotifyPublisherPort } from '../../src/domain/ports/publishers/account-locked-notify-publisher.port';
 
 export class FakeAccountLockedNotifyPublisher extends IAccountLockedNotifyPublisherPort {
     readonly published: AccountLockedNotifyEvent[] = [];

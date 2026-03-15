@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuthLogsEntity } from '../../../../domain/entities/auth-logs.entity';
-import { IAuthLogsRepositoryPort } from '../../../../domain/ports/auth-logs-repository.port';
+import { IAuthLogsRepositoryPort } from '../../../../domain/ports/repositories/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../../../domain/types/auth-logs-repository.types';
 import { DbService } from '../../../db/db.service';
 

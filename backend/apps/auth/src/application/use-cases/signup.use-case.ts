@@ -1,10 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { OtpCodeEntity } from '../../domain/entities/otp-code.entity';
-import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
-import { IOtpRepositoryPort } from '../../domain/ports/otp-repository.port';
-import { IOtpSendRequestedPublisherPort } from '../../domain/ports/otp-send-requested-publisher.port';
-import { IPasswordHasherPort } from '../../domain/ports/password-hasher.port';
+import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
+import { IOtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
+import { IOtpSendRequestedPublisherPort } from '../../domain/ports/publishers/otp-send-requested-publisher.port';
+import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
 import { TCreateAuthUser } from '../../domain/types/auth-user-repository.types';
 import { TCreateOtp } from '../../domain/types/otp-repository.types';
 import { TSignup } from '../dto/signup.dto';

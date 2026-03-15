@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { IAccountLockedNotifyPublisherPort } from '../../domain/ports/account-locked-notify-publisher.port';
-import { IAuthLogsRepositoryPort } from '../../domain/ports/auth-logs-repository.port';
-import { ILockoutStorePort } from '../../domain/ports/lockout-store.port';
+import { IAccountLockedNotifyPublisherPort } from '../../domain/ports/publishers/account-locked-notify-publisher.port';
+import { IAuthLogsRepositoryPort } from '../../domain/ports/repositories/auth-logs-repository.port';
+import { ILockoutStorePort } from '../../domain/ports/stores/lockout-store.port';
 import { AuthLogsEntity } from '../../domain/entities/auth-logs.entity';
 
 @Injectable()

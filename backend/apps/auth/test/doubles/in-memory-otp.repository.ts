@@ -1,5 +1,5 @@
 import { OtpCodeEntity } from '../../src/domain/entities/otp-code.entity';
-import { IOtpRepositoryPort } from '../../src/domain/ports/otp-repository.port';
+import { IOtpRepositoryPort } from '../../src/domain/ports/repositories/otp-repository.port';
 import { TCreateOtp } from '../../src/domain/types/otp-repository.types';
 
 export class InMemoryOtpRepository extends IOtpRepositoryPort {

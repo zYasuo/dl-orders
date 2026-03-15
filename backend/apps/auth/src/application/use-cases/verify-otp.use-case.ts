@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
-import { IJwtPort } from '../../domain/ports/jwt.port';
-import { IOtpRepositoryPort } from '../../domain/ports/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../domain/ports/user-verified-publisher.port';
+import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
+import { IJwtPort } from '../../domain/ports/security/jwt.port';
+import { IOtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
+import { IUserVerifiedPublisherPort } from '../../domain/ports/publishers/user-verified-publisher.port';
 import { TVerifyOtp } from '../dto/verify-otp.dto';
 
 @Injectable()

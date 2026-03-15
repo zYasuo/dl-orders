@@ -2,9 +2,9 @@ import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
 import { AuthLogsEntity } from '../../../src/domain/entities/auth-logs.entity';
-import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/account-locked-notify-publisher.port';
-import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/auth-logs-repository.port';
-import { ILockoutStorePort } from '../../../src/domain/ports/lockout-store.port';
+import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/publishers/account-locked-notify-publisher.port';
+import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/repositories/auth-logs-repository.port';
+import { ILockoutStorePort } from '../../../src/domain/ports/stores/lockout-store.port';
 
 describe('ValidateAuthAttemptUseCase', () => {
     let sut: ValidateAuthAttemptUseCase;

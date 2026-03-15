@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { IAuthUserRepositoryPort } from '../../domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/email-encrypted.security';
-import { IJwtPort } from '../../domain/ports/jwt.port';
-import { IPasswordHasherPort } from '../../domain/ports/password-hasher.port';
-import { ISessionStorePort } from '../../domain/ports/session-store.port';
+import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
+import { IJwtPort } from '../../domain/ports/security/jwt.port';
+import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
+import { ISessionStorePort } from '../../domain/ports/stores/session-store.port';
 import { ValidateAuthAttemptUseCase } from './validate-auth-attempt.use-case';
 import { TSignin } from '../dto/signin.dto';
 

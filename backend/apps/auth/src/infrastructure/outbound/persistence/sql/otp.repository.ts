@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
 import { OtpCodeEntity } from '../../../../domain/entities/otp-code.entity';
-import { IOtpRepositoryPort } from '../../../../domain/ports/otp-repository.port';
+import { IOtpRepositoryPort } from '../../../../domain/ports/repositories/otp-repository.port';
 import { TCreateOtp } from '../../../../domain/types/otp-repository.types';
 
 @Injectable()

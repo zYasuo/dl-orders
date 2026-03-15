@@ -1,5 +1,5 @@
 import { UserVerifiedEvent } from '@app/shared';
-import { IUserVerifiedPublisherPort } from '../../src/domain/ports/user-verified-publisher.port';
+import { IUserVerifiedPublisherPort } from '../../src/domain/ports/publishers/user-verified-publisher.port';
 
 export class FakeUserVerifiedPublisher extends IUserVerifiedPublisherPort {
     readonly published: UserVerifiedEvent[] = [];

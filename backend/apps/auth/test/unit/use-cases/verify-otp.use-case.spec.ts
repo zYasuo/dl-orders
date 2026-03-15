@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
 import { OtpCodeEntity } from '../../../src/domain/entities/otp-code.entity';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/jwt.port';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/user-verified-publisher.port';
+import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
+import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
 
 describe('VerifyOtpUseCase', () => {
     let sut: VerifyOtpUseCase;

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { PATTERNS, IResetPasswordRequestEvent } from "@app/shared";
-import { IResetPasswordPublisherPort } from "../../../domain/ports/reset-password-publisher.port";
+import { IResetPasswordPublisherPort } from '../../../domain/ports/publishers/reset-password-publisher.port';
 
 @Injectable()
 export class PasswordResetLinkRequestRabbitMqPublisher extends IResetPasswordPublisherPort {

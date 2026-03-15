@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ISessionStorePort, TSessionData } from '../../../../domain/ports/session-store.port';
+import { ISessionStorePort, TSessionData } from '../../../../domain/ports/stores/session-store.port';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
 import { RedisService } from '../../../redis/redis.service';
 

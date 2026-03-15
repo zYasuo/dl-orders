@@ -1,4 +1,4 @@
-import { IEmailEncryptedSecurity } from '../../src/domain/ports/email-encrypted.security';
+import { IEmailEncryptedSecurity } from '../../src/domain/ports/security/email-encrypted.security';
 
 export class FakeEmailEncryptedSecurity extends IEmailEncryptedSecurity {
     private normalize(email: string): string {

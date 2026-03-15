@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PasswordResetEntity } from 'apps/auth/src/domain/entities/password-reset.entity';
 import { TCreatePasswordReset } from 'apps/auth/src/domain/types/password-repository.type';
 import { DbService } from '../../../db/db.service';
-import { IPasswordResetRepositoryPort } from 'apps/auth/src/domain/ports/password-reset-repository.port';
+import { IPasswordResetRepositoryPort } from '../../../../domain/ports/repositories/password-reset-repository.port';
 
 @Injectable()
 export class PasswordResetRepository extends IPasswordResetRepositoryPort {
