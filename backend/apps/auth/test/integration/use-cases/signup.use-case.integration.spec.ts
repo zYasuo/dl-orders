@@ -77,13 +77,13 @@ describe('SignupUseCase (integration)', () => {
         it('throws BadRequestException when password is less than 12 characters', async () => {
             const input = { email: 'user@test.com', password: 'password', name: 'User' };
             await expect(sut.execute(input)).rejects.toThrow(BadRequestException);
-            await expect(sut.execute(input)).rejects.toThrow(/Password must be at least 12 characters/);
+            await expect(sut.execute(input)).rejects.toThrow(/password must be at least 12 characters/);
         });
         
         it('throws BadRequestException when password is more than 64 characters', async () => {
             const input = { email: 'user@test.com', password: 'password12345678901234567890123456789012345678901234567890123456789012345678901234567890', name: 'User' };
             await expect(sut.execute(input)).rejects.toThrow(BadRequestException);
-            await expect(sut.execute(input)).rejects.toThrow(/Password must be less than 64 characters/);
+            await expect(sut.execute(input)).rejects.toThrow(/password must be less than 64 characters/);
         });
     });
 });
