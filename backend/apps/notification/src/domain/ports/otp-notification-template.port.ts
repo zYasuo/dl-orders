@@ -1,6 +1,6 @@
 import { INotificationRequest } from '../types/notification-request.types';
-import { OtpSendRequestedEvent } from '@app/shared';
+import { IOtpSendRequestedEvent } from '@app/shared';
 
 export abstract class IOtpNotificationTemplatePort {
-    abstract getOtpVerificationMessage(payload: OtpSendRequestedEvent): INotificationRequest;
+    abstract getOtpVerificationMessage(payload: IOtpSendRequestedEvent): INotificationRequest;
 }

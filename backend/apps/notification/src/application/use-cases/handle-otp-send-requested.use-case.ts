@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OtpSendRequestedEvent } from '@app/shared';
+import { IOtpSendRequestedEvent } from '@app/shared';
 import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
 import { IOtpNotificationTemplatePort } from '../../domain/ports/otp-notification-template.port';
 import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
@@ -12,7 +12,7 @@ export class HandleOtpSendRequestedUseCase {
         private readonly notificationAuditLogPort: INotificationAuditLogPort,
     ) {}
 
-    async execute(payload: OtpSendRequestedEvent): Promise<void> {
+    async execute(payload: IOtpSendRequestedEvent): Promise<void> {
         const { email, code, expiresInMinutes } = payload;
 
         const timestamp = new Date().toISOString();
