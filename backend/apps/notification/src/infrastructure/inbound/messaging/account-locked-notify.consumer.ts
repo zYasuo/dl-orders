@@ -13,7 +13,8 @@ export class AccountLockedNotifyConsumer {
 
     @EventPattern(PATTERNS.ACCOUNT_LOCKED_NOTIFY)
     async handle(@Payload() payload: IAccountLockedNotifyEvent): Promise<void> {
-        this.logger.log('Received account locked notify', { email: payload.email });
+        const { email, lockedUntilMinutes } = payload;
+        this.logger.log('Received account locked notify', { email, lockedUntilMinutes });
         await this.handleUseCase.execute(payload);
     }
 }

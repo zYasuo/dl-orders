@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SCreateResetPasswordLinkDto = z.object({
@@ -5,3 +6,4 @@ export const SCreateResetPasswordLinkDto = z.object({
 });
 
 export type TCreateResetPasswordLink = z.infer<typeof SCreateResetPasswordLinkDto>;
+export class CreateResetPasswordLinkDto extends createZodDto(SCreateResetPasswordLinkDto) {}

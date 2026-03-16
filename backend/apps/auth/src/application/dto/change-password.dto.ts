@@ -2,8 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SChangePasswordDto = z.object({
-    email: z.email('email must be valid'),
-    current_password: z.string().min(12).max(64),
+    token: z.string().min(1).max(255),
     new_password: z.string().min(12).max(64),
 });
 

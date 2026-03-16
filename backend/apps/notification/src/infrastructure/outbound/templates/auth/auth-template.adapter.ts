@@ -18,29 +18,19 @@ export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
     }
 
     getResetPasswordRequestMessage(payload: IResetPasswordRequestEvent): INotificationRequest {
-        const { email, linkResetPassword, expiresAt } = payload;
-
-        const content = this.replacePlaceholders(
-            resetPasswordHtmlTemplate,
-            {
-                email,
-                linkResetPassword,
-            },
-            expiresAt,
-        );
-
+        const { linkResetPassword, expiresAt } = payload;
+        const data: Record<string, string> = {
+            resetPasswordLink: linkResetPassword,
+            expiresInMinutes: String(this.getExpiresInMinutes(expiresAt)),
+        };
+        const content = resetPasswordHtmlTemplate.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => data[key] ?? '');
         return {
             title: RESET_PASSWORD_TITLE,
             content: content.trim(),
         };
     }
 
-    private replacePlaceholders(template: string, data: Record<string, string>, expires: Date): string {
-        const expiresInMinutes = this.getExpiresInMinutes(expires);
-        return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => data[key] ?? '').replace('{{ expiresInMinutes }}', expiresInMinutes.toString());
-    }
-
     private getExpiresInMinutes(expires: Date): number {
-        return Math.floor((expires.getTime() - Date.now()) / 1000 / 60);
+        return Math.max(0, Math.floor((expires.getTime() - Date.now()) / 1000 / 60));
     }
 }

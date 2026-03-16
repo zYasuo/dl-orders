@@ -6,6 +6,7 @@ import { SigninDto } from '../../../../application/dto/signin.dto';
 import { VerifyOtpDto } from '../../../../application/dto/verify-otp.dto';
 import { ChangePasswordDto } from '../../../../application/dto/change-password.dto';
 import { RateLimitEndpoint } from '../decorators/rate-limit-endpoint.decorator';
+import { CreateResetPasswordLinkDto } from 'apps/auth/src/application/dto/create-reset-password-link.dto';
 
 export const ApiAuth = () => applyDecorators(ApiTags('Auth'));
 
@@ -56,9 +57,21 @@ export const AuthDoc = {
             HttpCode(HttpStatus.OK),
             RateLimitEndpoint('reset-password-link'),
             ApiOperation({ summary: 'Change password' }),
-            ApiBody({ type: ChangePasswordDto }),
+            ApiBody({ type: CreateResetPasswordLinkDto }),
             ApiResponse({ status: 200, description: 'Change password successful' }),
             standardError(400, 'Invalid credentials'),
+            standardError(429, 'Too many requests'),
+        ),
+
+    ChangePassword: () =>
+        applyDecorators(
+            Post('change-password'),
+            HttpCode(HttpStatus.OK),
+            RateLimitEndpoint('change-password'),
+            ApiOperation({ summary: 'Change password' }),
+            ApiBody({ type: ChangePasswordDto }),
+            ApiResponse({ status: 200, description: 'Change password successful' }),
+            standardError(400, 'Invalid token or password'),
             standardError(429, 'Too many requests'),
         ),
 };
