@@ -1,4 +1,4 @@
-import { AccountLockedNotifyEvent, PATTERNS } from '@app/shared';
+import { IAccountLockedNotifyEvent, PATTERNS } from '@app/shared';
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { HandleAccountLockedNotifyUseCase } from 'apps/notification/src/application/use-cases/handle-account-locked-notify.use-case';
@@ -12,7 +12,7 @@ export class AccountLockedNotifyConsumer {
     ) {}
 
     @EventPattern(PATTERNS.ACCOUNT_LOCKED_NOTIFY)
-    async handle(@Payload() payload: AccountLockedNotifyEvent): Promise<void> {
+    async handle(@Payload() payload: IAccountLockedNotifyEvent): Promise<void> {
         this.logger.log('Received account locked notify', { email: payload.email });
         await this.handleUseCase.execute(payload);
     }

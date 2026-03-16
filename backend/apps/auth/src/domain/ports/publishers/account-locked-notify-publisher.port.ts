@@ -1,5 +1,5 @@
-import { AccountLockedNotifyEvent } from '@app/shared';
+import { IAccountLockedNotifyEvent } from '@app/shared';
 
 export abstract class IAccountLockedNotifyPublisherPort {
-    abstract publish(event: AccountLockedNotifyEvent): Promise<void>;
+    abstract publish(event: IAccountLockedNotifyEvent): Promise<void>;
 }

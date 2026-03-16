@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AccountLockedNotifyEvent } from '@app/shared';
+import { IAccountLockedNotifyEvent } from '@app/shared';
 import { IAuthNotificationTemplatePort } from '../../domain/ports/auth-notification-template.port';
 import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
 import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
@@ -14,7 +14,7 @@ export class HandleAccountLockedNotifyUseCase {
         private readonly notificationAuditLogPort: INotificationAuditLogPort,
     ) {}
 
-    async execute(payload: AccountLockedNotifyEvent): Promise<void> {
+    async execute(payload: IAccountLockedNotifyEvent): Promise<void> {
         const { email } = payload;
 
         const { title, content } = this.authNotificationTemplatePort.getAccountLockedMessage(payload);
