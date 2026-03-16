@@ -43,6 +43,8 @@ export class CreateResetPasswordLinkUseCase {
             expiresAt,
         };
 
+        console.log('createData', createData);
+
         await Promise.all([
             this.passwordResetRepository.create(createData),
             this.resetPasswordPublisher.publish({

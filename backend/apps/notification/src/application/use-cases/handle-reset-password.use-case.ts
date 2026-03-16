@@ -13,9 +13,9 @@ export class HandleResetPasswordUseCase {
     ) {}
 
     async execute(payload: IResetPasswordRequestEvent): Promise<void> {
-        const { email } = payload;
+        const { email, linkResetPassword, expiresAt } = payload;
 
-        const { title, content } = this.authNotificationTemplatePort.getResetPasswordRequestMessage(payload);
+        const { title, content } = this.authNotificationTemplatePort.getResetPasswordRequestMessage({ email, linkResetPassword, expiresAt });
         const timestamp = new Date().toISOString();
 
         const result = await this.emailSender.send({

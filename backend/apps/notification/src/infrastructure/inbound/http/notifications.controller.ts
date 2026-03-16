@@ -1,17 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Param, Query } from '@nestjs/common';
 import { IUserNotificationsPort } from '../../../domain/ports/user-notifications.port';
+import { NotificationsDoc, ApiNotifications } from './docs/notifications-doc.decorator';
 
-@ApiTags('Notifications')
+@ApiNotifications()
 @Controller()
 export class NotificationsController {
     constructor(private readonly userNotificationsPort: IUserNotificationsPort) {}
 
-    @Get('users/:userId/notifications')
-    @ApiOperation({ summary: 'User notifications' })
-    @ApiParam({ name: 'userId', description: 'User ID' })
-    @ApiQuery({ name: 'limit', required: false, description: 'Max number of notifications to return' })
-    @ApiResponse({ status: 200, description: 'List of notifications' })
+    @NotificationsDoc.GetByUserId()
     getByUserId(
         @Param('userId') userId: string,
         @Query('limit') limit?: string,

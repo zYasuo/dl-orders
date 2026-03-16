@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StandardErrorResponseDto, ZodValidationPipe } from '@app/shared';
-import { CreateProductDto, SCreateProduct, type TCreateProduct } from '../../../application/dto/create-product.schema';
+import { Body, Controller, Param } from '@nestjs/common';
+import { ZodValidationPipe } from '@app/shared';
+import { SCreateProduct, type TCreateProduct } from '../../../application/dto/create-product.schema';
 import { CreateProductUseCase } from '../../../application/use-cases/create-product.use-case';
 import { FindAllProductsUseCase } from '../../../application/use-cases/find-all-products.use-case';
 import { FindProductByIdUseCase } from '../../../application/use-cases/find-product-by-id.use-case';
 import { ProductEntity } from '../../../domain/entities/product.entity';
+import { ProductDoc, ApiProducts } from './docs/product-doc.decorator';
 
-@ApiTags('Products')
+@ApiProducts()
 @Controller('products')
 export class ProductController {
     constructor(
@@ -16,27 +16,17 @@ export class ProductController {
         private readonly findProductByIdUseCase: FindProductByIdUseCase,
     ) {}
 
-    @Get()
-    @ApiOperation({ summary: 'List all products' })
-    @ApiResponse({ status: 200, description: 'Products list' })
+    @ProductDoc.List()
     async findAll(): Promise<ProductEntity[] | null> {
         return this.findAllProductsUseCase.execute();
     }
 
-    @Post()
-    @ApiOperation({ summary: 'Create product' })
-    @ApiBody({ type: CreateProductDto })
-    @ApiResponse({ status: 201, description: 'Product created' })
-    @ApiResponse({ status: 400, description: 'Invalid input', type: StandardErrorResponseDto })
+    @ProductDoc.Create()
     async create(@Body(new ZodValidationPipe(SCreateProduct)) input: TCreateProduct): Promise<ProductEntity> {
         return this.createProductUseCase.execute(input);
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Get product by ID' })
-    @ApiParam({ name: 'id', description: 'Product ID' })
-    @ApiResponse({ status: 200, description: 'Product found' })
-    @ApiResponse({ status: 404, description: 'Product not found', type: StandardErrorResponseDto })
+    @ProductDoc.GetById()
     async findById(@Param('id') id: string): Promise<ProductEntity> {
         return this.findProductByIdUseCase.execute(id);
     }
