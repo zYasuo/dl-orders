@@ -11,6 +11,8 @@ import { AuthDoc, ApiAuth } from './docs/auth-doc.decorator';
 import { RedisRateLimitGuard } from './guards/redis-rate-limit.guard';
 import { CreateResetPasswordLinkUseCase } from 'apps/auth/src/application/use-cases/create-reset-password-link.use-case';
 import { SCreateResetPasswordLinkDto, TCreateResetPasswordLink } from 'apps/auth/src/application/dto/create-reset-password-link.dto';
+import { ChangePasswordUseCase } from '../../../application/use-cases/change-password.use-case';
+import { SChangePasswordDto, type TChangePassword } from '../../../application/dto/change-password.dto';
 
 @ApiAuth()
 @Controller('auth')
@@ -21,6 +23,7 @@ export class AuthController {
         private readonly verifyOtpUseCase: VerifyOtpUseCase,
         private readonly signinUseCase: SigninUseCase,
         private readonly createResetPasswordLinkUseCase: CreateResetPasswordLinkUseCase,
+        private readonly changePasswordUseCase: ChangePasswordUseCase,
     ) {}
 
     @AuthDoc.Signup()
@@ -42,5 +45,10 @@ export class AuthController {
     @AuthDoc.CreateResetPasswordLink()
     createResetPasswordLink(@Body(new ZodValidationPipe(SCreateResetPasswordLinkDto)) dto: TCreateResetPasswordLink) {
         return this.createResetPasswordLinkUseCase.execute(dto);
+    }
+
+    @AuthDoc.ChangePassword()
+    changePassword(@Body(new ZodValidationPipe(SChangePasswordDto)) dto: TChangePassword) {
+        return this.changePasswordUseCase.execute(dto);
     }
 }

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HandleResetPasswordUseCase } from '../../../src/application/use-cases/handle-reset-password.use-case';
 import { IAuthNotificationTemplatePort } from '../../../src/domain/ports/auth-notification-template.port';
 import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
+import { INotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
 
 const resetPasswordPayload = {
     email: 'user@test.com',
@@ -13,6 +14,7 @@ describe('HandleResetPasswordUseCase', () => {
     let sut: HandleResetPasswordUseCase;
     let authNotificationTemplatePort: jest.Mocked<IAuthNotificationTemplatePort>;
     let emailSender: jest.Mocked<IEmailSenderPort>;
+    let notificationAuditLogPort: jest.Mocked<INotificationAuditLogPort>;
 
     beforeEach(async () => {
         jest.clearAllMocks();
@@ -28,11 +30,17 @@ describe('HandleResetPasswordUseCase', () => {
             send: jest.fn().mockResolvedValue({ success: true }),
         } as unknown as jest.Mocked<IEmailSenderPort>;
 
+        notificationAuditLogPort = {
+            log: jest.fn().mockResolvedValue(undefined),
+            getByData: jest.fn(),
+        } as unknown as jest.Mocked<INotificationAuditLogPort>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 HandleResetPasswordUseCase,
                 { provide: IAuthNotificationTemplatePort, useValue: authNotificationTemplatePort },
                 { provide: IEmailSenderPort, useValue: emailSender },
+                { provide: INotificationAuditLogPort, useValue: notificationAuditLogPort },
             ],
         }).compile();
 

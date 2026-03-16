@@ -12,6 +12,7 @@ import { AccountLockedNotifyConsumer } from './infrastructure/inbound/messaging/
 import { OrderConfirmedConsumer } from './infrastructure/inbound/messaging/order-confirmed.consumer';
 import { OtpSendRequestedConsumer } from './infrastructure/inbound/messaging/otp-send-requested.consumer';
 import { ResetPasswordLinkRequestedConsumer } from './infrastructure/inbound/messaging/reset-password-link-requested.consumer';
+import { PasswordChangedConsumer } from './infrastructure/inbound/messaging/password-changed.consumer';
 import { ResendEmailSender } from './infrastructure/outbound/email/resend-email.sender';
 import { MongoNotificationAuditLogRepository } from './infrastructure/outbound/persistence/mongodb/notification-audit-log.repository';
 import { MongoUserNotificationsRepository } from './infrastructure/outbound/persistence/mongodb/user-notifications.repository';
@@ -21,6 +22,7 @@ import { HandleOrderConfirmedUseCase } from './application/use-cases/handle-orde
 import { HandleAccountLockedNotifyUseCase } from './application/use-cases/handle-account-locked-notify.use-case';
 import { HandleOtpSendRequestedUseCase } from './application/use-cases/handle-otp-send-requested.use-case';
 import { HandleResetPasswordUseCase } from './application/use-cases/handle-reset-password.use-case';
+import { HandlePasswordChangedUseCase } from './application/use-cases/handle-password-changed.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
 import { OrderTemplateAdapter } from './infrastructure/outbound/templates/order/order-template.adapter';
 import { AuthTemplateAdapter } from './infrastructure/outbound/templates/auth/auth-template.adapter';
@@ -42,6 +44,7 @@ import { OtpTemplateAdapter } from './infrastructure/outbound/templates/auth/otp
         OrderConfirmedConsumer,
         OtpSendRequestedConsumer,
         ResetPasswordLinkRequestedConsumer,
+        PasswordChangedConsumer,
         NotificationsController,
     ],
     providers: [
@@ -50,6 +53,7 @@ import { OtpTemplateAdapter } from './infrastructure/outbound/templates/auth/otp
         HandleOrderConfirmedUseCase,
         HandleOtpSendRequestedUseCase,
         HandleResetPasswordUseCase,
+        HandlePasswordChangedUseCase,
         SendNotificationEmailUseCase,
         { provide: INotificationRepositoryPort, useClass: NotificationRepository },
         { provide: IOrderNotificationTemplatePort, useClass: OrderTemplateAdapter },

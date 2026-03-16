@@ -1,9 +1,10 @@
 import { IAuthNotificationTemplatePort } from 'apps/notification/src/domain/ports/auth-notification-template.port';
 import { Injectable } from '@nestjs/common';
 import { INotificationRequest } from 'apps/notification/src/domain/types/notification-request.types';
-import { IAccountLockedNotifyEvent, IResetPasswordRequestEvent } from '@app/shared';
+import { IAccountLockedNotifyEvent, IPasswordChangedEvent, IResetPasswordRequestEvent } from '@app/shared';
 import { ACCOUNT_LOCKED_TITLE, accountLockedHtmlTemplate } from './auth-locked-account.template';
 import { RESET_PASSWORD_TITLE, resetPasswordHtmlTemplate } from './auth-resent-password.template';
+import { PASSWORD_CHANGED_TITLE, passwordChangedHtmlTemplate } from './auth-password-changed.template';
 
 @Injectable()
 export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
@@ -27,6 +28,13 @@ export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
         return {
             title: RESET_PASSWORD_TITLE,
             content: content.trim(),
+        };
+    }
+
+    getPasswordChangedMessage(_payload: IPasswordChangedEvent): INotificationRequest {
+        return {
+            title: PASSWORD_CHANGED_TITLE,
+            content: passwordChangedHtmlTemplate.trim(),
         };
     }
 

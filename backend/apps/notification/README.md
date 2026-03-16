@@ -4,7 +4,7 @@ Sends notifications (e.g. email) when an order is confirmed. Listens for `order.
 
 ## Role
 
-- **Events in:** Listens for `order.confirmed` (from orders). Runs the notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model.
+- **Events in:** Listens for `order.confirmed` (from orders), `reset_password.link_requested` and `auth.password_changed` (from auth), `account.locked_notify`, `otp.send_requested`. Runs the corresponding notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model.
 - **HTTP:** `GET /users/:userId/notifications` to list notifications for a user (e.g. by email until auth exists).
 
 ## Ports
@@ -17,7 +17,7 @@ Sends notifications (e.g. email) when an order is confirmed. Listens for `order.
 ## Inbound
 
 - **HTTP:** `GET /users/:userId/notifications` (optional query `limit`, `cursor`).
-- **Messaging:** `order.confirmed`.
+- **Messaging:** `order.confirmed`, `reset_password.link_requested`, `auth.password_changed`, `account.locked_notify`, `otp.send_requested`.
 
 ## Outbound
 

@@ -7,6 +7,8 @@ Handles user signup (with email OTP verification), sign-in, and JWT issuance. Tr
 - **HTTP:** `POST /auth/signup` (email, password, name) — creates user, publishes `otp.send_requested` (notification service sends OTP email).
 - **HTTP:** `POST /auth/verify-otp` (email, code) — validates OTP, marks email verified, publishes `user.verified`, returns JWT.
 - **HTTP:** `POST /auth/signin` (email, password) — validates credentials and email verified; returns JWT. If the account is locked (after 3 failed attempts), returns `403` with a message to try again after X minutes. IP is captured from the request for audit. Rate limit per IP applies; when exceeded, returns `429 Too Many Requests` with optional `Retry-After` header.
+- **HTTP:** `POST /auth/reset-password-link` (email) — requests a password reset link; publishes `reset_password.link_requested` (notification service sends email with link).
+- **HTTP:** `POST /auth/change-password` (email, token, new_password) — changes password using the token from the reset link; publishes `auth.password_changed` (notification service sends confirmation email).
 
 JWT payload: `{ sub: userId, email }`; other services validate it with the same `JWT_SECRET`.
 
@@ -20,16 +22,19 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 - **IPasswordHasherPort** — Hash/compare password (Argon2).
 - **IJwtPort** — Sign/verify JWT.
 - **IUserVerifiedPublisherPort** — Publish `user.verified` (RabbitMQ).
+- **IPasswordResetRepositoryPort** — Create/find/consume password reset tokens (Postgres).
+- **IResetPasswordPublisherPort** — Publish `reset_password.link_requested` (RabbitMQ → notification).
+- **IPasswordChangedPublisherPort** — Publish `auth.password_changed` (RabbitMQ → notification).
 
 ## Inbound
 
-- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin` (Zod-validated bodies). Each endpoint is rate-limited per IP via Redis; excess requests return `429 Too Many Requests`.
+- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin`, `POST /auth/reset-password-link`, `POST /auth/change-password` (Zod-validated bodies). Each endpoint is rate-limited per IP via Redis; excess requests return `429 Too Many Requests`.
 
 ## Outbound
 
 - **Persistence:** `persistence/sql/` (users, otp_codes, auth_logs via Prisma). User relations use `onDelete: Cascade` for otp_codes and auth_logs.
 - **Security:** Argon2 password hasher, JWT sign/verify.
-- **Messaging:** `otp.send_requested` and `account.locked_notify` to notification queue; `user.verified` to users queue.
+- **Messaging:** `otp.send_requested`, `account.locked_notify`, `reset_password.link_requested`, and `auth.password_changed` to notification queue; `user.verified` to users queue.
 
 ## Data
 

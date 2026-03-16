@@ -7,6 +7,7 @@ export const PATTERNS = {
     OTP_SEND_REQUESTED: 'otp.send_requested',
     RESET_PASSWORD_LINK_SENT: 'reset_password.link_sent',
     RESET_PASSWORD_LINK_REQUESTED: 'reset_password.link_requested',
+    PASSWORD_CHANGED: 'auth.password_changed',
     ACCOUNT_LOCKED_NOTIFY: 'account.locked_notify',
     PAYMENT_APPROVED: 'payment.approved',
     PAYMENT_FAILED: 'payment.failed',

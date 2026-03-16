@@ -34,10 +34,13 @@ import { JwtService } from './infrastructure/outbound/security/jwt.service';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { CreateResetPasswordLinkUseCase } from './application/use-cases/create-reset-password-link.use-case';
+import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
 import { PasswordResetRepository } from './infrastructure/outbound/persistence/sql/password-reset.repository';
 import { IPasswordResetRepositoryPort } from './domain/ports/repositories/password-reset-repository.port';
 import { IResetPasswordPublisherPort } from './domain/ports/publishers/reset-password-publisher.port';
+import { IPasswordChangedPublisherPort } from './domain/ports/publishers/password-changed-publisher.port';
 import { PasswordResetLinkRequestRabbitMqPublisher } from './infrastructure/outbound/messaging/password-reset-link-request.publisher';
+import { PasswordChangedRabbitMqPublisher } from './infrastructure/outbound/messaging/password-changed.publisher';
 
 @Module({
     imports: [
@@ -58,6 +61,7 @@ import { PasswordResetLinkRequestRabbitMqPublisher } from './infrastructure/outb
         VerifyOtpUseCase,
         ValidateAuthAttemptUseCase,
         CreateResetPasswordLinkUseCase,
+        ChangePasswordUseCase,
         { provide: IAuthUserRepositoryPort, useClass: AuthUserRepository },
         { provide: ILockoutStorePort, useClass: RedisLockoutStoreAdapter },
         { provide: ISessionStorePort, useClass: RedisSessionStoreAdapter },
@@ -71,6 +75,7 @@ import { PasswordResetLinkRequestRabbitMqPublisher } from './infrastructure/outb
         { provide: IUserVerifiedPublisherPort, useClass: UserVerifiedRabbitMqPublisher },
         { provide: IPasswordResetRepositoryPort, useClass: PasswordResetRepository },
         { provide: IResetPasswordPublisherPort, useClass: PasswordResetLinkRequestRabbitMqPublisher },
+        { provide: IPasswordChangedPublisherPort, useClass: PasswordChangedRabbitMqPublisher },
     ],
 })
 export class AuthModule {}

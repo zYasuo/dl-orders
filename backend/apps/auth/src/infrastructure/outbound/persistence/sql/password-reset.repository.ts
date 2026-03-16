@@ -12,6 +12,7 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
 
     async create(data: TCreatePasswordReset): Promise<PasswordResetEntity> {
         const { emailEncrypted, emailLookupHash, linkResetPassword, expiresAt } = data;
+
         const passwordReset = await this.db.passwordReset.create({
             data: { emailEncrypted, emailLookupHash, linkResetPassword, expiresAt, used: false, createdAt: new Date(), updatedAt: new Date() },
         });
@@ -60,5 +61,20 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
             createdAt: passwordReset.createdAt,
             updatedAt: passwordReset.updatedAt,
         });
+    }
+
+    async consumeToken(linkResetPassword: string, emailLookupHash: string): Promise<boolean> {
+        const now = new Date();
+
+        const { count } = await this.db.passwordReset.updateMany({
+            where: {
+                linkResetPassword,
+                emailLookupHash,
+                used: false,
+                expiresAt: { gt: now },
+            },
+            data: { used: true, updatedAt: now },
+        });
+        return count === 1;
     }
 }
