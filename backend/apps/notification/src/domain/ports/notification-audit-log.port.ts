@@ -1,5 +1,5 @@
 export type TNotificationAuditEvent = {
-    orderId: string;
+    data: string;
     action: string;
     timestamp: string;
     details: Record<string, unknown>;
@@ -7,5 +7,5 @@ export type TNotificationAuditEvent = {
 
 export abstract class INotificationAuditLogPort {
     abstract log(event: TNotificationAuditEvent): Promise<void>;
-    abstract getByOrderId(orderId: string): Promise<TNotificationAuditEvent[]>;
+    abstract getByData(data: string): Promise<TNotificationAuditEvent[]>;
 }

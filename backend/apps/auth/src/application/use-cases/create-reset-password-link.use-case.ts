@@ -21,8 +21,11 @@ export class CreateResetPasswordLinkUseCase {
         const expiresAt = PasswordResetEntity.expiresAtFromNow();
 
         const message = 'If this email addres is registered, you will receive a reset password link in a few minutes.';
-
-        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
+        
+        const [linkResetPassword, emailLookupHash] = await Promise.all([
+            this.createLinkResetPassword(token),
+            this.emailEncrypted.getLookupHash(email),
+        ]);
 
         const [existing, emailEncrypted] = await Promise.all([
             this.passwordResetRepository.findByEmailLookupHash(emailLookupHash),
@@ -36,7 +39,7 @@ export class CreateResetPasswordLinkUseCase {
         const createData: TCreatePasswordReset = {
             emailEncrypted,
             emailLookupHash,
-            token,
+            linkResetPassword,
             expiresAt,
         };
 
@@ -44,11 +47,15 @@ export class CreateResetPasswordLinkUseCase {
             this.passwordResetRepository.create(createData),
             this.resetPasswordPublisher.publish({
                 email,
-                token,
+                linkResetPassword,
                 expiresAt,
             }),
         ]);
 
         return message;
+    }
+
+    private createLinkResetPassword(token: string): string {
+        return `${process.env.FRONTEND_URL_RESET_PASSWORD}?token=${token}`;
     }
 }

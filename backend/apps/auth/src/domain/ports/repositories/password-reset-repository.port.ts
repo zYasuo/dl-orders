@@ -3,6 +3,6 @@ import { TCreatePasswordReset } from '../../types/password-repository.type';
 
 export abstract class IPasswordResetRepositoryPort {
     abstract create(data: TCreatePasswordReset): Promise<PasswordResetEntity>;
-    abstract findByToken(token: string): Promise<PasswordResetEntity | null>;
+    abstract findByLinkResetPassword(linkResetPassword: string): Promise<PasswordResetEntity | null>;
     abstract findByEmailLookupHash(emailLookupHash: string): Promise<PasswordResetEntity | null>;
 }

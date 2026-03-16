@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { PATTERNS, InventoryReservedEvent, OrderCreationRequestedEvent, OrderConfirmedEvent } from '@app/shared';
+import { PATTERNS, InventoryReservedEvent, IOrderCreationRequestedEvent, IOrderConfirmedEvent } from '@app/shared';
 import { IOrderEventsPublisherPort } from '../../../domain/ports/order-events-publisher.port';
 
 @Injectable()
@@ -13,11 +13,11 @@ export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
         super();
     }
 
-    async publishOrderCreationRequested(event: OrderCreationRequestedEvent): Promise<void> {
+    async publishOrderCreationRequested(event: IOrderCreationRequestedEvent): Promise<void> {
         this.inventoryClient.emit(PATTERNS.ORDER_CREATION_REQUESTED, event);
     }
 
-    async publishOrderConfirmed(event: OrderConfirmedEvent): Promise<void> {
+    async publishOrderConfirmed(event: IOrderConfirmedEvent): Promise<void> {
         this.notificationClient.emit(PATTERNS.ORDER_CONFIRMED, event);
     }
 

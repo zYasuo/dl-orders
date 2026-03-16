@@ -1,0 +1,17 @@
+import { Controller, Logger } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
+import { PATTERNS, IResetPasswordRequestEvent } from '@app/shared';
+import { HandleResetPasswordUseCase } from '../../../application/use-cases/handle-reset-password.use-case';
+
+@Controller()
+export class ResetPasswordLinkRequestedConsumer {
+    private readonly logger = new Logger(ResetPasswordLinkRequestedConsumer.name);
+
+    constructor(private readonly handleUseCase: HandleResetPasswordUseCase) {}
+
+    @EventPattern(PATTERNS.RESET_PASSWORD_LINK_REQUESTED)
+    async handle(@Payload() payload: IResetPasswordRequestEvent): Promise<void> {
+        this.logger.log('Received reset password link request', { email: payload.email });
+        await this.handleUseCase.execute(payload);
+    }
+}

@@ -1,4 +1,4 @@
-export interface OrderConfirmedEvent {
+export interface IOrderConfirmedEvent {
     orderId: string;
     productId: string;
     productName: string;

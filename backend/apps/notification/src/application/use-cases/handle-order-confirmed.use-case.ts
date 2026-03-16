@@ -1,7 +1,7 @@
-import { OrderConfirmedEvent } from '@app/shared';
+import { IOrderConfirmedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { INotificationType } from '../../domain/entities/notification.entity';
-import { INotificationTemplatePort } from '../../domain/ports/notification-template.port';
+import { IOrderNotificationTemplatePort } from '../../domain/ports/order-notification-template.port';
 import { CreateNotificationUseCase } from './create-notification.use-case';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
 
@@ -10,13 +10,13 @@ export class HandleOrderConfirmedUseCase {
     constructor(
         private readonly createNotificationUseCase: CreateNotificationUseCase,
         private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
-        private readonly notificationTemplatePort: INotificationTemplatePort,
+        private readonly orderNotificationTemplatePort: IOrderNotificationTemplatePort,
     ) {}
 
-    async execute(payload: OrderConfirmedEvent): Promise<void> {
+    async execute(payload: IOrderConfirmedEvent): Promise<void> {
         const { orderId, productName, productDescription, totalPrice, userId, quantity, recipientEmail } = payload;
 
-        const { title, content } = this.notificationTemplatePort.getOrderConfirmedMessage(payload);
+        const { title, content } = this.orderNotificationTemplatePort.getOrderConfirmedMessage(payload);
 
         const notification = await this.createNotificationUseCase.execute({
             title,

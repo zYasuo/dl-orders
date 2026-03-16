@@ -73,7 +73,7 @@ describe('SignupUseCase', () => {
 
     describe('execute', () => {
         it('creates user, OTP and publishes OTP send event when email is not registered', async () => {
-            const input = { email: 'user@test.com', password: 'password123', name: 'User Name' };
+            const input = { email: 'user@test.com', password: 'password1234', name: 'User Name' };
 
             const result = await sut.execute(input);
 
@@ -108,7 +108,7 @@ describe('SignupUseCase', () => {
 
         it('throws ConflictException when email is already registered', async () => {
             authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(fakeUser);
-            const input = { email: 'user@test.com', password: 'password123', name: 'User' };
+            const input = { email: 'user@test.com', password: 'password1234', name: 'User' };
 
             await expect(sut.execute(input)).rejects.toThrow(/Email already registered/);
 
@@ -119,7 +119,7 @@ describe('SignupUseCase', () => {
 
         it('throws when repository create returns null', async () => {
             authUserRepository.create.mockResolvedValueOnce(null);
-            const input = { email: 'user@test.com', password: 'password123', name: 'User' };
+            const input = { email: 'user@test.com', password: 'password1234', name: 'User' };
 
             await expect(sut.execute(input)).rejects.toThrow('Failed to create user');
 
@@ -127,7 +127,7 @@ describe('SignupUseCase', () => {
         });
 
         it('accepts optional name', async () => {
-            const input = { email: 'user@test.com', password: 'password123' };
+            const input = { email: 'user@test.com', password: 'password1234' };
 
             await sut.execute(input);
 

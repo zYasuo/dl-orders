@@ -1,6 +1,6 @@
 export type TCreatePasswordReset = {
     emailEncrypted: string;
     emailLookupHash: string;
-    token: string;
+    linkResetPassword: string;
     expiresAt: Date;
 }

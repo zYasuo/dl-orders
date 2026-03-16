@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderConfirmedUseCase } from '../../../src/application/use-cases/handle-order-confirmed.use-case';
 import { INotificationStatus, INotificationType, NotificationEntity } from '../../../src/domain/entities/notification.entity';
-import { INotificationTemplatePort } from '../../../src/domain/ports/notification-template.port';
+import { IOrderNotificationTemplatePort } from '../../../src/domain/ports/order-notification-template.port';
 import { CreateNotificationUseCase } from '../../../src/application/use-cases/create-notification.use-case';
 import { SendNotificationEmailUseCase } from '../../../src/application/use-cases/send-notification-email.use-case';
 
@@ -22,7 +22,7 @@ describe('HandleOrderConfirmedUseCase', () => {
     let sut: HandleOrderConfirmedUseCase;
     let createNotificationUseCase: jest.Mocked<CreateNotificationUseCase>;
     let sendNotificationEmailUseCase: jest.Mocked<SendNotificationEmailUseCase>;
-    let notificationTemplatePort: jest.Mocked<INotificationTemplatePort>;
+    let notificationTemplatePort: jest.Mocked<IOrderNotificationTemplatePort>;
 
     const createdNotification = new NotificationEntity(
         'notif-1',
@@ -54,14 +54,14 @@ describe('HandleOrderConfirmedUseCase', () => {
                 title: 'Order confirmed',
                 content: '<p>Order #order-1 – Product A, 2 unit(s), Total $99.9</p>',
             }),
-        } as unknown as jest.Mocked<INotificationTemplatePort>;
+        } as unknown as jest.Mocked<IOrderNotificationTemplatePort>;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 HandleOrderConfirmedUseCase,
                 { provide: CreateNotificationUseCase, useValue: createNotificationUseCase },
                 { provide: SendNotificationEmailUseCase, useValue: sendNotificationEmailUseCase },
-                { provide: INotificationTemplatePort, useValue: notificationTemplatePort },
+                { provide: IOrderNotificationTemplatePort, useValue: notificationTemplatePort },
             ],
         }).compile();
 

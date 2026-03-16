@@ -1,4 +1,4 @@
-export interface OrderCreationRequestedEvent {
+export interface IOrderCreationRequestedEvent {
     orderId: string;
     productId: string;
     productName: string;

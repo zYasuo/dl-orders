@@ -1,25 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HandleAccountLockedNotifyUseCase } from '../../../src/application/use-cases/handle-account-locked-notify.use-case';
+import { HandleResetPasswordUseCase } from '../../../src/application/use-cases/handle-reset-password.use-case';
 import { IAuthNotificationTemplatePort } from '../../../src/domain/ports/auth-notification-template.port';
 import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
 
-describe('HandleAccountLockedNotifyUseCase', () => {
-    let sut: HandleAccountLockedNotifyUseCase;
+const resetPasswordPayload = {
+    email: 'user@test.com',
+    linkResetPassword: 'link-reset-password-123',
+    expiresAt: new Date('2025-12-31'),
+};
+
+describe('HandleResetPasswordUseCase', () => {
+    let sut: HandleResetPasswordUseCase;
     let authNotificationTemplatePort: jest.Mocked<IAuthNotificationTemplatePort>;
     let emailSender: jest.Mocked<IEmailSenderPort>;
-
-    const payload = {
-        email: 'user@test.com',
-        lockedUntilMinutes: 5,
-    };
 
     beforeEach(async () => {
         jest.clearAllMocks();
 
         authNotificationTemplatePort = {
-            getAccountLockedMessage: jest.fn().mockReturnValue({
-                title: 'Account temporarily locked - Login attempts',
-                content: '<p>Your account has been temporarily locked. Wait <strong>5 minutes</strong>.</p>',
+            getResetPasswordRequestMessage: jest.fn().mockReturnValue({
+                title: 'Reset your password',
+                content: '<p>Click the link to reset your password.</p>',
             }),
         } as unknown as jest.Mocked<IAuthNotificationTemplatePort>;
 
@@ -29,37 +30,34 @@ describe('HandleAccountLockedNotifyUseCase', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                HandleAccountLockedNotifyUseCase,
+                HandleResetPasswordUseCase,
                 { provide: IAuthNotificationTemplatePort, useValue: authNotificationTemplatePort },
                 { provide: IEmailSenderPort, useValue: emailSender },
             ],
         }).compile();
 
-        sut = module.get(HandleAccountLockedNotifyUseCase);
+        sut = module.get(HandleResetPasswordUseCase);
     });
 
     describe('execute', () => {
         it('calls template port with payload and sends email with derived title and content', async () => {
-            await sut.execute(payload);
+            await sut.execute(resetPasswordPayload);
 
-            expect(authNotificationTemplatePort.getAccountLockedMessage).toHaveBeenCalledTimes(1);
-            expect(authNotificationTemplatePort.getAccountLockedMessage).toHaveBeenCalledWith(payload);
+            expect(authNotificationTemplatePort.getResetPasswordRequestMessage).toHaveBeenCalledTimes(1);
+            expect(authNotificationTemplatePort.getResetPasswordRequestMessage).toHaveBeenCalledWith(resetPasswordPayload);
             expect(emailSender.send).toHaveBeenCalledTimes(1);
             expect(emailSender.send).toHaveBeenCalledWith({
                 to: 'user@test.com',
-                subject: 'Account temporarily locked - Login attempts',
-                html: '<p>Your account has been temporarily locked. Wait <strong>5 minutes</strong>.</p>',
+                subject: 'Reset your password',
+                html: '<p>Click the link to reset your password.</p>',
             });
         });
 
         it('does not throw when email send fails', async () => {
-            emailSender.send.mockResolvedValueOnce({
-                success: false,
-                error: 'SMTP error',
-            });
+            emailSender.send.mockResolvedValueOnce({ success: false, error: 'SMTP error' });
 
-            await expect(sut.execute(payload)).resolves.not.toThrow();
-            expect(authNotificationTemplatePort.getAccountLockedMessage).toHaveBeenCalledTimes(1);
+            await expect(sut.execute(resetPasswordPayload)).resolves.not.toThrow();
+            expect(authNotificationTemplatePort.getResetPasswordRequestMessage).toHaveBeenCalledTimes(1);
             expect(emailSender.send).toHaveBeenCalledTimes(1);
         });
     });

@@ -1,4 +1,4 @@
-import { OrderCreationRequestedEvent } from '@app/shared';
+import { IOrderCreationRequestedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { IInventoryEventsPublisherPort } from '../../domain/ports/inventory-events-publisher.port';
 import { IInventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
@@ -14,7 +14,7 @@ export class HandleOrderCreationRequestedUseCase {
         private readonly listCache: IInventoryListCachePort,
     ) {}
 
-    async execute(event: OrderCreationRequestedEvent): Promise<void> {
+    async execute(event: IOrderCreationRequestedEvent): Promise<void> {
         const { orderId, productId, quantity } = event;
 
         await this.reservationAuditLogPort.log({

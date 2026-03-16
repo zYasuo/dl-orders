@@ -17,16 +17,16 @@ export class MongoNotificationAuditLogRepository extends INotificationAuditLogPo
     }
 
     async log(event: TNotificationAuditEvent): Promise<void> {
-        const { orderId, timestamp, action, details } = event;
-        await this.collection.insertOne({ orderId, timestamp, action, details });
+        const { data, timestamp, action, details } = event;
+        await this.collection.insertOne({ data, timestamp, action, details });
     }
 
-    async getByOrderId(orderId: string): Promise<TNotificationAuditEvent[]> {
-        const cursor = this.collection.find({ orderId }).sort({ timestamp: 1 });
+    async getByData(data: string): Promise<TNotificationAuditEvent[]> {
+        const cursor = this.collection.find({ data }).sort({ timestamp: 1 });
         const items = await cursor.toArray();
         
         return items.map((item) => ({
-            orderId: item.orderId,
+            data: item.data,
             action: item.action,
             timestamp: item.timestamp,
             details: item.details ?? {},

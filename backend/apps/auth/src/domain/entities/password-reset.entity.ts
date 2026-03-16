@@ -4,7 +4,7 @@ export interface IPasswordResetEntity {
     id: string;
     emailEncrypted: string;
     emailLookupHash: string;
-    token: string;
+    linkResetPassword: string;
     used: boolean;
     expiresAt: Date;
     createdAt: Date;
@@ -18,7 +18,7 @@ export class PasswordResetEntity implements IPasswordResetEntity {
         public readonly id: string,
         public readonly emailEncrypted: string,
         public readonly emailLookupHash: string,
-        public readonly token: string,
+        public readonly linkResetPassword: string,
         public readonly used: boolean,
         public readonly expiresAt: Date,
         public readonly createdAt: Date,
@@ -26,11 +26,11 @@ export class PasswordResetEntity implements IPasswordResetEntity {
     ) {}
 
     static create(data: IPasswordResetEntity): PasswordResetEntity {
-        const { id, emailEncrypted, emailLookupHash, token, used, expiresAt } = data;
+        const { id, emailEncrypted, emailLookupHash, linkResetPassword, used, expiresAt } = data;
 
         const now = new Date();
 
-        return new PasswordResetEntity(id, emailEncrypted, emailLookupHash, token, used, expiresAt, now, now);
+        return new PasswordResetEntity(id, emailEncrypted, emailLookupHash, linkResetPassword, used, expiresAt, now, now);
     }
 
     static isExpired(expiresAt: Date): boolean {

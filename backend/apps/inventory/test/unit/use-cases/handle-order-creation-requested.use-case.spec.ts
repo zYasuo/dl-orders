@@ -62,6 +62,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
         productId: 'product-123',
         productName: 'Product A',
         productDescription: 'Description A',
+        idempotencyKey: 'test-idempotency-key',
         totalPrice: 99.9,
         userId: 'user-123',
         quantity: 3,

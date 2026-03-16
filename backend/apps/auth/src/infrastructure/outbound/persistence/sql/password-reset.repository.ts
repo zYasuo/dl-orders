@@ -11,16 +11,16 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
     }
 
     async create(data: TCreatePasswordReset): Promise<PasswordResetEntity> {
-        const { emailEncrypted, emailLookupHash, token, expiresAt } = data;
+        const { emailEncrypted, emailLookupHash, linkResetPassword, expiresAt } = data;
         const passwordReset = await this.db.passwordReset.create({
-            data: { emailEncrypted, emailLookupHash, token, expiresAt, used: false, createdAt: new Date(), updatedAt: new Date() },
+            data: { emailEncrypted, emailLookupHash, linkResetPassword, expiresAt, used: false, createdAt: new Date(), updatedAt: new Date() },
         });
 
         return PasswordResetEntity.create({
             id: passwordReset.id,
             emailEncrypted: passwordReset.emailEncrypted,
             emailLookupHash: passwordReset.emailLookupHash,
-            token: passwordReset.token,
+            linkResetPassword: passwordReset.linkResetPassword,
             used: passwordReset.used,
             expiresAt: passwordReset.expiresAt,
             createdAt: passwordReset.createdAt,
@@ -28,8 +28,8 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
         });
     }
 
-    async findByToken(token: string): Promise<PasswordResetEntity | null> {
-        const passwordReset = await this.db.passwordReset.findUnique({ where: { token } });
+    async findByLinkResetPassword(linkResetPassword: string): Promise<PasswordResetEntity | null> {
+        const passwordReset = await this.db.passwordReset.findUnique({ where: { linkResetPassword } });
 
         if (!passwordReset) return null;
 
@@ -37,7 +37,7 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
             id: passwordReset.id,
             emailEncrypted: passwordReset.emailEncrypted,
             emailLookupHash: passwordReset.emailLookupHash,
-            token: passwordReset.token,
+            linkResetPassword: passwordReset.linkResetPassword,
             used: passwordReset.used,
             expiresAt: passwordReset.expiresAt,
             createdAt: passwordReset.createdAt,
@@ -54,7 +54,7 @@ export class PasswordResetRepository extends IPasswordResetRepositoryPort {
             id: passwordReset.id,
             emailEncrypted: passwordReset.emailEncrypted,
             emailLookupHash: passwordReset.emailLookupHash,
-            token: passwordReset.token,
+            linkResetPassword: passwordReset.linkResetPassword,
             used: passwordReset.used,
             expiresAt: passwordReset.expiresAt,
             createdAt: passwordReset.createdAt,

@@ -18,6 +18,7 @@ export class SendNotificationEmailUseCase {
 
     async execute(notification: NotificationEntity): Promise<void> {
         const { recipient, title, content, sourceEventId, userId } = notification;
+        
         const orderId = sourceEventId;
         const now = new Date();
         const timestamp = now.toISOString();
@@ -27,7 +28,7 @@ export class SendNotificationEmailUseCase {
         if (result.success) {
             await Promise.all([
                 this.notificationAuditLogPort.log({
-                    orderId,
+                    data: orderId,
                     action: 'NOTIFICATION_SENT',
                     timestamp,
                     details: { notificationId: notification.id, recipient },
@@ -53,6 +54,17 @@ export class SendNotificationEmailUseCase {
             await this.notificationRepositoryPort.update(notification.id, {
                 status: INotificationStatus.SENT,
                 sentAt: now,
+                updatedAt: now,
+            });
+        } else {
+            await this.notificationAuditLogPort.log({
+                data: orderId,
+                action: 'NOTIFICATION_FAILED',
+                timestamp,
+                details: { notificationId: notification.id, recipient, error: result.error },
+            });
+            await this.notificationRepositoryPort.update(notification.id, {
+                status: INotificationStatus.FAILED,
                 updatedAt: now,
             });
         }
