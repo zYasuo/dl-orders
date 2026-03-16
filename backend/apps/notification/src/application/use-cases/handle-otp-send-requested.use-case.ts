@@ -7,8 +7,8 @@ import { INotificationAuditLogPort } from '../../domain/ports/notification-audit
 @Injectable()
 export class HandleOtpSendRequestedUseCase {
     constructor(
-        private readonly emailSender: IEmailSenderPort,
         private readonly otpNotificationTemplatePort: IOtpNotificationTemplatePort,
+        private readonly emailSender: IEmailSenderPort,
         private readonly notificationAuditLogPort: INotificationAuditLogPort,
     ) {}
 

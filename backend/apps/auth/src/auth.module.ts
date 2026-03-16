@@ -33,6 +33,11 @@ import { EmailEncryptedSecurity } from './infrastructure/outbound/security/email
 import { JwtService } from './infrastructure/outbound/security/jwt.service';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
+import { CreateResetPasswordLinkUseCase } from './application/use-cases/create-reset-password-link.use-case';
+import { PasswordResetRepository } from './infrastructure/outbound/persistence/sql/password-reset.repository';
+import { IPasswordResetRepositoryPort } from './domain/ports/repositories/password-reset-repository.port';
+import { IResetPasswordPublisherPort } from './domain/ports/publishers/reset-password-publisher.port';
+import { PasswordResetLinkRequestRabbitMqPublisher } from './infrastructure/outbound/messaging/password-reset-link-request.publisher';
 
 @Module({
     imports: [
@@ -52,6 +57,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
         SigninUseCase,
         VerifyOtpUseCase,
         ValidateAuthAttemptUseCase,
+        CreateResetPasswordLinkUseCase,
         { provide: IAuthUserRepositoryPort, useClass: AuthUserRepository },
         { provide: ILockoutStorePort, useClass: RedisLockoutStoreAdapter },
         { provide: ISessionStorePort, useClass: RedisSessionStoreAdapter },
@@ -63,6 +69,8 @@ import { RedisModule } from './infrastructure/redis/redis.module';
         { provide: IEmailEncryptedSecurity, useClass: EmailEncryptedSecurity },
         { provide: IJwtPort, useClass: JwtService },
         { provide: IUserVerifiedPublisherPort, useClass: UserVerifiedRabbitMqPublisher },
+        { provide: IPasswordResetRepositoryPort, useClass: PasswordResetRepository },
+        { provide: IResetPasswordPublisherPort, useClass: PasswordResetLinkRequestRabbitMqPublisher },
     ],
 })
 export class AuthModule {}

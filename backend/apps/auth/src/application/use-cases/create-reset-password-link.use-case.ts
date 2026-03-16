@@ -14,7 +14,7 @@ export class CreateResetPasswordLinkUseCase {
         private readonly resetPasswordPublisher: IResetPasswordPublisherPort,
     ) {}
 
-    async execute(input: TCreateResetPasswordLink): Promise<string> {
+    async execute(input: TCreateResetPasswordLink): Promise<{ message: string }> {
         const { email } = input;
 
         const token = PasswordResetEntity.generateToken();
@@ -33,7 +33,7 @@ export class CreateResetPasswordLinkUseCase {
         ]);
 
         if (existing && !PasswordResetEntity.isExpired(existing.expiresAt) && !PasswordResetEntity.isUsed(existing.used)) {
-            return message;
+            return { message };
         }
 
         const createData: TCreatePasswordReset = {
@@ -52,7 +52,7 @@ export class CreateResetPasswordLinkUseCase {
             }),
         ]);
 
-        return message;
+        return { message };
     }
 
     private createLinkResetPassword(token: string): string {

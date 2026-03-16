@@ -25,7 +25,9 @@ import { SendNotificationEmailUseCase } from './application/use-cases/send-notif
 import { OrderTemplateAdapter } from './infrastructure/outbound/templates/order/order-template.adapter';
 import { AuthTemplateAdapter } from './infrastructure/outbound/templates/auth/auth-template.adapter';
 import { IAuthNotificationTemplatePort } from './domain/ports/auth-notification-template.port';
-
+import { IOtpNotificationTemplatePort } from './domain/ports/otp-notification-template.port';
+import { OtpTemplateAdapter } from './infrastructure/outbound/templates/auth/otp-template.adapter';
+    
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -52,6 +54,7 @@ import { IAuthNotificationTemplatePort } from './domain/ports/auth-notification-
         { provide: INotificationRepositoryPort, useClass: NotificationRepository },
         { provide: IOrderNotificationTemplatePort, useClass: OrderTemplateAdapter },
         { provide: IAuthNotificationTemplatePort, useClass: AuthTemplateAdapter },
+        { provide: IOtpNotificationTemplatePort, useClass: OtpTemplateAdapter },
         { provide: IEmailSenderPort, useClass: ResendEmailSender },
         { provide: INotificationAuditLogPort, useClass: MongoNotificationAuditLogRepository },
         { provide: IUserNotificationsPort, useClass: MongoUserNotificationsRepository },

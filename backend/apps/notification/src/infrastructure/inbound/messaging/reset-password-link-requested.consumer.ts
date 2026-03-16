@@ -12,6 +12,12 @@ export class ResetPasswordLinkRequestedConsumer {
     @EventPattern(PATTERNS.RESET_PASSWORD_LINK_REQUESTED)
     async handle(@Payload() payload: IResetPasswordRequestEvent): Promise<void> {
         this.logger.log('Received reset password link request', { email: payload.email });
-        await this.handleUseCase.execute(payload);
+
+        const normalized: IResetPasswordRequestEvent = {
+            ...payload,
+            expiresAt: typeof payload.expiresAt === 'string' ? new Date(payload.expiresAt) : payload.expiresAt,
+        };
+        
+        await this.handleUseCase.execute(normalized);
     }
 }

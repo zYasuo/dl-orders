@@ -10,6 +10,9 @@ import { SignupUseCase } from '../../../application/use-cases/signup.use-case';
 import { VerifyOtpUseCase } from '../../../application/use-cases/verify-otp.use-case';
 import { RateLimitEndpoint } from './decorators/rate-limit-endpoint.decorator';
 import { RedisRateLimitGuard } from './guards/redis-rate-limit.guard';
+import { ChangePasswordDto, TChangePassword, SChangePasswordDto } from 'apps/auth/src/application/dto/change-password.dto';
+import { CreateResetPasswordLinkUseCase } from 'apps/auth/src/application/use-cases/create-reset-password-link.use-case';
+import { SCreateResetPasswordLinkDto } from 'apps/auth/src/application/dto/create-reset-password-link.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,6 +22,7 @@ export class AuthController {
         private readonly signupUseCase: SignupUseCase,
         private readonly verifyOtpUseCase: VerifyOtpUseCase,
         private readonly signinUseCase: SigninUseCase,
+        private readonly createResetPasswordLinkUseCase: CreateResetPasswordLinkUseCase,
     ) {}
 
     @Post('signup')
@@ -57,5 +61,17 @@ export class AuthController {
     signin(@Req() req: Request, @Body(new ZodValidationPipe(SSignin)) dto: TSignin) {
         const ip = req.ip ?? req.socket?.remoteAddress ?? (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? undefined;
         return this.signinUseCase.execute({ ...dto, ip });
+    }
+
+    @Post('change-password')
+    @HttpCode(HttpStatus.OK)
+    @RateLimitEndpoint('reset-password-link')
+    @ApiOperation({ summary: 'Change password' })
+    @ApiBody({ type: ChangePasswordDto })
+    @ApiResponse({ status: 200, description: 'Change password successful' })
+    @ApiResponse({ status: 400, description: 'Invalid credentials', type: StandardErrorResponseDto })
+    @ApiResponse({ status: 429, description: 'Too many requests', type: StandardErrorResponseDto })
+    changePassword(@Body(new ZodValidationPipe(SCreateResetPasswordLinkDto)) dto: TChangePassword) {
+        return this.createResetPasswordLinkUseCase.execute(dto);
     }
 }

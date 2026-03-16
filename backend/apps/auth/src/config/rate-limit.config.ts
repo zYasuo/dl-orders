@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 
-export type TRateLimitEndpointKey = 'signup' | 'verify-otp' | 'signin';
+export type TRateLimitEndpointKey = 'signup' | 'verify-otp' | 'signin' | 'reset-password-link';
 
 export interface IRateLimitEntry {
     max: number;
@@ -11,12 +11,14 @@ export interface IRateLimitConfig {
     signup: IRateLimitEntry;
     'verify-otp': IRateLimitEntry;
     signin: IRateLimitEntry;
+    'reset-password-link': IRateLimitEntry;
 }
 
 const defaultLimits: IRateLimitConfig = {
     signup: { max: 5, windowSeconds: 3600 },
     'verify-otp': { max: 10, windowSeconds: 900 },
     signin: { max: 10, windowSeconds: 60 },
+    'reset-password-link': { max: 10, windowSeconds: 60 },
 };
 
 function parseIntEnv(name: string, defaultValue: number): number {
@@ -48,6 +50,13 @@ export const rateLimitConfig = registerAs(
             windowSeconds: parseIntEnv(
                 'RATE_LIMIT_SIGNIN_WINDOW_SECONDS',
                 defaultLimits.signin.windowSeconds,
+            ),
+        },
+        'reset-password-link': {
+            max: parseIntEnv('RATE_LIMIT_RESET_PASSWORD_LINK_MAX', defaultLimits['reset-password-link'].max),
+            windowSeconds: parseIntEnv(
+                'RATE_LIMIT_RESET_PASSWORD_LINK_WINDOW_SECONDS',
+                defaultLimits['reset-password-link'].windowSeconds,
             ),
         },
     }),
