@@ -14,11 +14,7 @@ export class MongoOrderSummaryRepository extends IOrderSummaryPort {
     }
 
     async put(summary: TOrderSummary): Promise<void> {
-        await this.collection.updateOne(
-            { orderId: summary.orderId },
-            { $set: summary },
-            { upsert: true },
-        );
+        await this.collection.updateOne({ orderId: summary.orderId }, { $set: summary }, { upsert: true });
     }
 
     async getByOrderId(orderId: string): Promise<TOrderSummary | null> {

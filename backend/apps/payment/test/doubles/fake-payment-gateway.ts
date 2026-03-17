@@ -1,9 +1,4 @@
-import {
-    IPaymentGatewayPort,
-    ICreatePreferenceInput,
-    IPreferenceResult,
-    IPaymentDetails,
-} from '../../src/domain/ports/payment-gateway.port';
+import { IPaymentGatewayPort, ICreatePreferenceInput, IPreferenceResult, IPaymentDetails } from '../../src/domain/ports/payment-gateway.port';
 
 export class FakePaymentGateway extends IPaymentGatewayPort {
     readonly createdPreferences: ICreatePreferenceInput[] = [];

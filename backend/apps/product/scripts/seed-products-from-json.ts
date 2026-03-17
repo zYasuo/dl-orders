@@ -1,4 +1,3 @@
-
 import { MongoClient } from 'mongodb';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -12,7 +11,10 @@ function loadEnvFile(envPath: string): void {
                 const eq = trimmed.indexOf('=');
                 if (eq > 0) {
                     const key = trimmed.slice(0, eq).trim();
-                    const value = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
+                    const value = trimmed
+                        .slice(eq + 1)
+                        .trim()
+                        .replace(/^["']|["']$/g, '');
                     if (key && process.env[key] === undefined) process.env[key] = value;
                 }
             }
@@ -55,8 +57,7 @@ function parseDate(value: unknown): Date {
 
 function toProductDoc(item: JsonProduct, index: number): ProductDoc {
     const name = (item.title && String(item.title).trim()) || `Product ${index + 1}`;
-    const description =
-        (item.description && String(item.description).trim()) || name || 'No description';
+    const description = (item.description && String(item.description).trim()) || name || 'No description';
     const price =
         typeof item.final_price === 'number' && !Number.isNaN(item.final_price)
             ? item.final_price
@@ -64,8 +65,7 @@ function toProductDoc(item: JsonProduct, index: number): ProductDoc {
               ? item.initial_price
               : 0;
     const rawImage = item.image_url;
-    const imageUrl =
-        typeof rawImage === 'string' && rawImage.trim().length > 0 ? rawImage.trim() : null;
+    const imageUrl = typeof rawImage === 'string' && rawImage.trim().length > 0 ? rawImage.trim() : null;
     const now = parseDate(item.timestamp) || new Date();
     return {
         _id: crypto.randomUUID(),
@@ -82,9 +82,7 @@ async function main() {
     const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dl_product_svc';
     const defaultPath = path.resolve(__dirname, 'seed-data/csvjson.json');
     const jsonPath =
-        (process.argv[2] && process.argv[2].trim()) ||
-        process.env.SEED_JSON_PATH ||
-        (fs.existsSync(defaultPath) ? defaultPath : undefined);
+        (process.argv[2] && process.argv[2].trim()) || process.env.SEED_JSON_PATH || (fs.existsSync(defaultPath) ? defaultPath : undefined);
     const batchSize = parseInt(process.env.SEED_BATCH_SIZE || '500', 10);
     const limit = process.env.SEED_LIMIT ? parseInt(process.env.SEED_LIMIT, 10) : undefined;
 

@@ -23,7 +23,7 @@ export class CreateInventoryUseCase {
         if (existingInventory) {
             throw new BadRequestException('Inventory already exists for this product');
         }
-        
+
         if (existingByName) {
             throw new BadRequestException('An inventory with this name already exists');
         }

@@ -5,8 +5,8 @@ import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encry
 import { IJwtPort } from '../../domain/ports/security/jwt.port';
 import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
 import { ISessionStorePort } from '../../domain/ports/stores/session-store.port';
-import { ValidateAuthAttemptUseCase } from './validate-auth-attempt.use-case';
 import { TSignin } from '../dto/signin.dto';
+import { ValidateAuthAttemptUseCase } from './validate-auth-attempt.use-case';
 
 @Injectable()
 export class SigninUseCase {

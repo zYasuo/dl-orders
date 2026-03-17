@@ -13,15 +13,18 @@ export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
         super();
     }
 
-    async publishOrderCreationRequested(event: IOrderCreationRequestedEvent): Promise<void> {
+    publishOrderCreationRequested(event: IOrderCreationRequestedEvent): Promise<void> {
         this.inventoryClient.emit(PATTERNS.ORDER_CREATION_REQUESTED, event);
+        return Promise.resolve();
     }
 
-    async publishOrderConfirmed(event: IOrderConfirmedEvent): Promise<void> {
+    publishOrderConfirmed(event: IOrderConfirmedEvent): Promise<void> {
         this.notificationClient.emit(PATTERNS.ORDER_CONFIRMED, event);
+        return Promise.resolve();
     }
 
-    async publishInventoryReservedToPayment(event: InventoryReservedEvent): Promise<void> {
+    publishInventoryReservedToPayment(event: InventoryReservedEvent): Promise<void> {
         this.paymentClient.emit(PATTERNS.INVENTORY_RESERVED, event);
+        return Promise.resolve();
     }
 }

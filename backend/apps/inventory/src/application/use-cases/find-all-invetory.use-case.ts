@@ -18,7 +18,7 @@ export class FindAllInventoryUseCase {
 
         const items = await this.inventoryRepositoryPort.findAll();
         await this.listCache.set(items, LIST_CACHE_TTL_SECONDS);
-        
+
         return items;
     }
 }

@@ -6,8 +6,7 @@ import { CreateOrderDto } from '../../../../application/dto/create-order.dto';
 export const ApiOrders = () => applyDecorators(ApiTags('Orders'));
 
 const idParam = () => ApiParam({ name: 'id', description: 'Order ID' });
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const OrdersDoc = {
     Create: () =>

@@ -14,14 +14,12 @@ export class ValidateAuthAttemptUseCase {
 
     async validateBeforeLogin(userId: string): Promise<void> {
         const lockedUntil = await this.lockoutStore.getLockedUntil(userId);
-    
+
         if (!lockedUntil) return;
-    
+
         const minutesLeft = AuthLogsEntity.minutesRemainingUntil(lockedUntil);
-    
-        throw new ForbiddenException(
-            `Account temporarily locked. Try again in ${minutesLeft} minute(s).`
-        );
+
+        throw new ForbiddenException(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`);
     }
 
     async registerFailedAttempt(userId: string, ip: string | null, email: string): Promise<void> {
@@ -29,7 +27,6 @@ export class ValidateAuthAttemptUseCase {
         const { attempts, shouldLock } = await this.lockoutStore.incrementFailedAttempts(userId);
 
         if (shouldLock) {
-            
             await this.lockoutStore.setLocked(userId, AuthLogsEntity.LOCKOUT_MINUTES);
             await this.accountLockedNotifyPublisher.publish({
                 email,

@@ -103,7 +103,7 @@ export class PaymentEntity {
     getInitPoint(): string | null {
         const gr = this.params.gatewayResponse;
         if (!gr || typeof gr !== 'object') return null;
-        const initPoint = (gr as Record<string, unknown>).initPoint;
+        const initPoint = gr.initPoint;
         return typeof initPoint === 'string' ? initPoint : null;
     }
 }

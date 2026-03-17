@@ -10,8 +10,7 @@ import { CreateResetPasswordLinkDto } from 'apps/auth/src/application/dto/create
 
 export const ApiAuth = () => applyDecorators(ApiTags('Auth'));
 
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const AuthDoc = {
     Signup: () =>

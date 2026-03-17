@@ -37,10 +37,7 @@ describe('FindOrderByIdUseCase', () => {
         } as unknown as jest.Mocked<IOrdersRepositoryPort>;
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                FindOrderByIdUseCase,
-                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-            ],
+            providers: [FindOrderByIdUseCase, { provide: IOrdersRepositoryPort, useValue: ordersRepository }],
         }).compile();
 
         sut = module.get(FindOrderByIdUseCase);

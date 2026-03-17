@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelOrderUseCase } from '../../../src/application/use-cases/cancel-order.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';

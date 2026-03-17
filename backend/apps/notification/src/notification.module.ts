@@ -29,7 +29,7 @@ import { AuthTemplateAdapter } from './infrastructure/outbound/templates/auth/au
 import { IAuthNotificationTemplatePort } from './domain/ports/auth-notification-template.port';
 import { IOtpNotificationTemplatePort } from './domain/ports/otp-notification-template.port';
 import { OtpTemplateAdapter } from './infrastructure/outbound/templates/auth/otp-template.adapter';
-    
+
 @Module({
     imports: [
         ConfigModule.forRoot({

@@ -18,7 +18,7 @@ export class SendNotificationEmailUseCase {
 
     async execute(notification: NotificationEntity): Promise<void> {
         const { recipient, title, content, sourceEventId, userId } = notification;
-        
+
         const orderId = sourceEventId;
         const now = new Date();
         const timestamp = now.toISOString();
@@ -43,7 +43,7 @@ export class SendNotificationEmailUseCase {
                     content,
                     read: false,
                 }),
-            ]).catch((err) => {
+            ]).catch((err: unknown) => {
                 this.logger.warn('Failed to process notification side-effects', {
                     notificationId: notification.id,
                     recipient,

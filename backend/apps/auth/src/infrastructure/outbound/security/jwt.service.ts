@@ -20,7 +20,7 @@ export class JwtService extends IJwtPort {
         return Math.floor(toMs(this.expiresIn) / 1000);
     }
 
-    async sign(payload: TJwtPayload): Promise<string> {
+    sign(payload: TJwtPayload): Promise<string> {
         return new Promise((resolve, reject) => {
             jwt.sign(payload, this.secret, { expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'] }, (err, encoded) => {
                 if (err) reject(err);
@@ -29,12 +29,12 @@ export class JwtService extends IJwtPort {
         });
     }
 
-    async verify(token: string): Promise<TJwtPayload | null> {
+    verify(token: string): Promise<TJwtPayload | null> {
         try {
             const decoded = jwt.verify(token, this.secret) as TJwtPayload;
-            return decoded;
+            return Promise.resolve(decoded);
         } catch {
-            return null;
+            return Promise.resolve(null);
         }
     }
 }

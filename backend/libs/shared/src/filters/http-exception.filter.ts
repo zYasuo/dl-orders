@@ -1,11 +1,4 @@
-import {
-    ArgumentsHost,
-    Catch,
-    ExceptionFilter,
-    HttpException,
-    HttpStatus,
-    Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { StandardErrorResponse } from './standard-error.response';
 
@@ -54,10 +47,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
             message = 'Internal server error';
             details = undefined;
-            this.logger.error(
-                `${request.method} ${request.url} - ${String(exception)}`,
-                exception instanceof Error ? exception.stack : undefined,
-            );
+            this.logger.error(`${request.method} ${request.url} - ${String(exception)}`, exception instanceof Error ? exception.stack : undefined);
         }
 
         const body: StandardErrorResponse = {

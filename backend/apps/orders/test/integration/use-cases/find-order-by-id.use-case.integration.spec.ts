@@ -12,10 +12,7 @@ describe('FindOrderByIdUseCase (integration)', () => {
         ordersRepository = new InMemoryOrdersRepository();
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                FindOrderByIdUseCase,
-                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-            ],
+            providers: [FindOrderByIdUseCase, { provide: IOrdersRepositoryPort, useValue: ordersRepository }],
         }).compile();
 
         sut = module.get(FindOrderByIdUseCase);
@@ -35,9 +32,9 @@ describe('FindOrderByIdUseCase (integration)', () => {
                 totalPrice: 10,
             });
 
-            const result = await sut.execute(created!.id);
-            expect(result.id).toBe(created!.id);
-            expect(result.productId).toBe(created!.productId);
+            const result = await sut.execute(created.id);
+            expect(result.id).toBe(created.id);
+            expect(result.productId).toBe(created.productId);
         });
 
         it('throws NotFoundException when order does not exist', async () => {

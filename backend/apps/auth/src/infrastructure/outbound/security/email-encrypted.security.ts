@@ -25,12 +25,12 @@ export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
         return email.toLowerCase().trim();
     }
 
-    async getLookupHash(email: string): Promise<string> {
+    getLookupHash(email: string): Promise<string> {
         const normalized = this.normalize(email);
-        return crypto.createHmac('sha256', this.config.hashSecret).update(normalized, 'utf8').digest('hex');
+        return Promise.resolve(crypto.createHmac('sha256', this.config.hashSecret).update(normalized, 'utf8').digest('hex'));
     }
 
-    async encrypt(email: string): Promise<string> {
+    encrypt(email: string): Promise<string> {
         const normalized = this.normalize(email);
         const iv = crypto.randomBytes(this.config.ivLength);
         const cipher = crypto.createCipheriv(this.config.algorithm, this.key, iv);
@@ -39,10 +39,10 @@ export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
         ciphertextHex += cipher.final('hex');
 
         const authTag = (cipher as crypto.CipherGCM).getAuthTag();
-        return this.serializePayload(iv, authTag, ciphertextHex);
+        return Promise.resolve(this.serializePayload(iv, authTag, ciphertextHex));
     }
 
-    async decrypt(encryptedEmail: string): Promise<string> {
+    decrypt(encryptedEmail: string): Promise<string> {
         const { iv, authTag, ciphertextHex } = this.parsePayload(encryptedEmail);
         const decipher = crypto.createDecipheriv(this.config.algorithm, this.key, iv);
 
@@ -50,7 +50,7 @@ export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
 
         let decrypted = decipher.update(ciphertextHex, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
-        return decrypted;
+        return Promise.resolve(decrypted);
     }
 
     private serializePayload(iv: Buffer, authTag: Buffer, ciphertextHex: string): string {

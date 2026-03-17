@@ -1,10 +1,4 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    HttpException,
-    HttpStatus,
-    Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -17,9 +11,7 @@ function getClientIp(req: Request): string {
     return (
         req.ip ??
         req.socket?.remoteAddress ??
-        (typeof req.headers['x-forwarded-for'] === 'string'
-            ? req.headers['x-forwarded-for'].split(',')[0]?.trim()
-            : undefined) ??
+        (typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'].split(',')[0]?.trim() : undefined) ??
         'unknown'
     );
 }
@@ -33,10 +25,7 @@ export class RedisRateLimitGuard implements CanActivate {
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const endpoint = this.reflector.get<TRateLimitEndpointKey | undefined>(
-            RATE_LIMIT_ENDPOINT_KEY,
-            context.getHandler(),
-        );
+        const endpoint = this.reflector.get<TRateLimitEndpointKey | undefined>(RATE_LIMIT_ENDPOINT_KEY, context.getHandler());
         if (!endpoint) {
             return true;
         }

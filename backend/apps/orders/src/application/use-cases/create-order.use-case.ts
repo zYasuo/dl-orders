@@ -69,7 +69,7 @@ export class CreateOrderUseCase {
                     idempotencyKey: order.idempotencyKey,
                 },
             }),
-            
+
             this.orderSummaryPort.put({
                 orderId: order.id,
                 status: order.status,
@@ -96,9 +96,10 @@ export class CreateOrderUseCase {
 
         results.forEach((r) => {
             if (r.status === 'rejected') {
+                const reason: unknown = r.reason;
                 this.logger.warn('Order creation side-effect failed', {
                     orderId: order.id,
-                    error: r.reason,
+                    error: reason,
                 });
             }
         });

@@ -20,7 +20,7 @@ export class FindProductByIdUseCase {
         if (!product) {
             throw new NotFoundException(`Product ${id} not found`);
         }
-        
+
         await this.productCache.set(product, PRODUCT_CACHE_TTL_SECONDS);
         return product;
     }

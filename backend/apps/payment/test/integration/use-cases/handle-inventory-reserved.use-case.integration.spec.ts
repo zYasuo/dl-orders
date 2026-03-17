@@ -37,8 +37,7 @@ describe('HandleInventoryReservedUseCase (integration)', () => {
                 { provide: IPaymentEventsPublisherPort, useValue: new FakePaymentEventsPublisher() },
                 { provide: IPaymentAuditLogPort, useValue: paymentAuditLogPort },
             ],
-        })
-            .compile();
+        }).compile();
 
         sut = module.get(HandleInventoryReservedUseCase);
     });

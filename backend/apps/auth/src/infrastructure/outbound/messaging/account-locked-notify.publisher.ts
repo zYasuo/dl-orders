@@ -9,7 +9,8 @@ export class AccountLockedNotifyRabbitMqPublisher extends IAccountLockedNotifyPu
         super();
     }
 
-    async publish(event: IAccountLockedNotifyEvent): Promise<void> {
+    publish(event: IAccountLockedNotifyEvent): Promise<void> {
         this.notificationClient.emit(PATTERNS.ACCOUNT_LOCKED_NOTIFY, event);
+        return Promise.resolve();
     }
 }

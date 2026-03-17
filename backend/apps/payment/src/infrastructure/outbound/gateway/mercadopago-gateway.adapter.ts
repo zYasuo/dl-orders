@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ICreatePreferenceInput, IPaymentDetails, IPaymentGatewayPort, IPreferenceResult } from '../../../domain/ports/payment-gateway.port';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 @Injectable()
 export class MercadoPagoGatewayAdapter extends IPaymentGatewayPort {
@@ -11,8 +12,6 @@ export class MercadoPagoGatewayAdapter extends IPaymentGatewayPort {
     constructor(private readonly configService: ConfigService) {
         super();
         const accessToken = this.configService.getOrThrow<string>('MERCADOPAGO_ACCESS_TOKEN');
-
-        const { MercadoPagoConfig, Preference, Payment } = require('mercadopago') as typeof import('mercadopago');
 
         this.client = new MercadoPagoConfig({ accessToken });
 
@@ -70,7 +69,7 @@ export class MercadoPagoGatewayAdapter extends IPaymentGatewayPort {
             const id = body.id ?? paymentId;
 
             const status = body.status ?? '';
-            const amount = Number(body.transaction_amount) ?? 0;
+            const amount = Number(body.transaction_amount) || 0;
 
             const dateApproved = body.date_approved ?? null;
             const orderId = body.external_reference ?? undefined;

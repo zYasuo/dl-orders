@@ -12,7 +12,7 @@ export class OrderConfirmedConsumer {
     @EventPattern(PATTERNS.ORDER_CONFIRMED)
     async handle(@Payload() payload: IOrderConfirmedEvent): Promise<void> {
         const { orderId } = payload;
-        
+
         this.logger.log('Received order confirmed', { orderId });
         await this.handleUseCase.execute(payload);
     }

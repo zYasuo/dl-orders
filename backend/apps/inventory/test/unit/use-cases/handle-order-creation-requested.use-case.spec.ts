@@ -120,14 +120,14 @@ describe('HandleOrderCreationRequestedUseCase', () => {
                     reason: 'Inventory not available for this product',
                 },
             });
-            
+
             expect(eventsPublisher.publishInventoryReservationFailed).toHaveBeenCalledWith({
                 orderId: 'order-1',
                 productId: 'product-123',
                 quantity: 3,
                 reason: 'Inventory not available for this product',
             });
-            
+
             expect(eventsPublisher.publishInventoryReserved).not.toHaveBeenCalled();
             expect(inventoryRepository.decrementStock).not.toHaveBeenCalled();
         });

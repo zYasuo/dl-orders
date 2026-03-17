@@ -9,7 +9,8 @@ export class PasswordChangedRabbitMqPublisher extends IPasswordChangedPublisherP
         super();
     }
 
-    async publish(event: IPasswordChangedEvent): Promise<void> {
+    publish(event: IPasswordChangedEvent): Promise<void> {
         this.notificationClient.emit(PATTERNS.PASSWORD_CHANGED, event);
+        return Promise.resolve();
     }
 }

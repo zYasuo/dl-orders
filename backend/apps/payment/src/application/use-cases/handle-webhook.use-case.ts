@@ -101,10 +101,11 @@ export class HandleWebhookUseCase {
 
             results.forEach((r) => {
                 if (r.status === 'rejected') {
+                    const reason: unknown = r.reason;
                     this.logger.warn('Payment approved side-effect failed', {
                         orderId: paymentRecord.orderId,
                         externalId,
-                        error: r.reason,
+                        error: reason,
                     });
                 }
             });
@@ -152,10 +153,11 @@ export class HandleWebhookUseCase {
 
             results.forEach((r) => {
                 if (r.status === 'rejected') {
+                    const reason: unknown = r.reason;
                     this.logger.warn('Payment failed side-effect failed', {
                         orderId: paymentRecord.orderId,
                         externalId,
-                        error: r.reason,
+                        error: reason,
                     });
                 }
             });

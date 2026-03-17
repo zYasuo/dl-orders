@@ -37,11 +37,7 @@ describe('SigninUseCase (integration)', () => {
         jwtPort = new FakeJwtPort();
         const passwordHasher = new Argon2PasswordHasher();
 
-        const validateAuthAttempt = new ValidateAuthAttemptUseCase(
-            lockoutStore,
-            authLogsRepository,
-            accountLockedNotifyPublisher,
-        );
+        const validateAuthAttempt = new ValidateAuthAttemptUseCase(lockoutStore, authLogsRepository, accountLockedNotifyPublisher);
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [

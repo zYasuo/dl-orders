@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
@@ -98,27 +98,15 @@ describe('SigninUseCase', () => {
             const result = await sut.execute(input);
 
             expect(emailEncrypted.getLookupHash).toHaveBeenCalledWith(input.email);
-            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(
-                input.email,
-            );
+            expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith(input.email);
 
-            expect(validateAuthAttempt.validateBeforeLogin).toHaveBeenCalledWith(
-                verifiedUser.id,
-            );
+            expect(validateAuthAttempt.validateBeforeLogin).toHaveBeenCalledWith(verifiedUser.id);
 
-            expect(passwordHasher.compare).toHaveBeenCalledWith(
-                input.password,
-                verifiedUser.passwordHash,
-            );
-            
-            expect(validateAuthAttempt.registerSuccessfulLogin).toHaveBeenCalledWith(
-                verifiedUser.id,
-                null,
-            );
+            expect(passwordHasher.compare).toHaveBeenCalledWith(input.password, verifiedUser.passwordHash);
 
-            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(
-                verifiedUser.emailEncrypted,
-            );
+            expect(validateAuthAttempt.registerSuccessfulLogin).toHaveBeenCalledWith(verifiedUser.id, null);
+
+            expect(emailEncrypted.decrypt).toHaveBeenCalledWith(verifiedUser.emailEncrypted);
 
             expect(jwtPort.sign).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -129,19 +117,13 @@ describe('SigninUseCase', () => {
             );
 
             const signPayload = (jwtPort.sign as jest.Mock).mock.calls[0][0];
-            expect(sessionStore.set).toHaveBeenCalledWith(
-                signPayload.jti,
-                { sub: verifiedUser.id, email: verifiedUser.emailEncrypted },
-                86400,
-            );
+            expect(sessionStore.set).toHaveBeenCalledWith(signPayload.jti, { sub: verifiedUser.id, email: verifiedUser.emailEncrypted }, 86400);
 
             expect(result).toEqual({ accessToken: 'jwt-token' });
         });
 
         it('throws ForbiddenException when account is locked', async () => {
-            validateAuthAttempt.validateBeforeLogin.mockRejectedValueOnce(
-                new ForbiddenException('Account temporarily locked.'),
-            );
+            validateAuthAttempt.validateBeforeLogin.mockRejectedValueOnce(new ForbiddenException('Account temporarily locked.'));
             const input = { email: 'user@test.com', password: 'password123' };
 
             await expect(sut.execute(input)).rejects.toThrow(ForbiddenException);
@@ -163,9 +145,7 @@ describe('SigninUseCase', () => {
         });
 
         it('throws BadRequestException when email is not verified', async () => {
-            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(
-                unverifiedUser,
-            );
+            authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(unverifiedUser);
 
             const input = { email: 'user@test.com', password: 'password123' };
 
@@ -184,11 +164,7 @@ describe('SigninUseCase', () => {
 
             await expect(sut.execute(input)).rejects.toThrow('Authentication Error');
 
-            expect(validateAuthAttempt.registerFailedAttempt).toHaveBeenCalledWith(
-                verifiedUser.id,
-                null,
-                'user@test.com',
-            );
+            expect(validateAuthAttempt.registerFailedAttempt).toHaveBeenCalledWith(verifiedUser.id, null, 'user@test.com');
 
             expect(jwtPort.sign).not.toHaveBeenCalled();
             expect(sessionStore.set).not.toHaveBeenCalled();

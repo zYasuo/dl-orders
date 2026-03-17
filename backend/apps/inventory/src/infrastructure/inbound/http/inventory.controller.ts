@@ -1,6 +1,6 @@
 import { ZodValidationPipe } from '@app/shared';
 import { Body, Controller, Param } from '@nestjs/common';
-import { CreateInventoryDto, SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
+import { SCreateInventory, type TCreateInventory } from '../../../application/dto/create-inventory.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from '../../../application/use-cases/find-all-invetory.use-case';
 import { InventoryEntity } from '../../../domain/entities/inventory.entity';

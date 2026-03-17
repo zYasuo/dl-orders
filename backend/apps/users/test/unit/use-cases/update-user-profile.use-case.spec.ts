@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateUserProfileUseCase } from '../../../src/application/use-cases/update-user-profile.use-case';
 import { UserProfileEntity } from '../../../src/domain/entities/user-profile.entity';
@@ -26,10 +25,7 @@ describe('UpdateUserProfileUseCase', () => {
         } as unknown as jest.Mocked<IUserProfileRepositoryPort>;
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                UpdateUserProfileUseCase,
-                { provide: IUserProfileRepositoryPort, useValue: userProfileRepository },
-            ],
+            providers: [UpdateUserProfileUseCase, { provide: IUserProfileRepositoryPort, useValue: userProfileRepository }],
         }).compile();
 
         sut = module.get(UpdateUserProfileUseCase);

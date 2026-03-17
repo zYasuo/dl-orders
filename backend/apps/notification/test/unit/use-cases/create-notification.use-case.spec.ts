@@ -46,10 +46,7 @@ describe('CreateNotificationUseCase', () => {
         } as unknown as jest.Mocked<INotificationRepositoryPort>;
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                CreateNotificationUseCase,
-                { provide: INotificationRepositoryPort, useValue: notificationRepository },
-            ],
+            providers: [CreateNotificationUseCase, { provide: INotificationRepositoryPort, useValue: notificationRepository }],
         }).compile();
 
         sut = module.get(CreateNotificationUseCase);

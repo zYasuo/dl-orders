@@ -70,10 +70,12 @@ export class RedisProductCacheAdapter extends IProductCachePort {
 
         if (!keys.length) return null;
 
-        const products = await Promise.all(keys.map(async (key) => {
-            const product = await this.getById(key.replace(`${REDIS_KEY_PREFIX}item:`, ''));
-            return product;
-        }));
+        const products = await Promise.all(
+            keys.map(async (key) => {
+                const product = await this.getById(key.replace(`${REDIS_KEY_PREFIX}item:`, ''));
+                return product;
+            }),
+        );
 
         return products.filter((p): p is ProductEntity => p !== null);
     }

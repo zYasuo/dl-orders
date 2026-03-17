@@ -12,13 +12,7 @@ export type TUserParams = {
 export class UserEntity {
     constructor(private params: TUserParams) {}
 
-    static create(params: {
-        emailEncrypted: string;
-        emailLookupHash: string;
-        passwordHash: string;
-        name?: string | null;
-    }): UserEntity {
-        
+    static create(params: { emailEncrypted: string; emailLookupHash: string; passwordHash: string; name?: string | null }): UserEntity {
         const now = new Date();
         return new UserEntity({
             id: crypto.randomUUID(),

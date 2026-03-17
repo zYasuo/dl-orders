@@ -5,16 +5,10 @@ import { CreateProductDto } from '../../../../application/dto/create-product.sch
 
 export const ApiProducts = () => applyDecorators(ApiTags('Products'));
 
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const ProductDoc = {
-    List: () =>
-        applyDecorators(
-            Get(),
-            ApiOperation({ summary: 'List all products' }),
-            ApiResponse({ status: 200, description: 'Products list' }),
-        ),
+    List: () => applyDecorators(Get(), ApiOperation({ summary: 'List all products' }), ApiResponse({ status: 200, description: 'Products list' })),
 
     Create: () =>
         applyDecorators(

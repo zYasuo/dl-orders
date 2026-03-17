@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
-import {
-    INotificationAuditLogPort,
-    TNotificationAuditEvent,
-} from '../../../../domain/ports/notification-audit-log.port';
+import { INotificationAuditLogPort, TNotificationAuditEvent } from '../../../../domain/ports/notification-audit-log.port';
 
 const COLLECTION = 'notification_audit_log';
 
@@ -24,7 +21,7 @@ export class MongoNotificationAuditLogRepository extends INotificationAuditLogPo
     async getByData(data: string): Promise<TNotificationAuditEvent[]> {
         const cursor = this.collection.find({ data }).sort({ timestamp: 1 });
         const items = await cursor.toArray();
-        
+
         return items.map((item) => ({
             data: item.data,
             action: item.action,

@@ -7,9 +7,7 @@ import { HandleAccountLockedNotifyUseCase } from 'apps/notification/src/applicat
 export class AccountLockedNotifyConsumer {
     private readonly logger = new Logger(AccountLockedNotifyConsumer.name);
 
-    constructor(
-        private readonly handleUseCase: HandleAccountLockedNotifyUseCase,
-    ) {}
+    constructor(private readonly handleUseCase: HandleAccountLockedNotifyUseCase) {}
 
     @EventPattern(PATTERNS.ACCOUNT_LOCKED_NOTIFY)
     async handle(@Payload() payload: IAccountLockedNotifyEvent): Promise<void> {

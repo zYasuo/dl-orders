@@ -1,4 +1,3 @@
-import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';

@@ -57,7 +57,7 @@ export class OtpRepository extends IOtpRepositoryPort {
                 used: true,
             },
         });
-    
+
         return result.count === 1;
     }
 }

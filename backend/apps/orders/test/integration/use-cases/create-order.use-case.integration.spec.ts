@@ -45,7 +45,13 @@ describe('CreateOrderUseCase (integration)', () => {
 
     describe('execute', () => {
         it('persists order as PENDING and publishes OrderCreationRequested', async () => {
-            const input = { productId: 'product-123', quantity: 1, description: 'test order', recipient: 'test@test.com', idempotencyKey: crypto.randomUUID() };
+            const input = {
+                productId: 'product-123',
+                quantity: 1,
+                description: 'test order',
+                recipient: 'test@test.com',
+                idempotencyKey: crypto.randomUUID(),
+            };
 
             const result = await sut.execute(input);
 

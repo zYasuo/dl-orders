@@ -1,5 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { OrderStatus } from '../../domain/entities/order.entity';
+import { Injectable, Logger } from '@nestjs/common';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
@@ -67,9 +66,10 @@ export class ConfirmOrderUseCase {
 
         results.forEach((r) => {
             if (r.status === 'rejected') {
+                const reason: unknown = r.reason;
                 this.logger.warn('Order confirm side-effect failed', {
                     orderId: order.id,
-                    error: r.reason,
+                    error: reason,
                 });
             }
         });

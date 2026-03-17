@@ -46,8 +46,6 @@ export class HandleInventoryReservedUseCase {
             return;
         }
 
-
-
         await this.paymentAuditLogPort.log({
             orderId,
             action: 'PAYMENT_REQUESTED',
@@ -61,15 +59,13 @@ export class HandleInventoryReservedUseCase {
             title: `Order ${orderId}`,
         });
 
-
         const results = await Promise.allSettled([
-
             this.paymentRepositoryPort.updateStatus(payment.id, {
                 status: PaymentStatus.PENDING,
                 preferenceId: preference.preferenceId,
                 gatewayResponse: { initPoint: preference.initPoint },
             }),
-            
+
             this.paymentAuditLogPort.log({
                 orderId,
                 action: 'PREFERENCE_CREATED',
@@ -80,10 +76,11 @@ export class HandleInventoryReservedUseCase {
 
         results.forEach((r) => {
             if (r.status === 'rejected') {
+                const reason: unknown = r.reason;
                 this.logger.warn('Payment creation side-effect failed', {
                     orderId,
                     paymentId: payment.id,
-                    error: r.reason,
+                    error: reason,
                 });
             }
         });

@@ -1,5 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { OrderStatus } from '../../domain/entities/order.entity';
+import { Injectable, Logger } from '@nestjs/common';
 import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
@@ -20,13 +19,13 @@ export class CancelOrderUseCase {
         const order = await this.ordersRepositoryPort.confirmIfPending(event.orderId);
 
         if (!order) {
-           this.logger.warn(`Order ${event.orderId} already processed`);
-           return;
+            this.logger.warn(`Order ${event.orderId} already processed`);
+            return;
         }
-    
+
         const now = new Date();
         const timestamp = now.toISOString();
-    
+
         const results = await Promise.allSettled([
             this.orderAuditLogPort.log({
                 orderId: order.id,
@@ -34,7 +33,7 @@ export class CancelOrderUseCase {
                 timestamp,
                 details: { reason: event.reason },
             }),
-    
+
             this.orderSummaryPort.put({
                 orderId: order.id,
                 status: order.status,
@@ -47,12 +46,13 @@ export class CancelOrderUseCase {
                 updatedAt: timestamp,
             }),
         ]);
-    
+
         results.forEach((r) => {
             if (r.status === 'rejected') {
+                const reason: unknown = r.reason;
                 this.logger.warn('Order cancel side-effect failed', {
                     orderId: order.id,
-                    error: r.reason,
+                    error: reason,
                 });
             }
         });

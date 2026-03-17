@@ -15,11 +15,7 @@ export class PasswordChangedConsumer {
 
         const normalized: IPasswordChangedEvent = {
             ...payload,
-            changedAt: payload.changedAt
-                ? typeof payload.changedAt === 'string'
-                    ? new Date(payload.changedAt)
-                    : payload.changedAt
-                : undefined,
+            changedAt: payload.changedAt ? (typeof payload.changedAt === 'string' ? new Date(payload.changedAt) : payload.changedAt) : undefined,
         };
 
         await this.handlePasswordChangedUseCase.execute(normalized);

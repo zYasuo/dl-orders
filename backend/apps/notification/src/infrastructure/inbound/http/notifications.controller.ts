@@ -8,10 +8,7 @@ export class NotificationsController {
     constructor(private readonly userNotificationsPort: IUserNotificationsPort) {}
 
     @NotificationsDoc.GetByUserId()
-    getByUserId(
-        @Param('userId') userId: string,
-        @Query('limit') limit?: string,
-    ) {
+    getByUserId(@Param('userId') userId: string, @Query('limit') limit?: string) {
         const limitNum = limit != null ? parseInt(limit, 10) : undefined;
         return this.userNotificationsPort.getByUserId(userId, limitNum);
     }

@@ -5,8 +5,7 @@ import { CreateInventoryDto } from '../../../../application/dto/create-inventory
 
 export const ApiInventories = () => applyDecorators(ApiTags('Inventories'));
 
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const InventoryDoc = {
     Create: () =>

@@ -12,12 +12,12 @@ export class JwtService extends IJwtPort {
         this.secret = configService.getOrThrow<string>('JWT_SECRET');
     }
 
-    async verify(token: string): Promise<TJwtPayload | null> {
+    verify(token: string): Promise<TJwtPayload | null> {
         try {
             const decoded = jwt.verify(token, this.secret) as TJwtPayload;
-            return decoded;
+            return Promise.resolve(decoded);
         } catch {
-            return null;
+            return Promise.resolve(null);
         }
     }
 }

@@ -4,8 +4,7 @@ import { JwtAuthGuard, StandardErrorResponseDto } from '@app/shared';
 
 export const ApiPayments = () => applyDecorators(ApiTags('Payments'));
 
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const PaymentDoc = {
     Webhook: () =>

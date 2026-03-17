@@ -9,7 +9,8 @@ export class UserVerifiedRabbitMqPublisher extends IUserVerifiedPublisherPort {
         super();
     }
 
-    async publish(event: UserVerifiedEvent): Promise<void> {
+    publish(event: UserVerifiedEvent): Promise<void> {
         this.usersClient.emit(PATTERNS.USER_VERIFIED, event);
+        return Promise.resolve();
     }
 }

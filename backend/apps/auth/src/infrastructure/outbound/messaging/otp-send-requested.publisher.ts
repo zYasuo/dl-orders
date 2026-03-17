@@ -9,7 +9,8 @@ export class OtpSendRequestedRabbitMqPublisher extends IOtpSendRequestedPublishe
         super();
     }
 
-    async publish(event: IOtpSendRequestedEvent): Promise<void> {
+    publish(event: IOtpSendRequestedEvent): Promise<void> {
         this.notificationClient.emit(PATTERNS.OTP_SEND_REQUESTED, event);
+        return Promise.resolve();
     }
 }

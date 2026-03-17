@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
 import { UserProfileEntity } from '../../../../domain/entities/user-profile.entity';
 import { IUserProfileRepositoryPort } from '../../../../domain/ports/user-profile-repository.port';
-import {
-    TCreateUserProfile,
-    TUpdateUserProfile,
-} from '../../../../domain/types/user-profile-repository.types';
+import { TCreateUserProfile, TUpdateUserProfile } from '../../../../domain/types/user-profile-repository.types';
 
 @Injectable()
 export class UserProfileRepository extends IUserProfileRepositoryPort {

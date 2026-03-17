@@ -22,10 +22,8 @@ export class CreateResetPasswordLinkUseCase {
 
         const message = 'If this email addres is registered, you will receive a reset password link in a few minutes.';
 
-        const [linkResetPassword, emailLookupHash] = await Promise.all([
-            this.createLinkResetPassword(token),
-            this.emailEncrypted.getLookupHash(email),
-        ]);
+        const linkResetPassword = this.createLinkResetPassword(token);
+        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
 
         const [existing, emailEncrypted] = await Promise.all([
             this.passwordResetRepository.findByEmailLookupHash(emailLookupHash),

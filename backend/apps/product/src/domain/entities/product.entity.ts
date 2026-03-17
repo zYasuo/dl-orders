@@ -21,14 +21,6 @@ export class ProductEntity implements IProduct {
 
     static create(params: { name: string; description: string; price: number; imageUrl?: string | null }): ProductEntity {
         const now = new Date();
-        return new ProductEntity(
-            crypto.randomUUID(),
-            params.name,
-            params.description,
-            params.price,
-            params.imageUrl ?? null,
-            now,
-            now,
-        );
+        return new ProductEntity(crypto.randomUUID(), params.name, params.description, params.price, params.imageUrl ?? null, now, now);
     }
 }

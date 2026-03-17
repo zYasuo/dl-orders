@@ -31,4 +31,4 @@ async function bootstrap() {
 
     await app.listen(configService.get<number>('PORT') ?? 3006);
 }
-bootstrap();
+void bootstrap();

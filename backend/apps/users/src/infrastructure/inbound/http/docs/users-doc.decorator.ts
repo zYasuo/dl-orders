@@ -3,11 +3,9 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 import { JwtAuthGuard, StandardErrorResponseDto } from '@app/shared';
 import { UpdateUserProfileDto } from '../../../../application/dto/update-user-profile.dto';
 
-export const ApiUsers = () =>
-    applyDecorators(ApiTags('Users'), ApiBearerAuth(), UseGuards(JwtAuthGuard));
+export const ApiUsers = () => applyDecorators(ApiTags('Users'), ApiBearerAuth(), UseGuards(JwtAuthGuard));
 
-const standardError = (status: number, description: string) =>
-    ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const UsersDoc = {
     GetProfile: () =>

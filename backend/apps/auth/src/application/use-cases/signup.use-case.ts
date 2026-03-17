@@ -28,11 +28,8 @@ export class SignupUseCase {
         if (existing) {
             throw new ConflictException('Email already registered');
         }
-        
-        const [emailEncrypted, passwordHash] = await Promise.all([
-            this.emailEncrypted.encrypt(email),
-            this.passwordHasher.hash(password),
-        ]);
+
+        const [emailEncrypted, passwordHash] = await Promise.all([this.emailEncrypted.encrypt(email), this.passwordHasher.hash(password)]);
 
         const createData: TCreateAuthUser = {
             emailEncrypted,
@@ -59,7 +56,7 @@ export class SignupUseCase {
             code,
             expiresInMinutes,
         });
-        
+
         return { userId: user.id, email };
     }
 }

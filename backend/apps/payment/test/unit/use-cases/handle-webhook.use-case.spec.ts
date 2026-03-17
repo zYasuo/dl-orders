@@ -79,7 +79,10 @@ describe('HandleWebhookUseCase', () => {
 
         expect(paymentGatewayPort.getPayment).toHaveBeenCalledWith(externalId);
         expect(paymentRepositoryPort.findByOrderId).toHaveBeenCalledWith(orderId);
-        expect(paymentRepositoryPort.updateStatusIfPending).toHaveBeenCalledWith(fakePayment.id, expect.objectContaining({ status: PaymentStatus.APPROVED, externalId }));
+        expect(paymentRepositoryPort.updateStatusIfPending).toHaveBeenCalledWith(
+            fakePayment.id,
+            expect.objectContaining({ status: PaymentStatus.APPROVED, externalId }),
+        );
         expect(paymentEventsPublisherPort.publishPaymentApproved).toHaveBeenCalledWith({
             orderId,
             paymentId: externalId,
@@ -100,7 +103,10 @@ describe('HandleWebhookUseCase', () => {
 
         await sut.execute({ type: 'payment', data: { id: externalId } });
 
-        expect(paymentRepositoryPort.updateStatusIfPending).toHaveBeenCalledWith(fakePayment.id, expect.objectContaining({ status: PaymentStatus.REJECTED }));
+        expect(paymentRepositoryPort.updateStatusIfPending).toHaveBeenCalledWith(
+            fakePayment.id,
+            expect.objectContaining({ status: PaymentStatus.REJECTED }),
+        );
         expect(paymentEventsPublisherPort.publishPaymentFailed).toHaveBeenCalledWith({
             orderId,
             paymentId: externalId,

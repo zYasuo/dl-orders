@@ -9,11 +9,13 @@ export class PaymentRabbitMqPublisher extends IPaymentEventsPublisherPort {
         super();
     }
 
-    async publishPaymentApproved(event: PaymentApprovedEvent): Promise<void> {
+    publishPaymentApproved(event: PaymentApprovedEvent): Promise<void> {
         this.ordersClient.emit(PATTERNS.PAYMENT_APPROVED, event);
+        return Promise.resolve();
     }
 
-    async publishPaymentFailed(event: PaymentFailedEvent): Promise<void> {
+    publishPaymentFailed(event: PaymentFailedEvent): Promise<void> {
         this.ordersClient.emit(PATTERNS.PAYMENT_FAILED, event);
+        return Promise.resolve();
     }
 }

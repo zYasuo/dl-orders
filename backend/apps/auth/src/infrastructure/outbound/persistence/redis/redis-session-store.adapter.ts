@@ -11,11 +11,7 @@ export class RedisSessionStoreAdapter extends ISessionStorePort {
         super();
     }
 
-    async set(
-        sessionId: string,
-        data: TSessionData,
-        ttlSeconds: number,
-    ): Promise<void> {
+    async set(sessionId: string, data: TSessionData, ttlSeconds: number): Promise<void> {
         const client = this.redis.getClient();
         const key = SESSION_KEY_PREFIX + sessionId;
         const value = JSON.stringify(data);

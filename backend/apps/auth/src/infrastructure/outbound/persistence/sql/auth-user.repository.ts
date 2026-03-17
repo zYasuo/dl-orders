@@ -70,10 +70,10 @@ export class AuthUserRepository extends IAuthUserRepositoryPort {
         const row = await this.db.user.update({
             where: { id },
             data: { passwordHash: password },
-        })
-        
+        });
+
         if (!row) return false;
-        
+
         return true;
     }
 }

@@ -12,7 +12,7 @@ export class OtpSendRequestedConsumer {
     @EventPattern(PATTERNS.OTP_SEND_REQUESTED)
     async handle(@Payload() payload: IOtpSendRequestedEvent): Promise<void> {
         const { email, code, expiresInMinutes } = payload;
-        
+
         this.logger.log('Received OTP send request', { email, code, expiresInMinutes });
         await this.handleUseCase.execute(payload);
     }

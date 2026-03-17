@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
-import {
-    IUserNotificationsPort,
-    TUserNotificationItem,
-} from '../../../../domain/ports/user-notifications.port';
+import { IUserNotificationsPort, TUserNotificationItem } from '../../../../domain/ports/user-notifications.port';
 
 const COLLECTION = 'user_notifications';
 
@@ -29,10 +26,7 @@ export class MongoUserNotificationsRepository extends IUserNotificationsPort {
     }
 
     async getByUserId(userId: string, limit = 20): Promise<TUserNotificationItem[]> {
-        const cursor = this.collection
-            .find({ userId })
-            .sort({ timestamp: -1 })
-            .limit(limit);
+        const cursor = this.collection.find({ userId }).sort({ timestamp: -1 }).limit(limit);
         const items = await cursor.toArray();
         return items.map((item) => ({
             userId: item.userId,

@@ -9,11 +9,13 @@ export class InventoryRabbitMqPublisher extends IInventoryEventsPublisherPort {
         super();
     }
 
-    async publishInventoryReserved(event: InventoryReservedEvent): Promise<void> {
+    publishInventoryReserved(event: InventoryReservedEvent): Promise<void> {
         this.ordersClient.emit(PATTERNS.INVENTORY_RESERVED, event);
+        return Promise.resolve();
     }
 
-    async publishInventoryReservationFailed(event: InventoryReservationFailedEvent): Promise<void> {
+    publishInventoryReservationFailed(event: InventoryReservationFailedEvent): Promise<void> {
         this.ordersClient.emit(PATTERNS.INVENTORY_RESERVATION_FAILED, event);
+        return Promise.resolve();
     }
 }

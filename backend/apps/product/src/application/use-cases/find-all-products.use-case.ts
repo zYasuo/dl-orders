@@ -21,7 +21,7 @@ export class FindAllProductsUseCase {
         if (products) {
             await this.productCache.setAll(products, PRODUCT_CACHE_TTL_SECONDS);
         }
-        
+
         return products;
     }
 }

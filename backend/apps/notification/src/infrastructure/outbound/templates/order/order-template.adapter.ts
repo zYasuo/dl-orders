@@ -23,6 +23,6 @@ export class OrderTemplateAdapter implements IOrderNotificationTemplatePort {
     }
 
     private replacePlaceholders(template: string, data: Record<string, string>): string {
-        return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => data[key] ?? '');
+        return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_: string, key: string) => data[key] ?? '');
     }
 }

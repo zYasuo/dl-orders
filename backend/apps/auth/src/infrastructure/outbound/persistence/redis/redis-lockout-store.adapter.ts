@@ -43,7 +43,7 @@ export class RedisLockoutStoreAdapter extends ILockoutStorePort {
         if (attempts === 1) {
             await client.expire(key, ATTEMPTS_WINDOW_SECONDS);
         }
-        
+
         return {
             attempts,
             shouldLock: attempts >= AuthLogsEntity.MAX_LOGIN_ATTEMPTS,

@@ -22,12 +22,10 @@ export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
         const { idempotencyKey, orderId } = input;
 
         if (idempotencyKey) {
-
             const byKey = await this.findByIdempotencyKey(idempotencyKey);
             if (byKey) return byKey;
-
         }
-        
+
         const byOrderId = await this.findByOrderId(orderId);
         if (byOrderId) return byOrderId;
 

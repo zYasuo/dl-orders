@@ -22,7 +22,7 @@ export type TOrderParams = {
 
 export class OrderEntity {
     constructor(private params: TOrderParams) {}
-    
+
     static create(params: {
         productId: string;
         quantity: number;
@@ -34,7 +34,6 @@ export class OrderEntity {
         unitPrice: number;
         totalPrice: number;
     }): OrderEntity {
-        
         const now = new Date();
 
         return new OrderEntity({
@@ -53,11 +52,11 @@ export class OrderEntity {
             updatedAt: now,
         });
     }
-    
+
     static calculateTotalPrice(quantity: number, unitPrice: number): number {
         return quantity * unitPrice;
     }
-    
+
     get id() {
         return this.params.id;
     }
@@ -77,7 +76,7 @@ export class OrderEntity {
     get idempotencyKey() {
         return this.params.idempotencyKey;
     }
-    
+
     get recipient() {
         return this.params.recipient;
     }

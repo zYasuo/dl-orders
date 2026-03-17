@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
-import {
-    IReservationAuditLogPort,
-    TReservationAuditEvent,
-} from '../../../../domain/ports/reservation-audit-log.port';
+import { IReservationAuditLogPort, TReservationAuditEvent } from '../../../../domain/ports/reservation-audit-log.port';
 
 const COLLECTION = 'reservation_audit_log';
 

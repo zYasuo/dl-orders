@@ -28,15 +28,7 @@ export class InMemoryProductRepository extends IProductRepositoryPort {
         const product = this.products.get(id);
         if (!product) return null;
         const imageUrl = data.imageUrl !== undefined ? data.imageUrl : product.imageUrl;
-        const updated = new ProductEntity(
-            product.id,
-            data.name,
-            data.description,
-            data.price,
-            imageUrl ?? null,
-            product.createdAt,
-            new Date(),
-        );
+        const updated = new ProductEntity(product.id, data.name, data.description, data.price, imageUrl ?? null, product.createdAt, new Date());
         this.products.set(id, updated);
         return updated;
     }

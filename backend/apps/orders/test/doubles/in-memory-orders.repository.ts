@@ -11,7 +11,7 @@ export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
 
         const order = OrderEntity.create(input);
         this.orders.set(order.id, order);
-        
+
         return order;
     }
 

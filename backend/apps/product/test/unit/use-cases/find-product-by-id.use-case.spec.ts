@@ -63,9 +63,7 @@ describe('FindProductByIdUseCase', () => {
         it('throws NotFoundException when product does not exist', async () => {
             productRepository.findById.mockResolvedValueOnce(null);
 
-            await expect(sut.execute('non-existent')).rejects.toThrow(
-                new NotFoundException('Product non-existent not found'),
-            );
+            await expect(sut.execute('non-existent')).rejects.toThrow(new NotFoundException('Product non-existent not found'));
         });
 
         it('propagates error when repository throws', async () => {

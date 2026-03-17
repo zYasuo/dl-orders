@@ -1,5 +1,5 @@
-import { CurrentUser, JwtAuthGuard, TJwtPayload, ZodValidationPipe } from '@app/shared';
-import { Body, Controller, UseGuards } from '@nestjs/common';
+import { CurrentUser, TJwtPayload, ZodValidationPipe } from '@app/shared';
+import { Body, Controller } from '@nestjs/common';
 import { SUpdateUserProfile, type TUpdateUserProfileDto } from '../../../application/dto/update-user-profile.dto';
 import { GetUserProfileUseCase } from '../../../application/use-cases/get-user-profile.use-case';
 import { UpdateUserProfileUseCase } from '../../../application/use-cases/update-user-profile.use-case';

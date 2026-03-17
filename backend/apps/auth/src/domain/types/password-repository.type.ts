@@ -3,4 +3,4 @@ export type TCreatePasswordReset = {
     emailLookupHash: string;
     linkResetPassword: string;
     expiresAt: Date;
-}
+};

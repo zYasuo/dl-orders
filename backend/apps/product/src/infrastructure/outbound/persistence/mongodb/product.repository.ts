@@ -63,11 +63,7 @@ export class MongoProductRepository extends IProductRepositoryPort {
         const now = new Date();
         const update: Record<string, unknown> = { name, description, price, updatedAt: now };
         if (imageUrl !== undefined) update.imageUrl = imageUrl ?? null;
-        const result = await this.collection.findOneAndUpdate(
-            { _id: id },
-            { $set: update },
-            { returnDocument: 'after' },
-        );
+        const result = await this.collection.findOneAndUpdate({ _id: id }, { $set: update }, { returnDocument: 'after' });
         if (!result) return null;
         return this.toEntity(result);
     }

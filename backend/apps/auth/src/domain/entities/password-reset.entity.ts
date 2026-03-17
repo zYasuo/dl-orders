@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 
 export interface IPasswordResetEntity {
     id: string;
@@ -40,7 +40,7 @@ export class PasswordResetEntity implements IPasswordResetEntity {
     static isUsed(used: boolean): boolean {
         return used;
     }
-    
+
     static expiresAtFromNow(): Date {
         return new Date(Date.now() + PasswordResetEntity.EXPIRES_IN_MINUTES * 60 * 1000);
     }

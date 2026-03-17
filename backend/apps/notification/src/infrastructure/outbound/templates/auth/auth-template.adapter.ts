@@ -8,7 +8,6 @@ import { PASSWORD_CHANGED_TITLE, passwordChangedHtmlTemplate } from './auth-pass
 
 @Injectable()
 export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
-    
     getAccountLockedMessage(payload: IAccountLockedNotifyEvent): INotificationRequest {
         const { lockedUntilMinutes } = payload;
         const content = accountLockedHtmlTemplate.replace(/\{\{\s*lockedUntilMinutes\s*\}\}/g, String(lockedUntilMinutes));
@@ -24,7 +23,7 @@ export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
             resetPasswordLink: linkResetPassword,
             expiresInMinutes: String(this.getExpiresInMinutes(expiresAt)),
         };
-        const content = resetPasswordHtmlTemplate.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => data[key] ?? '');
+        const content = resetPasswordHtmlTemplate.replace(/\{\{\s*(\w+)\s*\}\}/g, (_: string, key: string) => data[key] ?? '');
         return {
             title: RESET_PASSWORD_TITLE,
             content: content.trim(),

@@ -8,9 +8,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     constructor(private readonly configService: ConfigService) {}
 
-    async onModuleInit() {
+    onModuleInit(): Promise<void> {
         const url = this.configService.getOrThrow<string>('REDIS_URL');
         this.client = new Redis(url);
+        return Promise.resolve();
     }
 
     async onModuleDestroy() {
