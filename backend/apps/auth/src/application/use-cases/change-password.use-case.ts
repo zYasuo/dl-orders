@@ -19,6 +19,7 @@ export class ChangePasswordUseCase {
     async execute(input: TChangePassword): Promise<{ message: string }> {
         const { token, email, new_password } = input;
 
+        const now = new Date();
         const message = 'Password changed successfully';
 
         const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
@@ -41,7 +42,7 @@ export class ChangePasswordUseCase {
 
         await this.passwordChangedPublisher.publish({
             email: email,
-            changedAt: new Date(),
+            changedAt: now,
         });
 
         return { message };
