@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
-import { TCreateResetPasswordLink } from '../dto/create-reset-password-link.dto';
-import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
 import { PasswordResetEntity } from '../../domain/entities/password-reset.entity';
-import { TCreatePasswordReset } from '../../domain/types/password-repository.type';
 import { IResetPasswordPublisherPort } from '../../domain/ports/publishers/reset-password-publisher.port';
+import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
+import { TCreatePasswordReset } from '../../domain/types/password-repository.type';
+import { TCreateResetPasswordLink } from '../dto/create-reset-password-link.dto';
 
 @Injectable()
 export class CreateResetPasswordLinkUseCase {
@@ -21,7 +21,7 @@ export class CreateResetPasswordLinkUseCase {
         const expiresAt = PasswordResetEntity.expiresAtFromNow();
 
         const message = 'If this email addres is registered, you will receive a reset password link in a few minutes.';
-        
+
         const [linkResetPassword, emailLookupHash] = await Promise.all([
             this.createLinkResetPassword(token),
             this.emailEncrypted.getLookupHash(email),
