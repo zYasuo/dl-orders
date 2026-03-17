@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
-import { TChangePassword } from '../dto/change-password.dto';
-import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
-import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
 import { IPasswordChangedPublisherPort } from '../../domain/ports/publishers/password-changed-publisher.port';
+import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
+import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
+import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
+import { TChangePassword } from '../dto/change-password.dto';
 
 @Injectable()
 export class ChangePasswordUseCase {
