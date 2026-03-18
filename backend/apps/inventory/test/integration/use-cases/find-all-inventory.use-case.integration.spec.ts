@@ -7,49 +7,72 @@ import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-li
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
 describe('FindAllInventoryUseCase (integration)', () => {
-    let sut: FindAllInventoryUseCase;
-    let repository: InMemoryInventoryRepository;
-    let listCache: InMemoryInventoryListCache;
+  let sut: FindAllInventoryUseCase;
+  let repository: InMemoryInventoryRepository;
+  let listCache: InMemoryInventoryListCache;
 
-    const item1 = new InventoryEntity('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date());
-    const item2 = new InventoryEntity('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date());
+  const now = new Date();
 
-    beforeEach(async () => {
-        repository = new InMemoryInventoryRepository();
-        repository.seed(item1);
-        repository.seed(item2);
-        listCache = new InMemoryInventoryListCache();
+  const item1 = new InventoryEntity(
+    'inventory-123',
+    'Inventory 1',
+    10,
+    100,
+    1,
+    5,
+    'product-123',
+    now,
+    now,
+  );
+  
+  const item2 = new InventoryEntity(
+    'inventory-456',
+    'Inventory 2',
+    20,
+    100,
+    1,
+    5,
+    'product-456',
+    now,
+    now,
+  );
 
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                FindAllInventoryUseCase,
-                { provide: IInventoryRepositoryPort, useValue: repository },
-                { provide: IInventoryListCachePort, useValue: listCache },
-            ],
-        }).compile();
+  beforeEach(async () => {
+    repository = new InMemoryInventoryRepository();
+    repository.seed(item1);
+    repository.seed(item2);
+    listCache = new InMemoryInventoryListCache();
 
-        sut = module.get(FindAllInventoryUseCase);
-    });
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FindAllInventoryUseCase,
+        { provide: IInventoryRepositoryPort, useValue: repository },
+        { provide: IInventoryListCachePort, useValue: listCache },
+      ],
+    }).compile();
 
-    it('should return all inventory items', async () => {
-        const result = await sut.execute();
-        expect(result).toHaveLength(2);
-        expect(result).toEqual(await repository.findAll());
-    });
+    sut = module.get(FindAllInventoryUseCase);
+  });
 
-    it('should return empty array when no inventory items exist', async () => {
-        const emptyRepository = new InMemoryInventoryRepository();
-        const emptyCache = new InMemoryInventoryListCache();
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                FindAllInventoryUseCase,
-                { provide: IInventoryRepositoryPort, useValue: emptyRepository },
-                { provide: IInventoryListCachePort, useValue: emptyCache },
-            ],
-        }).compile();
-        const useCase = module.get(FindAllInventoryUseCase);
+  it('should return all inventory items', async () => {
+    const result = await sut.execute();
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(await repository.findAll());
+  });
 
-        const result = await useCase.execute();
-        expect(result).toEqual([]);
-    });
+  it('should return empty array when no inventory items exist', async () => {
+    const emptyRepository = new InMemoryInventoryRepository();
+    const emptyCache = new InMemoryInventoryListCache();
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FindAllInventoryUseCase,
+        { provide: IInventoryRepositoryPort, useValue: emptyRepository },
+        { provide: IInventoryListCachePort, useValue: emptyCache },
+      ],
+    }).compile();
+    const useCase = module.get(FindAllInventoryUseCase);
+
+    const result = await useCase.execute();
+    expect(result).toEqual([]);
+  });
 });

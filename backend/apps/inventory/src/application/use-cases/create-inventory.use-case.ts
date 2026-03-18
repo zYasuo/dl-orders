@@ -7,35 +7,44 @@ import { TCreateInventory } from '../dto/create-inventory.schema';
 
 @Injectable()
 export class CreateInventoryUseCase {
-    constructor(
-        private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
-        private readonly listCache: IInventoryListCachePort,
-    ) {}
+  constructor(
+    private readonly inventoryRepositoryPort: IInventoryRepositoryPort,
+    private readonly listCache: IInventoryListCachePort,
+  ) {}
 
-    async execute(input: TCreateInventory): Promise<InventoryEntity> {
-        const { productId, name, quantity } = input;
+  async execute(input: TCreateInventory): Promise<InventoryEntity> {
+    const { productId, name, quantity, maxQuantity, minQuantity, lowStockThreshold } = input;
 
-        const [existingInventory, existingByName] = await Promise.all([
-            this.inventoryRepositoryPort.findByProductId(productId),
-            this.inventoryRepositoryPort.findByName(name),
-        ]);
+    const [existingInventory, existingByName] = await Promise.all([
+      this.inventoryRepositoryPort.findByProductId(productId),
+      this.inventoryRepositoryPort.findByName(name),
+    ]);
 
-        if (existingInventory) {
-            throw new BadRequestException('Inventory already exists for this product');
-        }
-
-        if (existingByName) {
-            throw new BadRequestException('An inventory with this name already exists');
-        }
-
-        const createInput: ICreateInventory = { productId, name, quantity };
-        const created = await this.inventoryRepositoryPort.create(createInput);
-
-        if (!created) {
-            throw new InternalServerErrorException('Failed to create inventory');
-        }
-
-        await this.listCache.invalidate();
-        return created;
+    if (existingInventory) {
+      throw new BadRequestException('Inventory already exists for this product');
     }
+
+    if (existingByName) {
+      throw new BadRequestException('An inventory with this name already exists');
+    }
+
+    const createInput: ICreateInventory = {
+      productId,
+      name,
+      quantity,
+      maxQuantity,
+      minQuantity,
+      lowStockThreshold,
+    };
+
+    const created = await this.inventoryRepositoryPort.create(createInput);
+
+    if (!created) {
+      throw new InternalServerErrorException('Failed to create inventory');
+    }
+
+    await this.listCache.invalidate();
+    
+    return created;
+  }
 }

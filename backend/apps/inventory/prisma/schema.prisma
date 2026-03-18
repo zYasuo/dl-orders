@@ -13,6 +13,9 @@ model Inventory {
   name       String   @unique
   quantity   Int
   productId  String   @unique @map("product_id")
+  maxQuantity Int      @default(100) @map("max_quantity")
+  minQuantity Int      @default(1) @map("min_quantity")
+  lowStockThreshold Int      @default(5) @map("low_stock_threshold")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 

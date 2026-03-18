@@ -5,9 +5,11 @@ import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-lis
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('FindAllInventoryUseCase', () => {
+    const now = new Date();
+    
     const fakeInventoryItems = [
-        new InventoryEntity('inventory-123', 'Inventory 1', 10, 'product-123', new Date(), new Date()),
-        new InventoryEntity('inventory-456', 'Inventory 2', 20, 'product-456', new Date(), new Date()),
+        new InventoryEntity('inventory-123', 'Inventory 1', 10, 100, 1, 5, 'product-123', now, now),
+        new InventoryEntity('inventory-456', 'Inventory 2', 20, 100, 1, 5, 'product-456', now, now),
     ];
 
     let sut: FindAllInventoryUseCase;
