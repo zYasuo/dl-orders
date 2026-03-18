@@ -4,17 +4,17 @@ import { IPasswordHasherPort } from '../../../domain/ports/security/password-has
 
 @Injectable()
 export class Argon2PasswordHasher extends IPasswordHasherPort {
-    async hash(plain: string): Promise<string> {
-        const hashConfig = {
-            memoryCost: 19456,
-            timeCost: 2,
-            parallelism: 4,
-        };
+  async hash(plain: string): Promise<string> {
+    const hashConfig = {
+      memoryCost: 19456,
+      timeCost: 2,
+      parallelism: 4,
+    };
 
-        return argon2.hash(plain, hashConfig);
-    }
+    return argon2.hash(plain, hashConfig);
+  }
 
-    async compare(plain: string, hash: string): Promise<boolean> {
-        return argon2.verify(hash, plain);
-    }
+  async compare(plain: string, hash: string): Promise<boolean> {
+    return argon2.verify(hash, plain);
+  }
 }

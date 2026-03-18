@@ -1,5 +1,5 @@
 export interface IResetPasswordRequestEvent {
-    email: string;
-    linkResetPassword: string;
-    expiresAt: Date;
+  email: string;
+  linkResetPassword: string;
+  expiresAt: Date;
 }

@@ -21,27 +21,27 @@ import { PaymentRepository } from './infrastructure/outbound/persistence/sql/pay
 import { OrdersHttpClient } from './infrastructure/outbound/http/orders-http.client';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: 'apps/payment/.env',
-            isGlobal: true,
-        }),
-        DbModule,
-        RabbitMQModule,
-        MongoDBModule.forRoot(),
-    ],
-    controllers: [PaymentController, InventoryReservedConsumer],
-    providers: [
-        JwtAuthGuard,
-        WebhookSignatureService,
-        HandleInventoryReservedUseCase,
-        HandleWebhookUseCase,
-        FindPaymentByOrderIdUseCase,
-        { provide: IPaymentRepositoryPort, useClass: PaymentRepository },
-        { provide: IPaymentGatewayPort, useClass: MercadoPagoGatewayAdapter },
-        { provide: IPaymentEventsPublisherPort, useClass: PaymentRabbitMqPublisher },
-        { provide: IPaymentAuditLogPort, useClass: MongoPaymentAuditLogRepository },
-        { provide: IOrderDetailsPort, useClass: OrdersHttpClient },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: 'apps/payment/.env',
+      isGlobal: true,
+    }),
+    DbModule,
+    RabbitMQModule,
+    MongoDBModule.forRoot(),
+  ],
+  controllers: [PaymentController, InventoryReservedConsumer],
+  providers: [
+    JwtAuthGuard,
+    WebhookSignatureService,
+    HandleInventoryReservedUseCase,
+    HandleWebhookUseCase,
+    FindPaymentByOrderIdUseCase,
+    { provide: IPaymentRepositoryPort, useClass: PaymentRepository },
+    { provide: IPaymentGatewayPort, useClass: MercadoPagoGatewayAdapter },
+    { provide: IPaymentEventsPublisherPort, useClass: PaymentRabbitMqPublisher },
+    { provide: IPaymentAuditLogPort, useClass: MongoPaymentAuditLogRepository },
+    { provide: IOrderDetailsPort, useClass: OrdersHttpClient },
+  ],
 })
 export class PaymentModule {}

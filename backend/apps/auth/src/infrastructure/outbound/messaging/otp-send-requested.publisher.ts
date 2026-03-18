@@ -5,12 +5,12 @@ import { IOtpSendRequestedPublisherPort } from '../../../domain/ports/publishers
 
 @Injectable()
 export class OtpSendRequestedRabbitMqPublisher extends IOtpSendRequestedPublisherPort {
-    constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
-        super();
-    }
+  constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
+    super();
+  }
 
-    publish(event: IOtpSendRequestedEvent): Promise<void> {
-        this.notificationClient.emit(PATTERNS.OTP_SEND_REQUESTED, event);
-        return Promise.resolve();
-    }
+  publish(event: IOtpSendRequestedEvent): Promise<void> {
+    this.notificationClient.emit(PATTERNS.OTP_SEND_REQUESTED, event);
+    return Promise.resolve();
+  }
 }

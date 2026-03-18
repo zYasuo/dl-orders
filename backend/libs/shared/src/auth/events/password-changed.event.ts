@@ -1,4 +1,4 @@
 export interface IPasswordChangedEvent {
-    email: string;
-    changedAt?: Date;
+  email: string;
+  changedAt?: Date;
 }

@@ -10,63 +10,65 @@ import { FakeOrderEventsPublisher } from '../../doubles/fake-order-events.publis
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
 
 describe('CreateOrderUseCase (integration)', () => {
-    let sut: CreateOrderUseCase;
-    let ordersRepository: InMemoryOrdersRepository;
-    let orderEventsPublisher: FakeOrderEventsPublisher;
+  let sut: CreateOrderUseCase;
+  let ordersRepository: InMemoryOrdersRepository;
+  let orderEventsPublisher: FakeOrderEventsPublisher;
 
-    beforeEach(async () => {
-        ordersRepository = new InMemoryOrdersRepository();
-        orderEventsPublisher = new FakeOrderEventsPublisher();
-        const productCatalog: IProductCatalogPort = {
-            findById: jest.fn().mockResolvedValue({ name: 'Product A', description: 'Desc', price: 99.9 }),
-        };
-        const orderAuditLog: IOrderAuditLogPort = {
-            log: jest.fn().mockResolvedValue(undefined),
-            getByOrderId: jest.fn().mockResolvedValue([]),
-        };
-        const orderSummary: IOrderSummaryPort = {
-            put: jest.fn().mockResolvedValue(undefined),
-            getByOrderId: jest.fn().mockResolvedValue(null),
-        };
+  beforeEach(async () => {
+    ordersRepository = new InMemoryOrdersRepository();
+    orderEventsPublisher = new FakeOrderEventsPublisher();
+    const productCatalog: IProductCatalogPort = {
+      findById: jest
+        .fn()
+        .mockResolvedValue({ name: 'Product A', description: 'Desc', price: 99.9 }),
+    };
+    const orderAuditLog: IOrderAuditLogPort = {
+      log: jest.fn().mockResolvedValue(undefined),
+      getByOrderId: jest.fn().mockResolvedValue([]),
+    };
+    const orderSummary: IOrderSummaryPort = {
+      put: jest.fn().mockResolvedValue(undefined),
+      getByOrderId: jest.fn().mockResolvedValue(null),
+    };
 
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                CreateOrderUseCase,
-                { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-                { provide: IProductCatalogPort, useValue: productCatalog },
-                { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-                { provide: IOrderAuditLogPort, useValue: orderAuditLog },
-                { provide: IOrderSummaryPort, useValue: orderSummary },
-            ],
-        }).compile();
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CreateOrderUseCase,
+        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+        { provide: IProductCatalogPort, useValue: productCatalog },
+        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: IOrderAuditLogPort, useValue: orderAuditLog },
+        { provide: IOrderSummaryPort, useValue: orderSummary },
+      ],
+    }).compile();
 
-        sut = module.get(CreateOrderUseCase);
+    sut = module.get(CreateOrderUseCase);
+  });
+
+  describe('execute', () => {
+    it('persists order as PENDING and publishes OrderCreationRequested', async () => {
+      const input = {
+        productId: 'product-123',
+        quantity: 1,
+        description: 'test order',
+        recipient: 'test@test.com',
+        idempotencyKey: crypto.randomUUID(),
+      };
+
+      const result = await sut.execute(input);
+
+      expect(result.status).toBe(OrderStatus.PENDING);
+
+      const found = await ordersRepository.findById(result.id);
+      expect(found).not.toBeNull();
+      expect(found!.productId).toBe(input.productId);
+      expect(found!.quantity).toBe(input.quantity);
+      expect(found!.description).toBe(input.description);
+      expect(found!.recipient).toBe(input.recipient);
+
+      expect(orderEventsPublisher.creationRequested).toHaveLength(1);
+      expect(orderEventsPublisher.creationRequested[0].orderId).toBe(result.id);
+      expect(orderEventsPublisher.creationRequested[0].productId).toBe(input.productId);
     });
-
-    describe('execute', () => {
-        it('persists order as PENDING and publishes OrderCreationRequested', async () => {
-            const input = {
-                productId: 'product-123',
-                quantity: 1,
-                description: 'test order',
-                recipient: 'test@test.com',
-                idempotencyKey: crypto.randomUUID(),
-            };
-
-            const result = await sut.execute(input);
-
-            expect(result.status).toBe(OrderStatus.PENDING);
-
-            const found = await ordersRepository.findById(result.id);
-            expect(found).not.toBeNull();
-            expect(found!.productId).toBe(input.productId);
-            expect(found!.quantity).toBe(input.quantity);
-            expect(found!.description).toBe(input.description);
-            expect(found!.recipient).toBe(input.recipient);
-
-            expect(orderEventsPublisher.creationRequested).toHaveLength(1);
-            expect(orderEventsPublisher.creationRequested[0].orderId).toBe(result.id);
-            expect(orderEventsPublisher.creationRequested[0].productId).toBe(input.productId);
-        });
-    });
+  });
 });

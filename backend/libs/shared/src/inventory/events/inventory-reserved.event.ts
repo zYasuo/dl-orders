@@ -1,5 +1,5 @@
 export interface InventoryReservedEvent {
-    orderId: string;
-    productId: string;
-    quantity: number;
+  orderId: string;
+  productId: string;
+  quantity: number;
 }

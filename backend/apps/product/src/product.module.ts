@@ -12,21 +12,21 @@ import { RedisProductCacheAdapter } from './infrastructure/outbound/persistence/
 import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: 'apps/product/.env',
-            isGlobal: true,
-        }),
-        MongoDBModule.forRoot(),
-        RedisModule,
-    ],
-    controllers: [ProductController],
-    providers: [
-        CreateProductUseCase,
-        FindAllProductsUseCase,
-        FindProductByIdUseCase,
-        { provide: IProductCachePort, useClass: RedisProductCacheAdapter },
-        { provide: IProductRepositoryPort, useClass: MongoProductRepository },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: 'apps/product/.env',
+      isGlobal: true,
+    }),
+    MongoDBModule.forRoot(),
+    RedisModule,
+  ],
+  controllers: [ProductController],
+  providers: [
+    CreateProductUseCase,
+    FindAllProductsUseCase,
+    FindProductByIdUseCase,
+    { provide: IProductCachePort, useClass: RedisProductCacheAdapter },
+    { provide: IProductRepositoryPort, useClass: MongoProductRepository },
+  ],
 })
 export class ProductModule {}

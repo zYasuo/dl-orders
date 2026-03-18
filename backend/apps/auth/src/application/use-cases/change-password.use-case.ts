@@ -8,43 +8,43 @@ import { TChangePassword } from '../dto/change-password.dto';
 
 @Injectable()
 export class ChangePasswordUseCase {
-    constructor(
-        private readonly authUserRepository: IAuthUserRepositoryPort,
-        private readonly passwordResetRepository: IPasswordResetRepositoryPort,
-        private readonly passwordHasher: IPasswordHasherPort,
-        private readonly emailEncrypted: IEmailEncryptedSecurity,
-        private readonly passwordChangedPublisher: IPasswordChangedPublisherPort,
-    ) {}
+  constructor(
+    private readonly authUserRepository: IAuthUserRepositoryPort,
+    private readonly passwordResetRepository: IPasswordResetRepositoryPort,
+    private readonly passwordHasher: IPasswordHasherPort,
+    private readonly emailEncrypted: IEmailEncryptedSecurity,
+    private readonly passwordChangedPublisher: IPasswordChangedPublisherPort,
+  ) {}
 
-    async execute(input: TChangePassword): Promise<{ message: string }> {
-        const { token, email, new_password } = input;
+  async execute(input: TChangePassword): Promise<{ message: string }> {
+    const { token, email, new_password } = input;
 
-        const now = new Date();
-        const message = 'Password changed successfully';
+    const now = new Date();
+    const message = 'Password changed successfully';
 
-        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
+    const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
 
-        const tokenConsumed = await this.passwordResetRepository.consumeToken(token, emailLookupHash);
+    const tokenConsumed = await this.passwordResetRepository.consumeToken(token, emailLookupHash);
 
-        if (!tokenConsumed) {
-            throw new BadRequestException('Token already used or expired');
-        }
-
-        const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const passwordHash = await this.passwordHasher.hash(new_password);
-
-        await this.authUserRepository.changePassword(user.id, passwordHash);
-
-        await this.passwordChangedPublisher.publish({
-            email: email,
-            changedAt: now,
-        });
-
-        return { message };
+    if (!tokenConsumed) {
+      throw new BadRequestException('Token already used or expired');
     }
+
+    const user = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const passwordHash = await this.passwordHasher.hash(new_password);
+
+    await this.authUserRepository.changePassword(user.id, passwordHash);
+
+    await this.passwordChangedPublisher.publish({
+      email: email,
+      changedAt: now,
+    });
+
+    return { message };
+  }
 }

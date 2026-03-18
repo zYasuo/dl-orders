@@ -5,12 +5,12 @@ import { IResetPasswordPublisherPort } from '../../../domain/ports/publishers/re
 
 @Injectable()
 export class PasswordResetLinkRequestRabbitMqPublisher extends IResetPasswordPublisherPort {
-    constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
-        super();
-    }
+  constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
+    super();
+  }
 
-    publish(event: IResetPasswordRequestEvent): Promise<void> {
-        this.notificationClient.emit(PATTERNS.RESET_PASSWORD_LINK_REQUESTED, event);
-        return Promise.resolve();
-    }
+  publish(event: IResetPasswordRequestEvent): Promise<void> {
+    this.notificationClient.emit(PATTERNS.RESET_PASSWORD_LINK_REQUESTED, event);
+    return Promise.resolve();
+  }
 }

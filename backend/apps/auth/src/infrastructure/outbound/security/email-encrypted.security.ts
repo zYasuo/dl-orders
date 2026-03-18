@@ -6,69 +6,75 @@ import { IEmailEncryptedSecurity } from '../../../domain/ports/security/email-en
 
 @Injectable()
 export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
-    private readonly config: EmailEncryptionConfig;
-    private readonly key: Buffer;
+  private readonly config: EmailEncryptionConfig;
+  private readonly key: Buffer;
 
-    constructor(configService: ConfigService) {
-        this.config = configService.getOrThrow<EmailEncryptionConfig>('emailEncryption');
-        this.key = this.deriveKey(this.config.key);
+  constructor(configService: ConfigService) {
+    this.config = configService.getOrThrow<EmailEncryptionConfig>('emailEncryption');
+    this.key = this.deriveKey(this.config.key);
+  }
+
+  private deriveKey(raw: string): Buffer {
+    if (raw.length === 64 && /^[0-9a-fA-F]+$/.test(raw)) {
+      return Buffer.from(raw, 'hex');
     }
+    return crypto.createHash('sha256').update(raw, 'utf8').digest();
+  }
 
-    private deriveKey(raw: string): Buffer {
-        if (raw.length === 64 && /^[0-9a-fA-F]+$/.test(raw)) {
-            return Buffer.from(raw, 'hex');
-        }
-        return crypto.createHash('sha256').update(raw, 'utf8').digest();
-    }
+  private normalize(email: string): string {
+    return email.toLowerCase().trim();
+  }
 
-    private normalize(email: string): string {
-        return email.toLowerCase().trim();
-    }
+  getLookupHash(email: string): Promise<string> {
+    const normalized = this.normalize(email);
+    return Promise.resolve(
+      crypto.createHmac('sha256', this.config.hashSecret).update(normalized, 'utf8').digest('hex'),
+    );
+  }
 
-    getLookupHash(email: string): Promise<string> {
-        const normalized = this.normalize(email);
-        return Promise.resolve(crypto.createHmac('sha256', this.config.hashSecret).update(normalized, 'utf8').digest('hex'));
-    }
+  encrypt(email: string): Promise<string> {
+    const normalized = this.normalize(email);
+    const iv = crypto.randomBytes(this.config.ivLength);
+    const cipher = crypto.createCipheriv(this.config.algorithm, this.key, iv);
 
-    encrypt(email: string): Promise<string> {
-        const normalized = this.normalize(email);
-        const iv = crypto.randomBytes(this.config.ivLength);
-        const cipher = crypto.createCipheriv(this.config.algorithm, this.key, iv);
+    let ciphertextHex = cipher.update(normalized, 'utf8', 'hex');
+    ciphertextHex += cipher.final('hex');
 
-        let ciphertextHex = cipher.update(normalized, 'utf8', 'hex');
-        ciphertextHex += cipher.final('hex');
+    const authTag = (cipher as crypto.CipherGCM).getAuthTag();
+    return Promise.resolve(this.serializePayload(iv, authTag, ciphertextHex));
+  }
 
-        const authTag = (cipher as crypto.CipherGCM).getAuthTag();
-        return Promise.resolve(this.serializePayload(iv, authTag, ciphertextHex));
-    }
+  decrypt(encryptedEmail: string): Promise<string> {
+    const { iv, authTag, ciphertextHex } = this.parsePayload(encryptedEmail);
+    const decipher = crypto.createDecipheriv(this.config.algorithm, this.key, iv);
 
-    decrypt(encryptedEmail: string): Promise<string> {
-        const { iv, authTag, ciphertextHex } = this.parsePayload(encryptedEmail);
-        const decipher = crypto.createDecipheriv(this.config.algorithm, this.key, iv);
+    (decipher as crypto.DecipherGCM).setAuthTag(authTag);
 
-        (decipher as crypto.DecipherGCM).setAuthTag(authTag);
+    let decrypted = decipher.update(ciphertextHex, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return Promise.resolve(decrypted);
+  }
 
-        let decrypted = decipher.update(ciphertextHex, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return Promise.resolve(decrypted);
-    }
+  private serializePayload(iv: Buffer, authTag: Buffer, ciphertextHex: string): string {
+    return iv.toString('hex') + authTag.toString('hex') + ciphertextHex;
+  }
 
-    private serializePayload(iv: Buffer, authTag: Buffer, ciphertextHex: string): string {
-        return iv.toString('hex') + authTag.toString('hex') + ciphertextHex;
-    }
+  private parsePayload(encryptedEmail: string): {
+    iv: Buffer;
+    authTag: Buffer;
+    ciphertextHex: string;
+  } {
+    const ivHexLen = this.config.ivLength * 2;
+    const tagHexLen = this.config.authTagLength * 2;
 
-    private parsePayload(encryptedEmail: string): { iv: Buffer; authTag: Buffer; ciphertextHex: string } {
-        const ivHexLen = this.config.ivLength * 2;
-        const tagHexLen = this.config.authTagLength * 2;
+    const ivHex = encryptedEmail.slice(0, ivHexLen);
+    const authTagHex = encryptedEmail.slice(ivHexLen, ivHexLen + tagHexLen);
+    const ciphertextHex = encryptedEmail.slice(ivHexLen + tagHexLen);
 
-        const ivHex = encryptedEmail.slice(0, ivHexLen);
-        const authTagHex = encryptedEmail.slice(ivHexLen, ivHexLen + tagHexLen);
-        const ciphertextHex = encryptedEmail.slice(ivHexLen + tagHexLen);
-
-        return {
-            iv: Buffer.from(ivHex, 'hex'),
-            authTag: Buffer.from(authTagHex, 'hex'),
-            ciphertextHex,
-        };
-    }
+    return {
+      iv: Buffer.from(ivHex, 'hex'),
+      authTag: Buffer.from(authTagHex, 'hex'),
+      ciphertextHex,
+    };
+  }
 }

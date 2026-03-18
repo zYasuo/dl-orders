@@ -14,6 +14,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
   let listCache: jest.Mocked<IInventoryListCachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
+  const createdBy = 'user@test.com';
   const fakeInventory = new InventoryEntity(
     'inv-1',
     'Warehouse',
@@ -22,6 +23,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
     1,
     5,
     'product-123',
+    createdBy,
     createdAt,
     createdAt,
   );
@@ -33,6 +35,7 @@ describe('HandleOrderCreationRequestedUseCase', () => {
     1,
     5,
     'product-123',
+    createdBy,
     createdAt,
     createdAt,
   );

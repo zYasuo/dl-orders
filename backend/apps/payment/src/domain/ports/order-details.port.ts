@@ -1,9 +1,9 @@
 export interface IOrderDetails {
-    orderId: string;
-    totalPrice: number;
-    idempotencyKey?: string | null;
+  orderId: string;
+  totalPrice: number;
+  idempotencyKey?: string | null;
 }
 
 export abstract class IOrderDetailsPort {
-    abstract getByOrderId(orderId: string): Promise<IOrderDetails | null>;
+  abstract getByOrderId(orderId: string): Promise<IOrderDetails | null>;
 }

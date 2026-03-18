@@ -2,7 +2,7 @@ import { Prisma } from '.prisma/inventory-client';
 import { Injectable } from '@nestjs/common';
 import { InventoryEntity } from '../../../../domain/entities/inventory.entity';
 import { IInventoryRepositoryPort } from '../../../../domain/ports/inventory-repository.port';
-import { ICreateInventory } from '../../../../domain/types/inventory-repository.types';
+import { ICreateInventory, TInventoryLowStockCursor } from '../../../../domain/types/inventory-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
@@ -164,6 +164,63 @@ export class InventoryRepository extends IInventoryRepositoryPort {
         updated_at AS "updatedAt"
       FROM inventories
       WHERE quantity <= min_quantity
+    `;
+
+    return rows.map(
+      (row) =>
+        new InventoryEntity(
+          row.id,
+          row.name,
+          row.quantity,
+          row.maxQuantity,
+          row.minQuantity,
+          row.lowStockThreshold,
+          row.productId,
+          row.createdBy,
+          row.createdAt,
+          row.updatedAt,
+        ),
+    );
+  }
+
+  async findLowStockPage(
+    limit: number,
+    cursor: TInventoryLowStockCursor | null,
+  ): Promise<InventoryEntity[]> {
+    type Row = {
+      id: string;
+      name: string;
+      quantity: number;
+      maxQuantity: number;
+      minQuantity: number;
+      lowStockThreshold: number;
+      productId: string;
+      createdBy: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+
+    const cursorWhere = cursor
+      ? Prisma.sql`AND (updated_at > ${cursor.updatedAt} OR (updated_at = ${cursor.updatedAt} AND id > ${cursor.id}))`
+      : Prisma.empty;
+
+    const rows = await this.db.$queryRaw<Row[]>`
+      SELECT
+        id,
+        name,
+        quantity,
+        max_quantity AS "maxQuantity",
+        min_quantity AS "minQuantity",
+        low_stock_threshold AS "lowStockThreshold",
+        product_id AS "productId",
+        created_by AS "createdBy",
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"
+      FROM inventories
+      WHERE quantity <= min_quantity
+      ${cursorWhere}
+      ORDER BY updated_at ASC, id ASC
+      LIMIT ${limit}
     `;
 
     return rows.map(

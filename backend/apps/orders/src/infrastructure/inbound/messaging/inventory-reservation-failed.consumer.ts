@@ -5,15 +5,15 @@ import { CancelOrderUseCase } from '../../../application/use-cases/cancel-order.
 
 @Controller()
 export class InventoryReservationFailedConsumer {
-    private readonly logger = new Logger(InventoryReservationFailedConsumer.name);
+  private readonly logger = new Logger(InventoryReservationFailedConsumer.name);
 
-    constructor(private readonly cancelOrderUseCase: CancelOrderUseCase) {}
+  constructor(private readonly cancelOrderUseCase: CancelOrderUseCase) {}
 
-    @EventPattern(PATTERNS.INVENTORY_RESERVATION_FAILED)
-    async handle(@Payload() payload: InventoryReservationFailedEvent): Promise<void> {
-        this.logger.warn(
-            `Inventory reservation failed, cancelling order. orderId=${payload.orderId} productId=${payload.productId} quantity=${payload.quantity} reason=${payload.reason}`,
-        );
-        await this.cancelOrderUseCase.execute(payload);
-    }
+  @EventPattern(PATTERNS.INVENTORY_RESERVATION_FAILED)
+  async handle(@Payload() payload: InventoryReservationFailedEvent): Promise<void> {
+    this.logger.warn(
+      `Inventory reservation failed, cancelling order. orderId=${payload.orderId} productId=${payload.productId} quantity=${payload.quantity} reason=${payload.reason}`,
+    );
+    await this.cancelOrderUseCase.execute(payload);
+  }
 }

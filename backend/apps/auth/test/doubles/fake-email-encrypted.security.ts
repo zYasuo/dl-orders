@@ -1,19 +1,19 @@
 import { IEmailEncryptedSecurity } from '../../src/domain/ports/security/email-encrypted.security';
 
 export class FakeEmailEncryptedSecurity extends IEmailEncryptedSecurity {
-    private normalize(email: string): string {
-        return email.toLowerCase().trim();
-    }
+  private normalize(email: string): string {
+    return email.toLowerCase().trim();
+  }
 
-    async encrypt(email: string): Promise<string> {
-        return this.normalize(email);
-    }
+  async encrypt(email: string): Promise<string> {
+    return this.normalize(email);
+  }
 
-    async decrypt(encryptedEmail: string): Promise<string> {
-        return encryptedEmail;
-    }
+  async decrypt(encryptedEmail: string): Promise<string> {
+    return encryptedEmail;
+  }
 
-    async getLookupHash(email: string): Promise<string> {
-        return this.normalize(email);
-    }
+  async getLookupHash(email: string): Promise<string> {
+    return this.normalize(email);
+  }
 }

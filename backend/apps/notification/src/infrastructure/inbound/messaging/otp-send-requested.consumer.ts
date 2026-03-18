@@ -5,15 +5,15 @@ import { HandleOtpSendRequestedUseCase } from 'apps/notification/src/application
 
 @Controller()
 export class OtpSendRequestedConsumer {
-    private readonly logger = new Logger(OtpSendRequestedConsumer.name);
+  private readonly logger = new Logger(OtpSendRequestedConsumer.name);
 
-    constructor(private readonly handleUseCase: HandleOtpSendRequestedUseCase) {}
+  constructor(private readonly handleUseCase: HandleOtpSendRequestedUseCase) {}
 
-    @EventPattern(PATTERNS.OTP_SEND_REQUESTED)
-    async handle(@Payload() payload: IOtpSendRequestedEvent): Promise<void> {
-        const { email, code, expiresInMinutes } = payload;
+  @EventPattern(PATTERNS.OTP_SEND_REQUESTED)
+  async handle(@Payload() payload: IOtpSendRequestedEvent): Promise<void> {
+    const { email, code, expiresInMinutes } = payload;
 
-        this.logger.log('Received OTP send request', { email, code, expiresInMinutes });
-        await this.handleUseCase.execute(payload);
-    }
+    this.logger.log('Received OTP send request', { email, code, expiresInMinutes });
+    await this.handleUseCase.execute(payload);
+  }
 }

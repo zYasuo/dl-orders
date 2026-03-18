@@ -1,7 +1,7 @@
 export const ORDER_CONFIRMED_TITLE = 'Order confirmed';
 
 export const orderConfirmedHtmlTemplate =
-    `
+  `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,8 +40,8 @@ export const orderConfirmedHtmlTemplate =
                                     <td style="padding: 16px;">
                                         <span style="font-size: 12px; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em;">Total</span>
                                         <p style="margin: 4px 0 0; font-size: 18px; font-weight: 600; color: #18181b;">` +
-    '{{ totalPrice }}' +
-    `</p>
+  '{{ totalPrice }}' +
+  `</p>
                                     </td>
                                 </tr>
                             </table>

@@ -7,30 +7,30 @@ export type TJwtPayload = { sub: string; email: string };
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {}
 
-    canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest<Request>();
-        const authHeader = request.headers.authorization;
+  canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const authHeader = request.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return Promise.reject(new UnauthorizedException('Missing or invalid Authorization header'));
-        }
-
-        const token = authHeader.slice(7);
-        const secret = this.configService.get<string>('JWT_SECRET');
-
-        if (!secret) {
-            return Promise.reject(new UnauthorizedException('JWT not configured'));
-        }
-
-        try {
-            const decoded = jwt.verify(token, secret) as TJwtPayload;
-            (request as Request & { user: TJwtPayload }).user = decoded;
-
-            return Promise.resolve(true);
-        } catch {
-            return Promise.reject(new UnauthorizedException('Invalid or expired token'));
-        }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return Promise.reject(new UnauthorizedException('Missing or invalid Authorization header'));
     }
+
+    const token = authHeader.slice(7);
+    const secret = this.configService.get<string>('JWT_SECRET');
+
+    if (!secret) {
+      return Promise.reject(new UnauthorizedException('JWT not configured'));
+    }
+
+    try {
+      const decoded = jwt.verify(token, secret) as TJwtPayload;
+      (request as Request & { user: TJwtPayload }).user = decoded;
+
+      return Promise.resolve(true);
+    } catch {
+      return Promise.reject(new UnauthorizedException('Invalid or expired token'));
+    }
+  }
 }

@@ -5,13 +5,13 @@ import { ConfirmOrderUseCase } from '../../../application/use-cases/confirm-orde
 
 @Controller()
 export class PaymentApprovedConsumer {
-    private readonly logger = new Logger(PaymentApprovedConsumer.name);
+  private readonly logger = new Logger(PaymentApprovedConsumer.name);
 
-    constructor(private readonly confirmOrderUseCase: ConfirmOrderUseCase) {}
+  constructor(private readonly confirmOrderUseCase: ConfirmOrderUseCase) {}
 
-    @EventPattern(PATTERNS.PAYMENT_APPROVED)
-    async handle(@Payload() payload: PaymentApprovedEvent): Promise<void> {
-        this.logger.log('Payment approved, confirming order', { orderId: payload.orderId });
-        await this.confirmOrderUseCase.execute({ orderId: payload.orderId });
-    }
+  @EventPattern(PATTERNS.PAYMENT_APPROVED)
+  async handle(@Payload() payload: PaymentApprovedEvent): Promise<void> {
+    this.logger.log('Payment approved, confirming order', { orderId: payload.orderId });
+    await this.confirmOrderUseCase.execute({ orderId: payload.orderId });
+  }
 }

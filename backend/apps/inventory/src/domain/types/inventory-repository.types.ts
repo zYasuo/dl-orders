@@ -7,3 +7,8 @@ export interface ICreateInventory {
   lowStockThreshold: number;
   createdBy: string;
 }
+
+export type TInventoryLowStockCursor = {
+  updatedAt: Date;
+  id: string;
+};

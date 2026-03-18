@@ -24,26 +24,32 @@ import { ConfirmOrderUseCase } from './application/use-cases/confirm-order.use-c
 import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-case';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: 'apps/orders/.env',
-            isGlobal: true,
-        }),
-        DbModule,
-        RabbitMQModule,
-        MongoDBModule.forRoot(),
-    ],
-    controllers: [OrdersController, InventoryReservedConsumer, InventoryReservationFailedConsumer, PaymentApprovedConsumer, PaymentFailedConsumer],
-    providers: [
-        CreateOrderUseCase,
-        FindOrderByIdUseCase,
-        ConfirmOrderUseCase,
-        CancelOrderUseCase,
-        { provide: IOrdersRepositoryPort, useClass: OrdersRepository },
-        { provide: IProductCatalogPort, useClass: ProductCatalogHttpClient },
-        { provide: IOrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
-        { provide: IOrderAuditLogPort, useClass: MongoOrderAuditLogRepository },
-        { provide: IOrderSummaryPort, useClass: MongoOrderSummaryRepository },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: 'apps/orders/.env',
+      isGlobal: true,
+    }),
+    DbModule,
+    RabbitMQModule,
+    MongoDBModule.forRoot(),
+  ],
+  controllers: [
+    OrdersController,
+    InventoryReservedConsumer,
+    InventoryReservationFailedConsumer,
+    PaymentApprovedConsumer,
+    PaymentFailedConsumer,
+  ],
+  providers: [
+    CreateOrderUseCase,
+    FindOrderByIdUseCase,
+    ConfirmOrderUseCase,
+    CancelOrderUseCase,
+    { provide: IOrdersRepositoryPort, useClass: OrdersRepository },
+    { provide: IProductCatalogPort, useClass: ProductCatalogHttpClient },
+    { provide: IOrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
+    { provide: IOrderAuditLogPort, useClass: MongoOrderAuditLogRepository },
+    { provide: IOrderSummaryPort, useClass: MongoOrderSummaryRepository },
+  ],
 })
 export class OrdersModule {}

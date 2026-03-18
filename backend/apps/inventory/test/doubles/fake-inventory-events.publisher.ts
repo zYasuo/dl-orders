@@ -1,9 +1,14 @@
-import { InventoryReservedEvent, InventoryReservationFailedEvent } from '@app/shared';
+import {
+  InventoryReservedEvent,
+  InventoryReservationFailedEvent,
+  IInventoryLowStockEvent,
+} from '@app/shared';
 import { IInventoryEventsPublisherPort } from '../../src/domain/ports/inventory-events-publisher.port';
 
 export class FakeInventoryEventsPublisher extends IInventoryEventsPublisherPort {
   readonly reserved: InventoryReservedEvent[] = [];
   readonly failed: InventoryReservationFailedEvent[] = [];
+  readonly lowStock: IInventoryLowStockEvent[] = [];
 
   async publishInventoryReserved(event: InventoryReservedEvent): Promise<void> {
     this.reserved.push(event);
@@ -11,5 +16,9 @@ export class FakeInventoryEventsPublisher extends IInventoryEventsPublisherPort 
 
   async publishInventoryReservationFailed(event: InventoryReservationFailedEvent): Promise<void> {
     this.failed.push(event);
+  }
+
+  async publishInventoryLowStock(event: IInventoryLowStockEvent): Promise<void> {
+    this.lowStock.push(event);
   }
 }

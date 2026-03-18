@@ -4,15 +4,15 @@ import { IUserProfileRepositoryPort } from '../../domain/ports/user-profile-repo
 
 @Injectable()
 export class GetUserProfileUseCase {
-    constructor(private readonly userProfileRepository: IUserProfileRepositoryPort) {}
+  constructor(private readonly userProfileRepository: IUserProfileRepositoryPort) {}
 
-    async execute(userId: string): Promise<UserProfileEntity> {
-        const profile = await this.userProfileRepository.findById(userId);
+  async execute(userId: string): Promise<UserProfileEntity> {
+    const profile = await this.userProfileRepository.findById(userId);
 
-        if (!profile) {
-            throw new NotFoundException('User profile not found');
-        }
-
-        return profile;
+    if (!profile) {
+      throw new NotFoundException('User profile not found');
     }
+
+    return profile;
+  }
 }

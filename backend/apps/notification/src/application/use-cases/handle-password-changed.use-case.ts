@@ -6,38 +6,38 @@ import { INotificationAuditLogPort } from '../../domain/ports/notification-audit
 
 @Injectable()
 export class HandlePasswordChangedUseCase {
-    constructor(
-        private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
-        private readonly emailSender: IEmailSenderPort,
-        private readonly notificationAuditLogPort: INotificationAuditLogPort,
-    ) {}
+  constructor(
+    private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
+    private readonly emailSender: IEmailSenderPort,
+    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+  ) {}
 
-    async execute(payload: IPasswordChangedEvent): Promise<void> {
-        const { email } = payload;
+  async execute(payload: IPasswordChangedEvent): Promise<void> {
+    const { email } = payload;
 
-        const { title, content } = this.authNotificationTemplatePort.getPasswordChangedMessage(payload);
-        const timestamp = new Date().toISOString();
+    const { title, content } = this.authNotificationTemplatePort.getPasswordChangedMessage(payload);
+    const timestamp = new Date().toISOString();
 
-        const result = await this.emailSender.send({
-            to: email,
-            subject: title,
-            html: content,
-        });
+    const result = await this.emailSender.send({
+      to: email,
+      subject: title,
+      html: content,
+    });
 
-        if (result.success) {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'PASSWORD_CHANGED',
-                timestamp,
-                details: { email },
-            });
-        } else {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'PASSWORD_CHANGED_FAILED',
-                timestamp,
-                details: { email, error: result.error },
-            });
-        }
+    if (result.success) {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'PASSWORD_CHANGED',
+        timestamp,
+        details: { email },
+      });
+    } else {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'PASSWORD_CHANGED_FAILED',
+        timestamp,
+        details: { email, error: result.error },
+      });
     }
+  }
 }

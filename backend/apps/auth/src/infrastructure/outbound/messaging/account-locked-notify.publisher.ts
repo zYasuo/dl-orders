@@ -5,12 +5,12 @@ import { IAccountLockedNotifyPublisherPort } from '../../../domain/ports/publish
 
 @Injectable()
 export class AccountLockedNotifyRabbitMqPublisher extends IAccountLockedNotifyPublisherPort {
-    constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
-        super();
-    }
+  constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
+    super();
+  }
 
-    publish(event: IAccountLockedNotifyEvent): Promise<void> {
-        this.notificationClient.emit(PATTERNS.ACCOUNT_LOCKED_NOTIFY, event);
-        return Promise.resolve();
-    }
+  publish(event: IAccountLockedNotifyEvent): Promise<void> {
+    this.notificationClient.emit(PATTERNS.ACCOUNT_LOCKED_NOTIFY, event);
+    return Promise.resolve();
+  }
 }

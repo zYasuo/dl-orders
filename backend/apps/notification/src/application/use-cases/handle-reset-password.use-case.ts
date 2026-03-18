@@ -6,38 +6,42 @@ import { INotificationAuditLogPort } from '../../domain/ports/notification-audit
 
 @Injectable()
 export class HandleResetPasswordUseCase {
-    constructor(
-        private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
-        private readonly emailSender: IEmailSenderPort,
-        private readonly notificationAuditLogPort: INotificationAuditLogPort,
-    ) {}
+  constructor(
+    private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
+    private readonly emailSender: IEmailSenderPort,
+    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+  ) {}
 
-    async execute(payload: IResetPasswordRequestEvent): Promise<void> {
-        const { email, linkResetPassword, expiresAt } = payload;
+  async execute(payload: IResetPasswordRequestEvent): Promise<void> {
+    const { email, linkResetPassword, expiresAt } = payload;
 
-        const { title, content } = this.authNotificationTemplatePort.getResetPasswordRequestMessage({ email, linkResetPassword, expiresAt });
-        const timestamp = new Date().toISOString();
+    const { title, content } = this.authNotificationTemplatePort.getResetPasswordRequestMessage({
+      email,
+      linkResetPassword,
+      expiresAt,
+    });
+    const timestamp = new Date().toISOString();
 
-        const result = await this.emailSender.send({
-            to: email,
-            subject: title,
-            html: content,
-        });
+    const result = await this.emailSender.send({
+      to: email,
+      subject: title,
+      html: content,
+    });
 
-        if (result.success) {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'RESET_PASSWORD_REQUESTED',
-                timestamp,
-                details: { email },
-            });
-        } else {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'RESET_PASSWORD_REQUESTED_FAILED',
-                timestamp,
-                details: { email, error: result.error },
-            });
-        }
+    if (result.success) {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'RESET_PASSWORD_REQUESTED',
+        timestamp,
+        details: { email },
+      });
+    } else {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'RESET_PASSWORD_REQUESTED_FAILED',
+        timestamp,
+        details: { email, error: result.error },
+      });
     }
+  }
 }

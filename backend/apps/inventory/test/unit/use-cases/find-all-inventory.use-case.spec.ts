@@ -5,66 +5,89 @@ import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-lis
 import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('FindAllInventoryUseCase', () => {
-    const now = new Date();
-    
-    const fakeInventoryItems = [
-        new InventoryEntity('inventory-123', 'Inventory 1', 10, 100, 1, 5, 'product-123', now, now),
-        new InventoryEntity('inventory-456', 'Inventory 2', 20, 100, 1, 5, 'product-456', now, now),
-    ];
+  const now = new Date();
+  const createdBy = 'creator@test.com';
 
-    let sut: FindAllInventoryUseCase;
-    let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
-    let listCache: jest.Mocked<IInventoryListCachePort>;
+  const fakeInventoryItems = [
+    new InventoryEntity(
+      'inventory-123',
+      'Inventory 1',
+      10,
+      100,
+      1,
+      5,
+      'product-123',
+      createdBy,
+      now,
+      now,
+    ),
+    new InventoryEntity(
+      'inventory-456',
+      'Inventory 2',
+      20,
+      100,
+      1,
+      5,
+      'product-456',
+      createdBy,
+      now,
+      now,
+    ),
+  ];
 
-    beforeEach(async () => {
-        jest.clearAllMocks();
+  let sut: FindAllInventoryUseCase;
+  let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
+  let listCache: jest.Mocked<IInventoryListCachePort>;
 
-        inventoryRepository = {
-            findAll: jest.fn().mockResolvedValue(fakeInventoryItems),
-            create: jest.fn(),
-            findByProductId: jest.fn(),
-            findByName: jest.fn(),
-            decrementStock: jest.fn(),
-            delete: jest.fn(),
-        } as unknown as jest.Mocked<IInventoryRepositoryPort>;
+  beforeEach(async () => {
+    jest.clearAllMocks();
 
-        listCache = {
-            get: jest.fn().mockResolvedValue(null),
-            set: jest.fn().mockResolvedValue(undefined),
-            invalidate: jest.fn().mockResolvedValue(undefined),
-        } as unknown as jest.Mocked<IInventoryListCachePort>;
+    inventoryRepository = {
+      findAll: jest.fn().mockResolvedValue(fakeInventoryItems),
+      create: jest.fn(),
+      findByProductId: jest.fn(),
+      findByName: jest.fn(),
+      decrementStock: jest.fn(),
+      delete: jest.fn(),
+    } as unknown as jest.Mocked<IInventoryRepositoryPort>;
 
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                FindAllInventoryUseCase,
-                { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-                { provide: IInventoryListCachePort, useValue: listCache },
-            ],
-        }).compile();
+    listCache = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      invalidate: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<IInventoryListCachePort>;
 
-        sut = module.get(FindAllInventoryUseCase);
-    });
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FindAllInventoryUseCase,
+        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: IInventoryListCachePort, useValue: listCache },
+      ],
+    }).compile();
 
-    it('should return all inventory items', async () => {
-        const result = await sut.execute();
-        expect(result).toEqual(fakeInventoryItems);
-        expect(listCache.get).toHaveBeenCalledTimes(1);
-        expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
-        expect(listCache.set).toHaveBeenCalledWith(fakeInventoryItems, 60);
-    });
+    sut = module.get(FindAllInventoryUseCase);
+  });
 
-    it('should return cached list when cache hit', async () => {
-        listCache.get.mockResolvedValueOnce(fakeInventoryItems);
-        const result = await sut.execute();
-        expect(result).toEqual(fakeInventoryItems);
-        expect(inventoryRepository.findAll).not.toHaveBeenCalled();
-        expect(listCache.set).not.toHaveBeenCalled();
-    });
+  it('should return all inventory items', async () => {
+    const result = await sut.execute();
+    expect(result).toEqual(fakeInventoryItems);
+    expect(listCache.get).toHaveBeenCalledTimes(1);
+    expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
+    expect(listCache.set).toHaveBeenCalledWith(fakeInventoryItems, 60);
+  });
 
-    it('should return empty array when no inventory items exist', async () => {
-        inventoryRepository.findAll.mockResolvedValueOnce([]);
-        const result = await sut.execute();
-        expect(result).toEqual([]);
-        expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
-    });
+  it('should return cached list when cache hit', async () => {
+    listCache.get.mockResolvedValueOnce(fakeInventoryItems);
+    const result = await sut.execute();
+    expect(result).toEqual(fakeInventoryItems);
+    expect(inventoryRepository.findAll).not.toHaveBeenCalled();
+    expect(listCache.set).not.toHaveBeenCalled();
+  });
+
+  it('should return empty array when no inventory items exist', async () => {
+    inventoryRepository.findAll.mockResolvedValueOnce([]);
+    const result = await sut.execute();
+    expect(result).toEqual([]);
+    expect(inventoryRepository.findAll).toHaveBeenCalledTimes(1);
+  });
 });

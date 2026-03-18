@@ -5,12 +5,12 @@ import { IUserVerifiedPublisherPort } from '../../../domain/ports/publishers/use
 
 @Injectable()
 export class UserVerifiedRabbitMqPublisher extends IUserVerifiedPublisherPort {
-    constructor(@Inject('USERS_SERVICE') private readonly usersClient: ClientProxy) {
-        super();
-    }
+  constructor(@Inject('USERS_SERVICE') private readonly usersClient: ClientProxy) {
+    super();
+  }
 
-    publish(event: UserVerifiedEvent): Promise<void> {
-        this.usersClient.emit(PATTERNS.USER_VERIFIED, event);
-        return Promise.resolve();
-    }
+  publish(event: UserVerifiedEvent): Promise<void> {
+    this.usersClient.emit(PATTERNS.USER_VERIFIED, event);
+    return Promise.resolve();
+  }
 }

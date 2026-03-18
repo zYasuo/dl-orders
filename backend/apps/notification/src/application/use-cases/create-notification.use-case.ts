@@ -5,9 +5,9 @@ import { ICreateNotification } from '../../domain/types/notification-repository.
 
 @Injectable()
 export class CreateNotificationUseCase {
-    constructor(private readonly notificationRepositoryPort: INotificationRepositoryPort) {}
+  constructor(private readonly notificationRepositoryPort: INotificationRepositoryPort) {}
 
-    async execute(params: ICreateNotification): Promise<NotificationEntity | null> {
-        return this.notificationRepositoryPort.create(params);
-    }
+  async execute(params: ICreateNotification): Promise<NotificationEntity | null> {
+    return this.notificationRepositoryPort.create(params);
+  }
 }

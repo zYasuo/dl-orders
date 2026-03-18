@@ -7,21 +7,21 @@ const PRODUCT_CACHE_TTL_SECONDS = 300;
 
 @Injectable()
 export class FindAllProductsUseCase {
-    constructor(
-        private readonly productRepositoryPort: IProductRepositoryPort,
-        private readonly productCache: IProductCachePort,
-    ) {}
+  constructor(
+    private readonly productRepositoryPort: IProductRepositoryPort,
+    private readonly productCache: IProductCachePort,
+  ) {}
 
-    async execute(): Promise<ProductEntity[] | null> {
-        const cached = await this.productCache.getAll();
-        if (cached !== null) return cached;
+  async execute(): Promise<ProductEntity[] | null> {
+    const cached = await this.productCache.getAll();
+    if (cached !== null) return cached;
 
-        const products = await this.productRepositoryPort.findAll();
+    const products = await this.productRepositoryPort.findAll();
 
-        if (products) {
-            await this.productCache.setAll(products, PRODUCT_CACHE_TTL_SECONDS);
-        }
-
-        return products;
+    if (products) {
+      await this.productCache.setAll(products, PRODUCT_CACHE_TTL_SECONDS);
     }
+
+    return products;
+  }
 }

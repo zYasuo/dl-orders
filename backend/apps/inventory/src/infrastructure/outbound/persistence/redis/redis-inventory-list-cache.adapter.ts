@@ -8,43 +8,54 @@ const LIST_KEY = `${REDIS_KEY_PREFIX}list`;
 
 @Injectable()
 export class RedisInventoryListCacheAdapter extends IInventoryListCachePort {
-    constructor(private readonly redis: RedisService) {
-        super();
-    }
+  constructor(private readonly redis: RedisService) {
+    super();
+  }
 
-    async get(): Promise<InventoryEntity[] | null> {
-        const client = this.redis.getClient();
-        const raw = await client.get(LIST_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw) as Array<Record<string, unknown>>;
-        return parsed.map(
-            (p) =>
-                new InventoryEntity(
-                    p.id as string,
-                    p.name as string,
-                    p.quantity as number,
-                    p.productId as string,
-                    new Date(p.createdAt as string),
-                    new Date(p.updatedAt as string),
-                ),
-        );
-    }
+  async get(): Promise<InventoryEntity[] | null> {
+    const client = this.redis.getClient();
+    const raw = await client.get(LIST_KEY);
 
-    async set(items: InventoryEntity[], ttlSeconds: number): Promise<void> {
-        const client = this.redis.getClient();
-        const payload = items.map((i) => ({
-            id: i.id,
-            name: i.name,
-            quantity: i.quantity,
-            productId: i.productId,
-            createdAt: i.createdAt.toISOString(),
-            updatedAt: i.updatedAt.toISOString(),
-        }));
-        await client.setex(LIST_KEY, ttlSeconds, JSON.stringify(payload));
-    }
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Array<Record<string, unknown>>;
 
-    async invalidate(): Promise<void> {
-        const client = this.redis.getClient();
-        await client.del(LIST_KEY);
-    }
+    return parsed.map(
+      (p) =>
+        new InventoryEntity(
+          p.id as string,
+          p.name as string,
+          p.quantity as number,
+          p.maxQuantity as number,
+          p.minQuantity as number,
+          p.lowStockThreshold as number,
+          p.productId as string,
+          p.createdBy as string,
+          new Date(p.createdAt as string),
+          new Date(p.updatedAt as string),
+        ),
+    );
+  }
+
+  async set(items: InventoryEntity[], ttlSeconds: number): Promise<void> {
+    const client = this.redis.getClient();
+    const payload = items.map((i) => ({
+      id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      maxQuantity: i.maxQuantity,
+      minQuantity: i.minQuantity,
+      lowStockThreshold: i.lowStockThreshold,
+      productId: i.productId,
+      createdBy: i.createdBy,
+      createdAt: i.createdAt.toISOString(),
+      updatedAt: i.updatedAt.toISOString(),
+    }));
+
+    await client.setex(LIST_KEY, ttlSeconds, JSON.stringify(payload));
+  }
+
+  async invalidate(): Promise<void> {
+    const client = this.redis.getClient();
+    await client.del(LIST_KEY);
+  }
 }

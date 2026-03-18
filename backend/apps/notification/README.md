@@ -1,10 +1,10 @@
 # Notification service
 
-Sends notifications (e.g. email) when an order is confirmed. Listens for `order.confirmed` and exposes HTTP to list user notifications.
+Sends notifications (e.g. email) when an order is confirmed or when the inventory is running low. Listens for `order.confirmed` and `inventory.low_stock` and exposes HTTP to list user notifications.
 
 ## Role
 
-- **Events in:** Listens for `order.confirmed` (from orders), `reset_password.link_requested` and `auth.password_changed` (from auth), `account.locked_notify`, `otp.send_requested`. Runs the corresponding notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model.
+- **Events in:** Listens for `order.confirmed` (from orders), `reset_password.link_requested` and `auth.password_changed` (from auth), `account.locked_notify`, `otp.send_requested`, and `inventory.low_stock`. Runs the corresponding notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model. For low-stock alerts, it uses the `inventory-low-stock` email template and expects an `IInventoryLowStockEvent` payload (`id`, `name`, `productId`, `quantity`, `createdBy` as the email snapshot).
 - **HTTP:** `GET /users/:userId/notifications` to list notifications for a user (e.g. by email until auth exists).
 
 ## Ports
@@ -17,7 +17,7 @@ Sends notifications (e.g. email) when an order is confirmed. Listens for `order.
 ## Inbound
 
 - **HTTP:** `GET /users/:userId/notifications` (optional query `limit`, `cursor`).
-- **Messaging:** `order.confirmed`, `reset_password.link_requested`, `auth.password_changed`, `account.locked_notify`, `otp.send_requested`.
+- **Messaging:** `order.confirmed`, `reset_password.link_requested`, `auth.password_changed`, `account.locked_notify`, `otp.send_requested`, `inventory.low_stock` (consumed from `notification_queue`).
 
 ## Outbound
 

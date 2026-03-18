@@ -17,27 +17,38 @@ import { RedisInventoryListCacheAdapter } from './infrastructure/outbound/persis
 import { InventoryRepository } from './infrastructure/outbound/persistence/sql/inventory.repository';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
+import { CheckQuantityInInventoryUseCase } from './application/use-cases/check-quantity-in-inventory';
+import { IInventoryLowStockPublisherPort } from './domain/ports/inventory-low-stock-publisher.port';
+import { LowStockCronService } from './infrastructure/cron/low-stock-cron.service';
+import { ILowStockNotificationDeduperPort } from './domain/ports/inventory-low-stock-notification-deduper.port';
+import { RedisLowStockNotificationDeduperAdapter } from './infrastructure/outbound/persistence/redis/redis-low-stock-notification-deduper.adapter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: 'apps/inventory/.env',
-            isGlobal: true,
-        }),
-        DbModule,
-        RabbitMQModule,
-        RedisModule,
-        MongoDBModule.forRoot(),
-    ],
-    controllers: [InventoryController, OrderCreationRequestedConsumer],
-    providers: [
-        CreateInventoryUseCase,
-        HandleOrderCreationRequestedUseCase,
-        FindAllInventoryUseCase,
-        { provide: IInventoryListCachePort, useClass: RedisInventoryListCacheAdapter },
-        { provide: IInventoryRepositoryPort, useClass: InventoryRepository },
-        { provide: IInventoryEventsPublisherPort, useClass: InventoryRabbitMqPublisher },
-        { provide: IReservationAuditLogPort, useClass: MongoReservationAuditLogRepository },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: 'apps/inventory/.env',
+      isGlobal: true,
+    }),
+    ScheduleModule.forRoot(),
+    DbModule,
+    RabbitMQModule,
+    RedisModule,
+    MongoDBModule.forRoot(),
+  ],
+  controllers: [InventoryController, OrderCreationRequestedConsumer],
+  providers: [
+    CreateInventoryUseCase,
+    HandleOrderCreationRequestedUseCase,
+    FindAllInventoryUseCase,
+    CheckQuantityInInventoryUseCase,
+    LowStockCronService,
+    { provide: IInventoryLowStockPublisherPort, useClass: InventoryRabbitMqPublisher },
+    { provide: ILowStockNotificationDeduperPort, useClass: RedisLowStockNotificationDeduperAdapter },
+    { provide: IInventoryListCachePort, useClass: RedisInventoryListCacheAdapter },
+    { provide: IInventoryRepositoryPort, useClass: InventoryRepository },
+    { provide: IInventoryEventsPublisherPort, useClass: InventoryRabbitMqPublisher },
+    { provide: IReservationAuditLogPort, useClass: MongoReservationAuditLogRepository },
+  ],
 })
 export class InventoryModule {}

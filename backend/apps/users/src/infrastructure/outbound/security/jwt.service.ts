@@ -5,19 +5,19 @@ import { IJwtPort, TJwtPayload } from '../../../domain/ports/jwt.port';
 
 @Injectable()
 export class JwtService extends IJwtPort {
-    private readonly secret: string;
+  private readonly secret: string;
 
-    constructor(configService: ConfigService) {
-        super();
-        this.secret = configService.getOrThrow<string>('JWT_SECRET');
-    }
+  constructor(configService: ConfigService) {
+    super();
+    this.secret = configService.getOrThrow<string>('JWT_SECRET');
+  }
 
-    verify(token: string): Promise<TJwtPayload | null> {
-        try {
-            const decoded = jwt.verify(token, this.secret) as TJwtPayload;
-            return Promise.resolve(decoded);
-        } catch {
-            return Promise.resolve(null);
-        }
+  verify(token: string): Promise<TJwtPayload | null> {
+    try {
+      const decoded = jwt.verify(token, this.secret) as TJwtPayload;
+      return Promise.resolve(decoded);
+    } catch {
+      return Promise.resolve(null);
     }
+  }
 }

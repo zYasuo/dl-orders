@@ -5,12 +5,12 @@ import { IPasswordChangedPublisherPort } from '../../../domain/ports/publishers/
 
 @Injectable()
 export class PasswordChangedRabbitMqPublisher extends IPasswordChangedPublisherPort {
-    constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
-        super();
-    }
+  constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
+    super();
+  }
 
-    publish(event: IPasswordChangedEvent): Promise<void> {
-        this.notificationClient.emit(PATTERNS.PASSWORD_CHANGED, event);
-        return Promise.resolve();
-    }
+  publish(event: IPasswordChangedEvent): Promise<void> {
+    this.notificationClient.emit(PATTERNS.PASSWORD_CHANGED, event);
+    return Promise.resolve();
+  }
 }

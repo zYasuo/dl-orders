@@ -1,5 +1,5 @@
 export type TCreateOtp = {
-    code: string;
-    userId: string;
-    expiresAt: Date;
+  code: string;
+  userId: string;
+  expiresAt: Date;
 };

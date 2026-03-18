@@ -5,30 +5,31 @@ import { CreateInventoryDto } from '../../../../application/dto/create-inventory
 
 export const ApiInventories = () => applyDecorators(ApiTags('Inventories'));
 
-const standardError = (status: number, description: string) => ApiResponse({ status, description, type: StandardErrorResponseDto });
+const standardError = (status: number, description: string) =>
+  ApiResponse({ status, description, type: StandardErrorResponseDto });
 
 export const InventoryDoc = {
-    Create: () =>
-        applyDecorators(
-            Post(),
-            ApiOperation({ summary: 'Create inventory item' }),
-            ApiBody({ type: CreateInventoryDto }),
-            ApiResponse({ status: 201, description: 'Inventory item created' }),
-            standardError(400, 'Invalid input'),
-        ),
+  Create: () =>
+    applyDecorators(
+      Post(),
+      ApiOperation({ summary: 'Create inventory item' }),
+      ApiBody({ type: CreateInventoryDto }),
+      ApiResponse({ status: 201, description: 'Inventory item created' }),
+      standardError(400, 'Invalid input'),
+    ),
 
-    ReservationAuditLog: () =>
-        applyDecorators(
-            Get('reservations/:orderId/audit-log'),
-            ApiOperation({ summary: 'Reservation audit log for order' }),
-            ApiParam({ name: 'orderId', description: 'Order ID' }),
-            ApiResponse({ status: 200, description: 'List of reservation audit events' }),
-        ),
+  ReservationAuditLog: () =>
+    applyDecorators(
+      Get('reservations/:orderId/audit-log'),
+      ApiOperation({ summary: 'Reservation audit log for order' }),
+      ApiParam({ name: 'orderId', description: 'Order ID' }),
+      ApiResponse({ status: 200, description: 'List of reservation audit events' }),
+    ),
 
-    List: () =>
-        applyDecorators(
-            Get(),
-            ApiOperation({ summary: 'Get all inventory items' }),
-            ApiResponse({ status: 200, description: 'List of inventory items' }),
-        ),
+  List: () =>
+    applyDecorators(
+      Get(),
+      ApiOperation({ summary: 'Get all inventory items' }),
+      ApiResponse({ status: 200, description: 'List of inventory items' }),
+    ),
 };

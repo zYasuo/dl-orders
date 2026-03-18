@@ -11,6 +11,7 @@ describe('CreateInventoryUseCase', () => {
   let listCache: jest.Mocked<IInventoryListCachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
+  const createdBy = 'user@test.com';
   const fakeInventory = new InventoryEntity(
     'inventory-123',
     'Warehouse 1',
@@ -19,6 +20,7 @@ describe('CreateInventoryUseCase', () => {
     1,
     5,
     'product-123',
+    createdBy,
     createdAt,
     createdAt,
   );
@@ -60,6 +62,7 @@ describe('CreateInventoryUseCase', () => {
         maxQuantity: 100,
         minQuantity: 1,
         lowStockThreshold: 5,
+        createdBy,
       };
 
       const result = await sut.execute(input);
@@ -70,6 +73,10 @@ describe('CreateInventoryUseCase', () => {
         productId: input.productId,
         name: input.name,
         quantity: input.quantity,
+        maxQuantity: input.maxQuantity,
+        minQuantity: input.minQuantity,
+        lowStockThreshold: input.lowStockThreshold,
+        createdBy: input.createdBy,
       });
       expect(result).toEqual(fakeInventory);
       expect(listCache.invalidate).toHaveBeenCalledTimes(1);
@@ -86,6 +93,7 @@ describe('CreateInventoryUseCase', () => {
           maxQuantity: 100,
           minQuantity: 1,
           lowStockThreshold: 5,
+          createdBy,
         }),
       ).rejects.toThrow(new BadRequestException('Inventory already exists for this product'));
       expect(inventoryRepository.create).not.toHaveBeenCalled();
@@ -102,6 +110,7 @@ describe('CreateInventoryUseCase', () => {
           maxQuantity: 100,
           minQuantity: 1,
           lowStockThreshold: 5,
+          createdBy,
         }),
       ).rejects.toThrow(new BadRequestException('An inventory with this name already exists'));
       expect(inventoryRepository.create).not.toHaveBeenCalled();
@@ -118,6 +127,7 @@ describe('CreateInventoryUseCase', () => {
           maxQuantity: 100,
           minQuantity: 1,
           lowStockThreshold: 5,
+          createdBy,
         }),
       ).rejects.toThrow(new InternalServerErrorException('Failed to create inventory'));
     });

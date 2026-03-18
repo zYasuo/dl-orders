@@ -5,13 +5,13 @@ import { HandleOrderCreationRequestedUseCase } from '../../../application/use-ca
 
 @Controller()
 export class OrderCreationRequestedConsumer {
-    private readonly logger = new Logger(OrderCreationRequestedConsumer.name);
+  private readonly logger = new Logger(OrderCreationRequestedConsumer.name);
 
-    constructor(private readonly handleUseCase: HandleOrderCreationRequestedUseCase) {}
+  constructor(private readonly handleUseCase: HandleOrderCreationRequestedUseCase) {}
 
-    @EventPattern(PATTERNS.ORDER_CREATION_REQUESTED)
-    async handle(@Payload() payload: IOrderCreationRequestedEvent): Promise<void> {
-        this.logger.log('Received order creation requested', { orderId: payload.orderId });
-        await this.handleUseCase.execute(payload);
-    }
+  @EventPattern(PATTERNS.ORDER_CREATION_REQUESTED)
+  async handle(@Payload() payload: IOrderCreationRequestedEvent): Promise<void> {
+    this.logger.log('Received order creation requested', { orderId: payload.orderId });
+    await this.handleUseCase.execute(payload);
+  }
 }

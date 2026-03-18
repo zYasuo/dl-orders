@@ -6,18 +6,20 @@ import { IOtpNotificationTemplatePort } from 'apps/notification/src/domain/ports
 
 @Injectable()
 export class OtpTemplateAdapter implements IOtpNotificationTemplatePort {
-    getOtpVerificationMessage(payload: IOtpSendRequestedEvent): INotificationRequest {
-        const { code, expiresInMinutes } = payload;
+  getOtpVerificationMessage(payload: IOtpSendRequestedEvent): INotificationRequest {
+    const { code, expiresInMinutes } = payload;
 
-        const content = this.replacePlaceholders(otpVerificationHtmlTemplate, code, expiresInMinutes);
+    const content = this.replacePlaceholders(otpVerificationHtmlTemplate, code, expiresInMinutes);
 
-        return {
-            title: OTP_VERIFICATION_TITLE,
-            content: content.trim(),
-        };
-    }
+    return {
+      title: OTP_VERIFICATION_TITLE,
+      content: content.trim(),
+    };
+  }
 
-    private replacePlaceholders(template: string, code: string, expiresInMinutes: number): string {
-        return template.replace('{{ code }}', code).replace('{{ expiresInMinutes }}', expiresInMinutes.toString());
-    }
+  private replacePlaceholders(template: string, code: string, expiresInMinutes: number): string {
+    return template
+      .replace('{{ code }}', code)
+      .replace('{{ expiresInMinutes }}', expiresInMinutes.toString());
+  }
 }

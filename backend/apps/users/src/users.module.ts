@@ -12,20 +12,20 @@ import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.
 import { UpdateUserProfileUseCase } from './application/use-cases/update-user-profile.use-case';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: 'apps/users/.env',
-            isGlobal: true,
-        }),
-        DbModule,
-    ],
-    controllers: [UsersController, UserVerifiedConsumer],
-    providers: [
-        JwtAuthGuard,
-        GetUserProfileUseCase,
-        UpdateUserProfileUseCase,
-        { provide: IUserProfileRepositoryPort, useClass: UserProfileRepository },
-        { provide: IJwtPort, useClass: JwtService },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: 'apps/users/.env',
+      isGlobal: true,
+    }),
+    DbModule,
+  ],
+  controllers: [UsersController, UserVerifiedConsumer],
+  providers: [
+    JwtAuthGuard,
+    GetUserProfileUseCase,
+    UpdateUserProfileUseCase,
+    { provide: IUserProfileRepositoryPort, useClass: UserProfileRepository },
+    { provide: IJwtPort, useClass: JwtService },
+  ],
 })
 export class UsersModule {}

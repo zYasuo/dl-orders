@@ -6,40 +6,40 @@ import { INotificationAuditLogPort } from '../../domain/ports/notification-audit
 
 @Injectable()
 export class HandleAccountLockedNotifyUseCase {
-    private readonly logger = new Logger(HandleAccountLockedNotifyUseCase.name);
+  private readonly logger = new Logger(HandleAccountLockedNotifyUseCase.name);
 
-    constructor(
-        private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
-        private readonly emailSender: IEmailSenderPort,
-        private readonly notificationAuditLogPort: INotificationAuditLogPort,
-    ) {}
+  constructor(
+    private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
+    private readonly emailSender: IEmailSenderPort,
+    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+  ) {}
 
-    async execute(payload: IAccountLockedNotifyEvent): Promise<void> {
-        const { email } = payload;
+  async execute(payload: IAccountLockedNotifyEvent): Promise<void> {
+    const { email } = payload;
 
-        const { title, content } = this.authNotificationTemplatePort.getAccountLockedMessage(payload);
-        const timestamp = new Date().toISOString();
+    const { title, content } = this.authNotificationTemplatePort.getAccountLockedMessage(payload);
+    const timestamp = new Date().toISOString();
 
-        const result = await this.emailSender.send({
-            to: email,
-            subject: title,
-            html: content,
-        });
+    const result = await this.emailSender.send({
+      to: email,
+      subject: title,
+      html: content,
+    });
 
-        if (!result.success) {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'ACCOUNT_LOCKED_NOTIFIED',
-                timestamp,
-                details: { email, error: result.error },
-            });
-        } else {
-            await this.notificationAuditLogPort.log({
-                data: email,
-                action: 'ACCOUNT_LOCKED_NOTIFIED_FAILED',
-                timestamp,
-                details: { email },
-            });
-        }
+    if (!result.success) {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'ACCOUNT_LOCKED_NOTIFIED',
+        timestamp,
+        details: { email, error: result.error },
+      });
+    } else {
+      await this.notificationAuditLogPort.log({
+        data: email,
+        action: 'ACCOUNT_LOCKED_NOTIFIED_FAILED',
+        timestamp,
+        details: { email },
+      });
     }
+  }
 }

@@ -5,15 +5,15 @@ import { HandleOrderConfirmedUseCase } from '../../../application/use-cases/hand
 
 @Controller()
 export class OrderConfirmedConsumer {
-    private readonly logger = new Logger(OrderConfirmedConsumer.name);
+  private readonly logger = new Logger(OrderConfirmedConsumer.name);
 
-    constructor(private readonly handleUseCase: HandleOrderConfirmedUseCase) {}
+  constructor(private readonly handleUseCase: HandleOrderConfirmedUseCase) {}
 
-    @EventPattern(PATTERNS.ORDER_CONFIRMED)
-    async handle(@Payload() payload: IOrderConfirmedEvent): Promise<void> {
-        const { orderId } = payload;
+  @EventPattern(PATTERNS.ORDER_CONFIRMED)
+  async handle(@Payload() payload: IOrderConfirmedEvent): Promise<void> {
+    const { orderId } = payload;
 
-        this.logger.log('Received order confirmed', { orderId });
-        await this.handleUseCase.execute(payload);
-    }
+    this.logger.log('Received order confirmed', { orderId });
+    await this.handleUseCase.execute(payload);
+  }
 }

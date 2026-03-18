@@ -5,13 +5,13 @@ import { HandleInventoryReservedUseCase } from '../../../application/use-cases/h
 
 @Controller()
 export class InventoryReservedConsumer {
-    private readonly logger = new Logger(InventoryReservedConsumer.name);
+  private readonly logger = new Logger(InventoryReservedConsumer.name);
 
-    constructor(private readonly handleInventoryReservedUseCase: HandleInventoryReservedUseCase) {}
+  constructor(private readonly handleInventoryReservedUseCase: HandleInventoryReservedUseCase) {}
 
-    @EventPattern(PATTERNS.INVENTORY_RESERVED)
-    async handle(@Payload() payload: InventoryReservedEvent): Promise<void> {
-        this.logger.log('Received inventory reserved', { orderId: payload.orderId });
-        await this.handleInventoryReservedUseCase.execute(payload);
-    }
+  @EventPattern(PATTERNS.INVENTORY_RESERVED)
+  async handle(@Payload() payload: InventoryReservedEvent): Promise<void> {
+    this.logger.log('Received inventory reserved', { orderId: payload.orderId });
+    await this.handleInventoryReservedUseCase.execute(payload);
+  }
 }

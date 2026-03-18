@@ -1,12 +1,14 @@
 import { InventoryEntity } from '../../src/domain/entities/inventory.entity';
 import { IInventoryRepositoryPort } from '../../src/domain/ports/inventory-repository.port';
 import { ICreateInventory } from '../../src/domain/types/inventory-repository.types';
+import { TInventoryLowStockCursor } from '../../src/domain/types/inventory-repository.types';
 
 export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
   private readonly inventories = new Map<string, InventoryEntity>();
 
   async create(input: ICreateInventory): Promise<InventoryEntity | null> {
-    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } = input;
+    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } =
+      input;
 
     const existing = await this.findByProductId(productId);
     if (existing) return null;
@@ -68,6 +70,32 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
 
   async findLowStock(): Promise<InventoryEntity[]> {
     return Array.from(this.inventories.values()).filter((inv) => inv.isLowStock());
+  }
+
+  async findLowStockPage(
+    limit: number,
+    cursor: TInventoryLowStockCursor | null,
+  ): Promise<InventoryEntity[]> {
+    const lowStock = Array.from(this.inventories.values())
+      .filter((inv) => inv.isLowStock())
+      .sort((a, b) => {
+        const updatedDiff = a.updatedAt.getTime() - b.updatedAt.getTime();
+        if (updatedDiff !== 0) return updatedDiff;
+        return a.id.localeCompare(b.id);
+      });
+
+    if (!cursor) return lowStock.slice(0, limit);
+
+    const cursorTime = cursor.updatedAt.getTime();
+    const startIndex = lowStock.findIndex(
+      (inv) =>
+        inv.updatedAt.getTime() > cursorTime ||
+        (inv.updatedAt.getTime() === cursorTime && inv.id > cursor.id),
+    );
+
+    if (startIndex < 0) return [];
+
+    return lowStock.slice(startIndex, startIndex + limit);
   }
 
   async delete(id: string): Promise<InventoryEntity | null> {

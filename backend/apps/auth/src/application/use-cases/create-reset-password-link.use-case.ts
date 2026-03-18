@@ -8,52 +8,57 @@ import { TCreateResetPasswordLink } from '../dto/create-reset-password-link.dto'
 
 @Injectable()
 export class CreateResetPasswordLinkUseCase {
-    constructor(
-        private readonly passwordResetRepository: IPasswordResetRepositoryPort,
-        private readonly emailEncrypted: IEmailEncryptedSecurity,
-        private readonly resetPasswordPublisher: IResetPasswordPublisherPort,
-    ) {}
+  constructor(
+    private readonly passwordResetRepository: IPasswordResetRepositoryPort,
+    private readonly emailEncrypted: IEmailEncryptedSecurity,
+    private readonly resetPasswordPublisher: IResetPasswordPublisherPort,
+  ) {}
 
-    async execute(input: TCreateResetPasswordLink): Promise<{ message: string }> {
-        const { email } = input;
+  async execute(input: TCreateResetPasswordLink): Promise<{ message: string }> {
+    const { email } = input;
 
-        const token = PasswordResetEntity.generateToken();
-        const expiresAt = PasswordResetEntity.expiresAtFromNow();
+    const token = PasswordResetEntity.generateToken();
+    const expiresAt = PasswordResetEntity.expiresAtFromNow();
 
-        const message = 'If this email addres is registered, you will receive a reset password link in a few minutes.';
+    const message =
+      'If this email addres is registered, you will receive a reset password link in a few minutes.';
 
-        const linkResetPassword = this.createLinkResetPassword(token);
-        const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
+    const linkResetPassword = this.createLinkResetPassword(token);
+    const emailLookupHash = await this.emailEncrypted.getLookupHash(email);
 
-        const [existing, emailEncrypted] = await Promise.all([
-            this.passwordResetRepository.findByEmailLookupHash(emailLookupHash),
-            this.emailEncrypted.encrypt(email),
-        ]);
+    const [existing, emailEncrypted] = await Promise.all([
+      this.passwordResetRepository.findByEmailLookupHash(emailLookupHash),
+      this.emailEncrypted.encrypt(email),
+    ]);
 
-        if (existing && !PasswordResetEntity.isExpired(existing.expiresAt) && !PasswordResetEntity.isUsed(existing.used)) {
-            return { message };
-        }
-
-        const createData: TCreatePasswordReset = {
-            emailEncrypted,
-            emailLookupHash,
-            linkResetPassword,
-            expiresAt,
-        };
-
-        await Promise.all([
-            this.passwordResetRepository.create(createData),
-            this.resetPasswordPublisher.publish({
-                email,
-                linkResetPassword,
-                expiresAt,
-            }),
-        ]);
-
-        return { message };
+    if (
+      existing &&
+      !PasswordResetEntity.isExpired(existing.expiresAt) &&
+      !PasswordResetEntity.isUsed(existing.used)
+    ) {
+      return { message };
     }
 
-    private createLinkResetPassword(token: string): string {
-        return `${process.env.FRONTEND_URL_RESET_PASSWORD}?token=${token}`;
-    }
+    const createData: TCreatePasswordReset = {
+      emailEncrypted,
+      emailLookupHash,
+      linkResetPassword,
+      expiresAt,
+    };
+
+    await Promise.all([
+      this.passwordResetRepository.create(createData),
+      this.resetPasswordPublisher.publish({
+        email,
+        linkResetPassword,
+        expiresAt,
+      }),
+    ]);
+
+    return { message };
+  }
+
+  private createLinkResetPassword(token: string): string {
+    return `${process.env.FRONTEND_URL_RESET_PASSWORD}?token=${token}`;
+  }
 }

@@ -6,58 +6,58 @@ import { DbService } from '../../../db/db.service';
 
 @Injectable()
 export class AuthLogsRepository extends IAuthLogsRepositoryPort {
-    constructor(private readonly db: DbService) {
-        super();
-    }
+  constructor(private readonly db: DbService) {
+    super();
+  }
 
-    async findByUserId(userId: string): Promise<AuthLogsEntity | null> {
-        const row = await this.db.authLogs.findUnique({
-            where: { userId },
-        });
+  async findByUserId(userId: string): Promise<AuthLogsEntity | null> {
+    const row = await this.db.authLogs.findUnique({
+      where: { userId },
+    });
 
-        if (!row) return null;
+    if (!row) return null;
 
-        return new AuthLogsEntity(
-            row.id,
-            row.userId,
-            row.loginAttempts,
-            row.lastLoginAttempt,
-            row.lastLoginAttemptIp,
-            row.lastLoginAttemptSuccess,
-            row.lockedUntil,
-            row.createdAt,
-        );
-    }
+    return new AuthLogsEntity(
+      row.id,
+      row.userId,
+      row.loginAttempts,
+      row.lastLoginAttempt,
+      row.lastLoginAttemptIp,
+      row.lastLoginAttemptSuccess,
+      row.lockedUntil,
+      row.createdAt,
+    );
+  }
 
-    async upsert(data: TUpsertAuthLogs): Promise<AuthLogsEntity> {
-        const row = await this.db.authLogs.upsert({
-            where: { userId: data.userId },
-            create: {
-                userId: data.userId,
-                loginAttempts: data.loginAttempts,
-                lastLoginAttempt: data.lastLoginAttempt,
-                lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
-                lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
-                lockedUntil: data.lockedUntil ?? null,
-            },
-            update: {
-                loginAttempts: data.loginAttempts,
-                lastLoginAttempt: data.lastLoginAttempt,
-                lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
-                lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
-                lockedUntil: data.lockedUntil ?? null,
-            },
-        });
+  async upsert(data: TUpsertAuthLogs): Promise<AuthLogsEntity> {
+    const row = await this.db.authLogs.upsert({
+      where: { userId: data.userId },
+      create: {
+        userId: data.userId,
+        loginAttempts: data.loginAttempts,
+        lastLoginAttempt: data.lastLoginAttempt,
+        lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
+        lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
+        lockedUntil: data.lockedUntil ?? null,
+      },
+      update: {
+        loginAttempts: data.loginAttempts,
+        lastLoginAttempt: data.lastLoginAttempt,
+        lastLoginAttemptIp: data.lastLoginAttemptIp ?? null,
+        lastLoginAttemptSuccess: data.lastLoginAttemptSuccess,
+        lockedUntil: data.lockedUntil ?? null,
+      },
+    });
 
-        return new AuthLogsEntity(
-            row.id,
-            row.userId,
-            row.loginAttempts,
-            row.lastLoginAttempt,
-            row.lastLoginAttemptIp,
-            row.lastLoginAttemptSuccess,
-            row.lockedUntil,
-            row.createdAt,
-        );
-    }
+    return new AuthLogsEntity(
+      row.id,
+      row.userId,
+      row.loginAttempts,
+      row.lastLoginAttempt,
+      row.lastLoginAttemptIp,
+      row.lastLoginAttemptSuccess,
+      row.lockedUntil,
+      row.createdAt,
+    );
+  }
 }

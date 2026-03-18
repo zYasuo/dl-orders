@@ -1,10 +1,10 @@
 # Inventory service
 
-Reserves stock when an order is created and tells the orders service whether the reservation succeeded or failed.
+Reserves stock when an order is created and tells the orders service whether the reservation succeeded or failed. Also periodically checks for low-stock items and triggers low-stock alerts.
 
 ## Role
 
-- **Events in:** Listens for `order.creation_requested` (from orders). Tries to reserve inventory and publishes either `inventory.reserved` or `inventory.reservation_failed`.
+- **Events in:** Listens for `order.creation_requested` (from orders). Tries to reserve inventory and publishes either `inventory.reserved` or `inventory.reservation_failed`. Additionally runs a low-stock check every 5 minutes and publishes `inventory.low_stock`.
 - **HTTP:** Optional endpoints (e.g. create inventory) for setup or admin; main flow is event-driven.
 
 ## Ports
@@ -12,6 +12,7 @@ Reserves stock when an order is created and tells the orders service whether the
 - **IInventoryRepositoryPort** — Persist and load inventory/reservations (Postgres/Prisma).
 - **IInventoryListCachePort** — Cache list of inventory items (Redis); invalidated on create and on reservation.
 - **IInventoryEventsPublisherPort** — Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
+- **IInventoryLowStockPublisherPort** — Publish `inventory.low_stock` to RabbitMQ (`notification_queue`) so notification can send alert emails.
 - **IReservationAuditLogPort** — Append reservation audit entries (MongoDB).
 
 ## Inbound
@@ -22,7 +23,7 @@ Reserves stock when an order is created and tells the orders service whether the
 ## Outbound
 
 - **Persistence:** `persistence/sql/` (inventory via Prisma), `persistence/mongodb/` (reservation audit log), `persistence/redis/` (list cache).
-- **Events:** `inventory.reserved`, `inventory.reservation_failed`.
+- **Events:** `inventory.reserved`, `inventory.reservation_failed`, `inventory.low_stock`.
 
 ## Data
 
