@@ -13,7 +13,8 @@ export class CreateInventoryUseCase {
   ) {}
 
   async execute(input: TCreateInventory): Promise<InventoryEntity> {
-    const { productId, name, quantity, maxQuantity, minQuantity, lowStockThreshold } = input;
+    const { productId, name, quantity, maxQuantity, minQuantity, lowStockThreshold, createdBy } =
+      input;
 
     const [existingInventory, existingByName] = await Promise.all([
       this.inventoryRepositoryPort.findByProductId(productId),
@@ -35,6 +36,7 @@ export class CreateInventoryUseCase {
       maxQuantity,
       minQuantity,
       lowStockThreshold,
+      createdBy,
     };
 
     const created = await this.inventoryRepositoryPort.create(createInput);
@@ -44,7 +46,7 @@ export class CreateInventoryUseCase {
     }
 
     await this.listCache.invalidate();
-    
+
     return created;
   }
 }

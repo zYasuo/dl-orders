@@ -1,4 +1,4 @@
-import { applyDecorators, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { applyDecorators, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StandardErrorResponseDto } from '@app/shared';
 import { SignupDto } from '../../../../application/dto/signup.dto';
@@ -64,7 +64,7 @@ export const AuthDoc = {
 
     ChangePassword: () =>
         applyDecorators(
-            Post('change-password'),
+            Patch('change-password'),
             HttpCode(HttpStatus.OK),
             RateLimitEndpoint('change-password'),
             ApiOperation({ summary: 'Change password with reset token' }),

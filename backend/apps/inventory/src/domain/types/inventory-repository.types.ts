@@ -1,8 +1,9 @@
 export interface ICreateInventory {
-    productId: string;
-    name: string;
-    quantity: number;
-    maxQuantity: number;
-    minQuantity: number;
-    lowStockThreshold: number;
+  productId: string;
+  name: string;
+  quantity: number;
+  maxQuantity: number;
+  minQuantity: number;
+  lowStockThreshold: number;
+  createdBy: string;
 }

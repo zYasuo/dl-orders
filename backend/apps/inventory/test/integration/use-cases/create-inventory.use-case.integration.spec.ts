@@ -35,6 +35,7 @@ describe('CreateInventoryUseCase (integration)', () => {
         maxQuantity: 100,
         minQuantity: 1,
         lowStockThreshold: 5,
+        createdBy: 'test@example.com',
       };
 
       const result = await sut.execute(input);
@@ -56,6 +57,7 @@ describe('CreateInventoryUseCase (integration)', () => {
         maxQuantity: 100,
         minQuantity: 1,
         lowStockThreshold: 5,
+        createdBy: 'test@example.com',
       });
 
       await expect(
@@ -66,6 +68,7 @@ describe('CreateInventoryUseCase (integration)', () => {
           maxQuantity: 100,
           minQuantity: 1,
           lowStockThreshold: 5,
+          createdBy: 'test@example.com',
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -78,6 +81,7 @@ describe('CreateInventoryUseCase (integration)', () => {
         maxQuantity: 100,
         minQuantity: 1,
         lowStockThreshold: 5,
+        createdBy: 'test@example.com',
       });
 
       await expect(
@@ -88,6 +92,7 @@ describe('CreateInventoryUseCase (integration)', () => {
           maxQuantity: 100,
           minQuantity: 1,
           lowStockThreshold: 5,
+          createdBy: 'test@example.com',
         }),
       ).rejects.toThrow(BadRequestException);
     });

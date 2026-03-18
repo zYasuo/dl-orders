@@ -31,6 +31,7 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
         1,
         5,
         productId,
+        'test@example.com',
         now,
         now,
       ),

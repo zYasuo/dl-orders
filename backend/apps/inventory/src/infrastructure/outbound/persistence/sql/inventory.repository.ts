@@ -12,7 +12,8 @@ export class InventoryRepository extends IInventoryRepositoryPort {
   }
 
   async create(input: ICreateInventory): Promise<InventoryEntity | null> {
-    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold } = input;
+    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } =
+      input;
 
     const now = new Date();
     const row = await this.db.inventory.create({
@@ -23,6 +24,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
         maxQuantity,
         minQuantity,
         lowStockThreshold,
+        createdBy,
         createdAt: now,
         updatedAt: now,
       },
@@ -37,6 +39,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
       row.minQuantity,
       row.lowStockThreshold,
       row.productId,
+      row.createdBy,
       row.createdAt,
       row.updatedAt,
     );
@@ -53,6 +56,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
       row.minQuantity,
       row.lowStockThreshold,
       row.productId,
+      row.createdBy,
       row.createdAt,
       row.updatedAt,
     );
@@ -69,6 +73,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
       row.minQuantity,
       row.lowStockThreshold,
       row.productId,
+      row.createdBy,
       row.createdAt,
       row.updatedAt,
     );
@@ -83,6 +88,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
       minQuantity: number;
       lowStockThreshold: number;
       productId: string;
+      createdBy: string;
       createdAt: Date;
       updatedAt: Date;
     };
@@ -91,7 +97,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
             UPDATE inventories
             SET quantity = quantity - ${quantity}, "updatedAt" = NOW()
             WHERE id = ${id} AND quantity >= ${quantity}
-            RETURNING id, name, quantity, maxQuantity, minQuantity, lowStockThreshold, "productId", "createdAt", "updatedAt"
+            RETURNING id, name, quantity, maxQuantity, minQuantity, lowStockThreshold, "productId", "createdBy", "createdAt", "updatedAt"
         `;
 
     if (!rows?.length) return null;
@@ -105,6 +111,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
       row.minQuantity,
       row.lowStockThreshold,
       row.productId,
+      row.createdBy,
       row.createdAt,
       row.updatedAt,
     );
@@ -122,21 +129,44 @@ export class InventoryRepository extends IInventoryRepositoryPort {
           row.minQuantity,
           row.lowStockThreshold,
           row.productId,
+          row.createdBy,
           row.createdAt,
           row.updatedAt,
         ),
     );
   }
 
-  async findLowStock(quantity: number): Promise<InventoryEntity[]> {
-    const lowStock = await this.db.inventory.findMany({
-      where: {
-        quantity: {
-          lte: quantity,
-        },
-      },
-    });
-    return lowStock.map(
+  async findLowStock(): Promise<InventoryEntity[]> {
+    type Row = {
+      id: string;
+      name: string;
+      quantity: number;
+      maxQuantity: number;
+      minQuantity: number;
+      lowStockThreshold: number;
+      productId: string;
+      createdBy: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+
+    const rows = await this.db.$queryRaw<Row[]>`
+      SELECT
+        id,
+        name,
+        quantity,
+        max_quantity AS "maxQuantity",
+        min_quantity AS "minQuantity",
+        low_stock_threshold AS "lowStockThreshold",
+        product_id AS "productId",
+        created_by AS "createdBy",
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"
+      FROM inventories
+      WHERE quantity <= min_quantity
+    `;
+
+    return rows.map(
       (row) =>
         new InventoryEntity(
           row.id,
@@ -146,6 +176,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
           row.minQuantity,
           row.lowStockThreshold,
           row.productId,
+          row.createdBy,
           row.createdAt,
           row.updatedAt,
         ),
@@ -163,6 +194,7 @@ export class InventoryRepository extends IInventoryRepositoryPort {
         row.minQuantity,
         row.lowStockThreshold,
         row.productId,
+        row.createdBy,
         row.createdAt,
         row.updatedAt,
       );

@@ -6,7 +6,7 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
   private readonly inventories = new Map<string, InventoryEntity>();
 
   async create(input: ICreateInventory): Promise<InventoryEntity | null> {
-    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold } = input;
+    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } = input;
 
     const existing = await this.findByProductId(productId);
     if (existing) return null;
@@ -23,6 +23,7 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
       minQuantity,
       lowStockThreshold,
       productId,
+      createdBy,
       createdAt: now,
       updatedAt: now,
     });
@@ -53,6 +54,7 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
       inventory.minQuantity,
       inventory.lowStockThreshold,
       inventory.productId,
+      inventory.createdBy,
       inventory.createdAt,
       new Date(),
     );
@@ -64,8 +66,8 @@ export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
     return Array.from(this.inventories.values());
   }
 
-  async findLowStock(quantity: number): Promise<InventoryEntity[]> {
-    return Array.from(this.inventories.values()).filter((inv) => inv.quantity <= quantity);
+  async findLowStock(): Promise<InventoryEntity[]> {
+    return Array.from(this.inventories.values()).filter((inv) => inv.isLowStock());
   }
 
   async delete(id: string): Promise<InventoryEntity | null> {

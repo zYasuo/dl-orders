@@ -21,10 +21,11 @@ describe('FindAllInventoryUseCase (integration)', () => {
     1,
     5,
     'product-123',
+    'test@example.com',
     now,
     now,
   );
-  
+
   const item2 = new InventoryEntity(
     'inventory-456',
     'Inventory 2',
@@ -33,6 +34,7 @@ describe('FindAllInventoryUseCase (integration)', () => {
     1,
     5,
     'product-456',
+    'test@example.com',
     now,
     now,
   );

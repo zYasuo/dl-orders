@@ -8,7 +8,7 @@ Handles user signup (with email OTP verification), sign-in, and JWT issuance. Tr
 - **HTTP:** `POST /auth/verify-otp` (email, code) — validates OTP, marks email verified, publishes `user.verified`, returns JWT.
 - **HTTP:** `POST /auth/signin` (email, password) — validates credentials and email verified; returns JWT. If the account is locked (after 3 failed attempts), returns `403` with a message to try again after X minutes. IP is captured from the request for audit. Rate limit per IP applies; when exceeded, returns `429 Too Many Requests` with optional `Retry-After` header.
 - **HTTP:** `POST /auth/reset-password-link` (email) — requests a password reset link; publishes `reset_password.link_requested` (notification service sends email with link).
-- **HTTP:** `POST /auth/change-password` (email, token, new_password) — changes password using the token from the reset link; publishes `auth.password_changed` (notification service sends confirmation email).
+- **HTTP:** `PATCH /auth/change-password` (email, token, new_password) — changes password using the token from the reset link; publishes `auth.password_changed` (notification service sends confirmation email).
 
 JWT payload: `{ sub: userId, email }`; other services validate it with the same `JWT_SECRET`.
 
@@ -28,7 +28,7 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 
 ## Inbound
 
-- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin`, `POST /auth/reset-password-link`, `POST /auth/change-password` (Zod-validated bodies). Each endpoint is rate-limited per IP via Redis; excess requests return `429 Too Many Requests`.
+- **HTTP:** `POST /auth/signup`, `POST /auth/verify-otp`, `POST /auth/signin`, `POST /auth/reset-password-link`, `PATCH /auth/change-password` (Zod-validated bodies). Each endpoint is rate-limited per IP via Redis; excess requests return `429 Too Many Requests`.
 
 ## Outbound
 
