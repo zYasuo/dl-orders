@@ -2,10 +2,6 @@ import { Prisma } from '.prisma/payment-client';
 import { Injectable } from '@nestjs/common';
 import { PaymentEntity, PaymentStatus } from '../../../../domain/entities/payment.entity';
 import { PaymentRepositoryPort } from '../../../../domain/ports/payment-repository.port';
-import {
-  ICreatePayment,
-  IUpdatePaymentStatus,
-} from '../../../../domain/types/payment-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
@@ -14,26 +10,31 @@ export class PaymentRepository extends PaymentRepositoryPort {
     super();
   }
 
-  async create(input: ICreatePayment): Promise<PaymentEntity | null> {
+  async create(entity: PaymentEntity): Promise<PaymentEntity | null> {
     try {
       const row = await this.db.payment.create({
         data: {
-          orderId: input.orderId,
-          amount: input.amount,
-          idempotencyKey: input.idempotencyKey ?? null,
-          preferenceId: input.preferenceId ?? null,
-          externalId: input.externalId ?? null,
+          id: entity.id,
+          orderId: entity.orderId,
+          amount: entity.amount,
+          idempotencyKey: entity.idempotencyKey ?? null,
+          preferenceId: entity.preferenceId ?? null,
+          externalId: entity.externalId ?? null,
+          status: entity.status,
+          gatewayResponse: entity.gatewayResponse ?? null,
+          createdAt: entity.createdAt,
+          updatedAt: entity.updatedAt,
         },
       });
 
       return this.toDomain(row);
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        if (input.idempotencyKey) {
-          const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+        if (entity.idempotencyKey) {
+          const existing = await this.findByIdempotencyKey(entity.idempotencyKey);
           if (existing) return existing;
         }
-        const existing = await this.findByOrderId(input.orderId);
+        const existing = await this.findByOrderId(entity.orderId);
         return existing;
       }
       throw err;
@@ -64,42 +65,37 @@ export class PaymentRepository extends PaymentRepositoryPort {
     return this.toDomain(row);
   }
 
-  async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
-    const updateData = this.buildUpdateData(data);
-
+  async updateStatus(entity: PaymentEntity): Promise<PaymentEntity | null> {
     const row = await this.db.payment.update({
-      where: { id },
-      data: updateData as never,
+      where: { id: entity.id },
+      data: this.toPersistenceUpdate(entity) as never,
     });
 
     if (!row) return null;
     return this.toDomain(row);
   }
 
-  async updateStatusIfPending(
-    id: string,
-    data: IUpdatePaymentStatus,
-  ): Promise<PaymentEntity | null> {
-    const updateData = this.buildUpdateData(data);
-
+  async updateStatusIfPending(entity: PaymentEntity): Promise<PaymentEntity | null> {
     const result = await this.db.payment.updateMany({
-      where: { id, status: PaymentStatus.PENDING },
-      data: updateData as never,
+      where: { id: entity.id, status: PaymentStatus.PENDING },
+      data: this.toPersistenceUpdate(entity) as never,
     });
 
     if (result.count === 0) return null;
 
-    const row = await this.db.payment.findUnique({ where: { id } });
+    const row = await this.db.payment.findUnique({ where: { id: entity.id } });
     if (!row) return null;
     return this.toDomain(row);
   }
 
-  private buildUpdateData(data: IUpdatePaymentStatus): Record<string, unknown> {
-    const updateData: Record<string, unknown> = { status: data.status };
-    if (data.externalId !== undefined) updateData.externalId = data.externalId;
-    if (data.preferenceId !== undefined) updateData.preferenceId = data.preferenceId;
-    if (data.gatewayResponse !== undefined) updateData.gatewayResponse = data.gatewayResponse;
-    return updateData;
+  private toPersistenceUpdate(entity: PaymentEntity): Record<string, unknown> {
+    return {
+      status: entity.status,
+      externalId: entity.externalId,
+      preferenceId: entity.preferenceId,
+      gatewayResponse: entity.gatewayResponse,
+      updatedAt: entity.updatedAt,
+    };
   }
 
   private toDomain(row: {

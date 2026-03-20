@@ -1,6 +1,6 @@
 import { InventoryReservedEvent } from '@app/shared';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PaymentStatus } from '../../domain/entities/payment.entity';
+import { PaymentEntity, PaymentStatus } from '../../domain/entities/payment.entity';
 import { OrderDetailsPort } from '../../domain/ports/order-details.port';
 import { PaymentAuditLogPort } from '../../domain/ports/payment-audit-log.port';
 import { PaymentGatewayPort } from '../../domain/ports/payment-gateway.port';
@@ -30,11 +30,13 @@ export class HandleInventoryReservedUseCase {
       throw new NotFoundException(`Order ${orderId} not found`);
     }
 
-    const payment = await this.paymentRepositoryPort.create({
-      orderId,
-      amount: orderDetails.totalPrice,
-      idempotencyKey: orderDetails.idempotencyKey ?? orderId,
-    });
+    const payment = await this.paymentRepositoryPort.create(
+      PaymentEntity.create({
+        orderId,
+        amount: orderDetails.totalPrice,
+        idempotencyKey: orderDetails.idempotencyKey ?? orderId,
+      }),
+    );
 
     if (!payment) {
       this.logger.error(`Failed to create payment record. orderId=${orderId}`);
@@ -60,11 +62,20 @@ export class HandleInventoryReservedUseCase {
     });
 
     const results = await Promise.allSettled([
-      this.paymentRepositoryPort.updateStatus(payment.id, {
-        status: PaymentStatus.PENDING,
-        preferenceId: preference.preferenceId,
-        gatewayResponse: { initPoint: preference.initPoint },
-      }),
+      this.paymentRepositoryPort.updateStatus(
+        new PaymentEntity({
+          id: payment.id,
+          orderId: payment.orderId,
+          idempotencyKey: payment.idempotencyKey,
+          externalId: payment.externalId,
+          preferenceId: preference.preferenceId,
+          amount: payment.amount,
+          status: PaymentStatus.PENDING,
+          gatewayResponse: { initPoint: preference.initPoint },
+          createdAt: payment.createdAt,
+          updatedAt: new Date(),
+        }),
+      ),
 
       this.paymentAuditLogPort.log({
         orderId,

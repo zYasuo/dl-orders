@@ -1,4 +1,4 @@
-# Product service
+﻿# Product service
 
 Product catalog: create and manage products. HTTP-only; no messaging.
 
@@ -8,12 +8,12 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Ports
 
-- **ProductRepositoryPort** — Persist and load products (MongoDB).
-- **ProductCachePort** — Cache product by ID (Redis); invalidated on create.
+- **ProductRepositoryPort** â€” Persist and load products (MongoDB).
+- **ProductCachePort** â€” Cache product by ID (Redis); invalidated on create.
 
 ## Inbound
 
-- **HTTP:** REST API (v1) — `POST /api/v1/products` (create product), `GET /api/v1/products/:id` (get product by id). Global prefix `api/v1` keeps the contract stable for consumers (e.g. orders service).
+- **HTTP:** REST API (v1) â€” `POST /api/v1/products` (create product), `GET /api/v1/products/:id` (get product by id). Global prefix `api/v1` keeps the contract stable for consumers (e.g. orders service).
 
 ## Outbound
 
@@ -21,8 +21,8 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Data
 
-- **MongoDB** — Product catalog; connection via `MONGODB_URI` in `apps/product/.env`.
-- **Redis** — Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Keys use prefix `product:` (e.g. item by id).
+- **MongoDB** â€” Product catalog; connection via `MONGODB_URI` in `apps/product/.env`.
+- **Redis** â€” Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Keys use prefix `product:` (e.g. item by id).
 
 ## Run locally
 
@@ -61,4 +61,11 @@ npm run seed:product -- "C:\path\to\your.json"
 
 Or set `SEED_JSON_PATH` (PowerShell: `$env:SEED_JSON_PATH="C:\path\to\your.json"; npm run seed:product`).
 
-The script maps: `title` → `name`, `description` → `description`, `final_price` (or `initial_price`) → `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).
+The script maps: `title` â†’ `name`, `description` â†’ `description`, `final_price` (or `initial_price`) â†’ `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).
+
+## Regra de Ouro de Repositorio
+
+- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
+- Padrao esperado: `create(entity)` e `update(entity)`.
+- Use case monta entidade de dominio antes de chamar repositorio.
+- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

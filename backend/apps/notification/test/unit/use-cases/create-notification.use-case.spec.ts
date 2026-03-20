@@ -6,7 +6,6 @@ import {
   NotificationEntity,
 } from '../../../src/domain/entities/notification.entity';
 import { NotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
-import { ICreateNotification } from '../../../src/domain/types/notification-repository.types';
 
 describe('CreateNotificationUseCase', () => {
   let sut: CreateNotificationUseCase;
@@ -22,12 +21,16 @@ describe('CreateNotificationUseCase', () => {
     'order-1',
     'user@test.com',
     'user-123',
+    'Product A',
+    'Description A',
+    99.9,
+    2,
     null,
     createdAt,
     createdAt,
   );
 
-  const fullCreateParams: ICreateNotification = {
+  const fullCreateParams = {
     title: 'Pedido confirmado',
     content: 'Seu pedido #order-1 foi confirmado.',
     type: INotificationType.EMAIL,
@@ -64,7 +67,19 @@ describe('CreateNotificationUseCase', () => {
       const result = await sut.execute(fullCreateParams);
 
       expect(notificationRepository.create).toHaveBeenCalledTimes(1);
-      expect(notificationRepository.create).toHaveBeenCalledWith(fullCreateParams);
+      expect(notificationRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: fullCreateParams.title,
+          content: fullCreateParams.content,
+          sourceEventId: fullCreateParams.sourceEventId,
+          recipient: fullCreateParams.recipientEmail,
+          userId: fullCreateParams.userId,
+          productName: fullCreateParams.productName,
+          productDescription: fullCreateParams.productDescription,
+          totalPrice: fullCreateParams.totalPrice,
+          quantity: fullCreateParams.quantity,
+        }),
+      );
       expect(result).toEqual(fakeNotification);
     });
 
@@ -73,7 +88,7 @@ describe('CreateNotificationUseCase', () => {
 
       const result = await sut.execute(fullCreateParams);
 
-      expect(notificationRepository.create).toHaveBeenCalledWith(fullCreateParams);
+      expect(notificationRepository.create).toHaveBeenCalled();
       expect(result).toBeNull();
     });
 

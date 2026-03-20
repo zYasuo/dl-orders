@@ -94,17 +94,19 @@ describe('CreateOrderUseCase', () => {
 
       expect(productCatalogPort.findById).toHaveBeenCalledWith('product-123');
       expect(ordersRepository.create).toHaveBeenCalledTimes(1);
-      expect(ordersRepository.create).toHaveBeenCalledWith({
-        productId: input.productId,
-        quantity: input.quantity,
-        description: input.description,
-        recipient: input.recipient,
-        productName: 'Product A',
-        productDescription: 'Description A',
-        unitPrice: 99.9,
-        totalPrice: 99.9,
-        idempotencyKey,
-      });
+      expect(ordersRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productId: input.productId,
+          quantity: input.quantity,
+          description: input.description,
+          recipient: input.recipient,
+          productName: 'Product A',
+          productDescription: 'Description A',
+          unitPrice: 99.9,
+          totalPrice: 99.9,
+          idempotencyKey,
+        }),
+      );
 
       expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
       expect(orderAuditLog.log).toHaveBeenCalledWith({

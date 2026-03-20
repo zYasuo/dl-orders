@@ -3,7 +3,6 @@ import { Prisma } from '.prisma/orders-client';
 import { DbService } from '../../../db/db.service';
 import { OrderEntity, OrderStatus } from '../../../../domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../../../domain/ports/orders-repository.port';
-import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 
 @Injectable()
 export class OrdersRepository extends OrdersRepositoryPort {
@@ -11,19 +10,20 @@ export class OrdersRepository extends OrdersRepositoryPort {
     super();
   }
 
-  async create(input: ICreateOrder): Promise<OrderEntity> {
+  async create(entity: OrderEntity): Promise<OrderEntity> {
     try {
       const order = await this.db.order.create({
         data: {
-          productId: input.productId,
-          quantity: input.quantity,
-          description: input.description,
-          recipient: input.recipient,
-          productName: input.productName,
-          productDescription: input.productDescription,
-          unitPrice: input.unitPrice,
-          totalPrice: input.totalPrice,
-          idempotencyKey: input.idempotencyKey,
+          id: entity.id,
+          productId: entity.productId,
+          quantity: entity.quantity,
+          description: entity.description,
+          recipient: entity.recipient,
+          productName: entity.productName,
+          productDescription: entity.productDescription,
+          unitPrice: entity.unitPrice,
+          totalPrice: entity.totalPrice,
+          idempotencyKey: entity.idempotencyKey,
         },
       });
 
@@ -44,7 +44,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+        const existing = await this.findByIdempotencyKey(entity.idempotencyKey);
         if (existing) return existing;
       }
       throw e;

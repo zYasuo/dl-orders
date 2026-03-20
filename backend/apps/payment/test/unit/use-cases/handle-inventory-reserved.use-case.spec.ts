@@ -79,21 +79,26 @@ describe('HandleInventoryReservedUseCase', () => {
     await sut.execute(event);
 
     expect(orderDetailsPort.getByOrderId).toHaveBeenCalledWith(orderId);
-    expect(paymentRepositoryPort.create).toHaveBeenCalledWith({
-      orderId,
-      amount: totalPrice,
-      idempotencyKey: orderIdempotencyKey,
-    });
+    expect(paymentRepositoryPort.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId,
+        amount: totalPrice,
+        idempotencyKey: orderIdempotencyKey,
+      }),
+    );
     expect(paymentGatewayPort.createPreference).toHaveBeenCalledWith({
       orderId,
       amount: totalPrice,
       title: `Order ${orderId}`,
     });
-    expect(paymentRepositoryPort.updateStatus).toHaveBeenCalledWith(fakePayment.id, {
-      status: PaymentStatus.PENDING,
-      preferenceId: 'pref-123',
-      gatewayResponse: { initPoint: 'https://checkout.test/123' },
-    });
+    expect(paymentRepositoryPort.updateStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: fakePayment.id,
+        status: PaymentStatus.PENDING,
+        preferenceId: 'pref-123',
+        gatewayResponse: { initPoint: 'https://checkout.test/123' },
+      }),
+    );
     expect(paymentAuditLogPort.log).toHaveBeenCalledTimes(2);
   });
 
@@ -123,11 +128,13 @@ describe('HandleInventoryReservedUseCase', () => {
 
     await sut.execute({ orderId, productId: 'p', quantity: 1 });
 
-    expect(paymentRepositoryPort.create).toHaveBeenCalledWith({
-      orderId,
-      amount: totalPrice,
-      idempotencyKey: orderIdempotencyKey,
-    });
+    expect(paymentRepositoryPort.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId,
+        amount: totalPrice,
+        idempotencyKey: orderIdempotencyKey,
+      }),
+    );
     expect(paymentGatewayPort.createPreference).not.toHaveBeenCalled();
   });
 });

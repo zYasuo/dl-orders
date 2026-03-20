@@ -69,15 +69,17 @@ describe('CreateInventoryUseCase', () => {
 
       expect(inventoryRepository.findByProductId).toHaveBeenCalledWith(input.productId);
       expect(inventoryRepository.findByName).toHaveBeenCalledWith(input.name);
-      expect(inventoryRepository.create).toHaveBeenCalledWith({
-        productId: input.productId,
-        name: input.name,
-        quantity: input.quantity,
-        maxQuantity: input.maxQuantity,
-        minQuantity: input.minQuantity,
-        lowStockThreshold: input.lowStockThreshold,
-        createdBy: input.createdBy,
-      });
+      expect(inventoryRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productId: input.productId,
+          name: input.name,
+          quantity: input.quantity,
+          maxQuantity: input.maxQuantity,
+          minQuantity: input.minQuantity,
+          lowStockThreshold: input.lowStockThreshold,
+          createdBy: input.createdBy,
+        }),
+      );
       expect(result).toEqual(fakeInventory);
       expect(listCache.invalidate).toHaveBeenCalledTimes(1);
     });

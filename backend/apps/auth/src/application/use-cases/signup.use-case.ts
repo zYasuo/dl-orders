@@ -1,12 +1,12 @@
-﻿import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import * as crypto from 'node:crypto';
 import { OtpCodeEntity } from '../../domain/entities/otp-code.entity';
 import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
 import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
 import { OtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
 import { OtpSendRequestedPublisherPort } from '../../domain/ports/publishers/otp-send-requested-publisher.port';
 import { PasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
-import { TCreateAuthUser } from '../../domain/types/auth-user-repository.types';
-import { TCreateOtp } from '../../domain/types/otp-repository.types';
+import { UserEntity } from '../../domain/entities/user.entity';
 import { TSignup } from '../dto/signup.dto';
 
 @Injectable()
@@ -34,14 +34,14 @@ export class SignupUseCase {
       this.passwordHasher.hash(password),
     ]);
 
-    const createData: TCreateAuthUser = {
-      emailEncrypted,
-      emailLookupHash,
-      passwordHash,
-      name: name ?? null,
-    };
-
-    const user = await this.authUserRepository.create(createData);
+    const user = await this.authUserRepository.create(
+      UserEntity.create({
+        emailEncrypted,
+        emailLookupHash,
+        passwordHash,
+        name: name ?? null,
+      }),
+    );
 
     if (!user) {
       throw new Error('Failed to create user');
@@ -50,9 +50,16 @@ export class SignupUseCase {
     const code = OtpCodeEntity.generateCode();
     const expiresInMinutes = parseInt(process.env.OTP_EXPIRES_IN_MINUTES ?? '10', 10);
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
-    const otpData: TCreateOtp = { code, userId: user.id, expiresAt };
-
-    await this.otpRepository.create(otpData);
+    await this.otpRepository.create(
+      new OtpCodeEntity({
+        id: crypto.randomUUID(),
+        code,
+        userId: user.id,
+        expiresAt,
+        used: false,
+        createdAt: new Date(),
+      }),
+    );
 
     await this.otpSendRequestedPublisher.publish({
       email,

@@ -55,11 +55,25 @@ export class SendNotificationEmailUseCase {
         });
       });
 
-      await this.notificationRepositoryPort.update(notification.id, {
-        status: INotificationStatus.SENT,
-        sentAt: now,
-        updatedAt: now,
-      });
+      await this.notificationRepositoryPort.update(
+        new NotificationEntity(
+          notification.id,
+          notification.title,
+          notification.content,
+          notification.type,
+          INotificationStatus.SENT,
+          notification.sourceEventId,
+          notification.recipient,
+          notification.userId,
+          notification.productName,
+          notification.productDescription,
+          notification.totalPrice,
+          notification.quantity,
+          now,
+          notification.createdAt,
+          now,
+        ),
+      );
     } else {
       await this.notificationAuditLogPort.log({
         data: orderId,
@@ -67,10 +81,25 @@ export class SendNotificationEmailUseCase {
         timestamp,
         details: { notificationId: notification.id, recipient, error: result.error },
       });
-      await this.notificationRepositoryPort.update(notification.id, {
-        status: INotificationStatus.FAILED,
-        updatedAt: now,
-      });
+      await this.notificationRepositoryPort.update(
+        new NotificationEntity(
+          notification.id,
+          notification.title,
+          notification.content,
+          notification.type,
+          INotificationStatus.FAILED,
+          notification.sourceEventId,
+          notification.recipient,
+          notification.userId,
+          notification.productName,
+          notification.productDescription,
+          notification.totalPrice,
+          notification.quantity,
+          notification.sentAt,
+          notification.createdAt,
+          now,
+        ),
+      );
     }
   }
 }

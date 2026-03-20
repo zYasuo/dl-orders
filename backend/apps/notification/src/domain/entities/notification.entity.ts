@@ -17,6 +17,10 @@ export interface INotification {
   readonly sourceEventId: string;
   readonly recipient: string;
   readonly userId: string;
+  readonly productName: string;
+  readonly productDescription: string;
+  readonly totalPrice: number;
+  readonly quantity: number;
   sentAt: Date | null;
   readonly createdAt: Date;
   updatedAt: Date;
@@ -32,6 +36,10 @@ export class NotificationEntity implements INotification {
     readonly sourceEventId: string,
     readonly recipient: string,
     readonly userId: string,
+    readonly productName: string,
+    readonly productDescription: string,
+    readonly totalPrice: number,
+    readonly quantity: number,
     readonly sentAt: Date | null,
     readonly createdAt: Date,
     readonly updatedAt: Date,
@@ -44,8 +52,23 @@ export class NotificationEntity implements INotification {
     sourceEventId: string;
     recipient: string;
     userId: string;
+    productName: string;
+    productDescription: string;
+    totalPrice: number;
+    quantity: number;
   }): NotificationEntity {
-    const { title, content, type, sourceEventId, recipient, userId } = params;
+    const {
+      title,
+      content,
+      type,
+      sourceEventId,
+      recipient,
+      userId,
+      productName,
+      productDescription,
+      totalPrice,
+      quantity,
+    } = params;
     const now = new Date();
     return new NotificationEntity(
       crypto.randomUUID(),
@@ -56,6 +79,10 @@ export class NotificationEntity implements INotification {
       sourceEventId,
       recipient,
       userId,
+      productName,
+      productDescription,
+      totalPrice,
+      quantity,
       null,
       now,
       now,

@@ -20,6 +20,10 @@ const notification = new NotificationEntity(
   'order-1',
   'user@test.com',
   'user-123',
+  'Product A',
+  'Description A',
+  99.9,
+  2,
   null,
   createdAt,
   createdAt,
@@ -77,12 +81,14 @@ describe('SendNotificationEmailUseCase', () => {
         subject: notification.title,
         html: notification.content,
       });
-      expect(notificationAuditLogPort.log).toHaveBeenCalledWith({
-        orderId: 'order-1',
-        action: 'NOTIFICATION_SENT',
-        timestamp: expect.any(String),
-        details: { notificationId: notification.id, recipient: notification.recipient },
-      });
+      expect(notificationAuditLogPort.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: 'order-1',
+          action: 'NOTIFICATION_SENT',
+          timestamp: expect.any(String),
+          details: { notificationId: notification.id, recipient: notification.recipient },
+        }),
+      );
       expect(userNotificationsPort.add).toHaveBeenCalledWith({
         userId: notification.userId,
         timestamp: expect.any(String),
@@ -92,11 +98,14 @@ describe('SendNotificationEmailUseCase', () => {
         content: notification.content,
         read: false,
       });
-      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(notification.id, {
-        status: INotificationStatus.SENT,
-        sentAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: notification.id,
+          status: INotificationStatus.SENT,
+          sentAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+      );
     });
 
     it('logs NOTIFICATION_FAILED and updates status to FAILED when send fails', async () => {
@@ -104,20 +113,25 @@ describe('SendNotificationEmailUseCase', () => {
 
       await sut.execute(notification);
 
-      expect(notificationAuditLogPort.log).toHaveBeenCalledWith({
-        orderId: 'order-1',
-        action: 'NOTIFICATION_FAILED',
-        timestamp: expect.any(String),
-        details: {
-          notificationId: notification.id,
-          recipient: notification.recipient,
-          error: 'SMTP error',
-        },
-      });
-      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(notification.id, {
-        status: INotificationStatus.FAILED,
-        updatedAt: expect.any(Date),
-      });
+      expect(notificationAuditLogPort.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: 'order-1',
+          action: 'NOTIFICATION_FAILED',
+          timestamp: expect.any(String),
+          details: {
+            notificationId: notification.id,
+            recipient: notification.recipient,
+            error: 'SMTP error',
+          },
+        }),
+      );
+      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: notification.id,
+          status: INotificationStatus.FAILED,
+          updatedAt: expect.any(Date),
+        }),
+      );
       expect(userNotificationsPort.add).not.toHaveBeenCalled();
     });
 
@@ -126,17 +140,22 @@ describe('SendNotificationEmailUseCase', () => {
 
       await sut.execute(notification);
 
-      expect(notificationAuditLogPort.log).toHaveBeenCalledWith({
-        orderId: 'order-1',
-        action: 'NOTIFICATION_SENT',
-        timestamp: expect.any(String),
-        details: { notificationId: notification.id, recipient: notification.recipient },
-      });
-      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(notification.id, {
-        status: INotificationStatus.SENT,
-        sentAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(notificationAuditLogPort.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: 'order-1',
+          action: 'NOTIFICATION_SENT',
+          timestamp: expect.any(String),
+          details: { notificationId: notification.id, recipient: notification.recipient },
+        }),
+      );
+      expect(notificationRepositoryPort.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: notification.id,
+          status: INotificationStatus.SENT,
+          sentAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+      );
     });
   });
 });

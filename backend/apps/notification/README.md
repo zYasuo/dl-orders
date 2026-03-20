@@ -1,4 +1,4 @@
-# Notification service
+﻿# Notification service
 
 Sends notifications (e.g. email) when an order is confirmed or when the inventory is running low. Listens for `order.confirmed` and `inventory.low_stock` and exposes HTTP to list user notifications.
 
@@ -9,10 +9,10 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Ports
 
-- **NotificationRepositoryPort** — Persist notification records (Postgres/Prisma).
-- **EmailSenderPort** — Send email (e.g. Resend adapter).
-- **NotificationAuditLogPort** — Append notification audit entries (MongoDB).
-- **UserNotificationsPort** — Read/write user notifications list (MongoDB).
+- **NotificationRepositoryPort** â€” Persist notification records (Postgres/Prisma).
+- **EmailSenderPort** â€” Send email (e.g. Resend adapter).
+- **NotificationAuditLogPort** â€” Append notification audit entries (MongoDB).
+- **UserNotificationsPort** â€” Read/write user notifications list (MongoDB).
 
 ## Inbound
 
@@ -26,8 +26,8 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Data
 
-- **Postgres** — Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
-- **MongoDB** — Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
+- **Postgres** â€” Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
+- **MongoDB** â€” Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
 
 ## Run locally
 
@@ -44,3 +44,10 @@ npm run start:dev:notification
 ```
 
 Ensure RabbitMQ, Postgres, and MongoDB are up. Set `apps/notification/.env` with `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, and any email provider keys (e.g. Resend).
+
+## Regra de Ouro de Repositorio
+
+- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
+- Padrao esperado: `create(entity)` e `update(entity)`.
+- Use case monta entidade de dominio antes de chamar repositorio.
+- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

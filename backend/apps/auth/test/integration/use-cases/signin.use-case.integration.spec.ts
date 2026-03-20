@@ -1,7 +1,8 @@
-﻿import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
+import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { AccountLockedNotifyPublisherPort } from '../../../src/domain/ports/publishers/account-locked-notify-publisher.port';
 import { AuthLogsRepositoryPort } from '../../../src/domain/ports/repositories/auth-logs-repository.port';
 import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
@@ -12,7 +13,7 @@ import { PasswordHasherPort } from '../../../src/domain/ports/security/password-
 import { SessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
 import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
 import { FakeAccountLockedNotifyPublisher } from '../../doubles/fake-account-locked-notify.publisher';
-import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.port';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { InMemoryAuthLogsRepository } from '../../doubles/in-memory-auth-logs.repository';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
@@ -68,12 +69,14 @@ describe('SigninUseCase (integration)', () => {
     it('returns accessToken when user exists, is verified and password matches', async () => {
       const password = 'password123';
       const hash = await new Argon2PasswordHasher().hash(password);
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: hash,
-        name: 'User',
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: hash,
+          name: 'User',
+        }),
+      );
       await authUserRepository.markEmailVerified(user!.id);
 
       const result = await sut.execute({ email: 'user@test.com', password });
@@ -93,12 +96,14 @@ describe('SigninUseCase (integration)', () => {
     it('throws BadRequestException when email is not verified', async () => {
       const password = 'password123';
       const hash = await new Argon2PasswordHasher().hash(password);
-      await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: hash,
-        name: 'User',
-      });
+      await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: hash,
+          name: 'User',
+        }),
+      );
 
       await expect(sut.execute({ email: 'user@test.com', password })).rejects.toThrow(
         BadRequestException,
@@ -110,12 +115,14 @@ describe('SigninUseCase (integration)', () => {
 
     it('throws BadRequestException when password is invalid', async () => {
       const hash = await new Argon2PasswordHasher().hash('correct');
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: hash,
-        name: 'User',
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: hash,
+          name: 'User',
+        }),
+      );
       await authUserRepository.markEmailVerified(user!.id);
 
       await expect(sut.execute({ email: 'user@test.com', password: 'wrong' })).rejects.toThrow(
@@ -129,12 +136,14 @@ describe('SigninUseCase (integration)', () => {
     it('throws ForbiddenException when account is locked after 3 failed attempts', async () => {
       const password = 'password123';
       const hash = await new Argon2PasswordHasher().hash(password);
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: hash,
-        name: 'User',
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: hash,
+          name: 'User',
+        }),
+      );
       await authUserRepository.markEmailVerified(user!.id);
 
       await sut.execute({ email: 'user@test.com', password: 'wrong1' }).catch(() => {});
@@ -152,4 +161,5 @@ describe('SigninUseCase (integration)', () => {
     });
   });
 });
+
 

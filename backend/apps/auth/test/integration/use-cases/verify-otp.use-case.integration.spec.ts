@@ -1,12 +1,15 @@
-﻿import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
+import * as crypto from 'node:crypto';
+import { OtpCodeEntity } from '../../../src/domain/entities/otp-code.entity';
+import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
 import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
 import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
 import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
 import { UserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
-import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.port';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { FakeUserVerifiedPublisher } from '../../doubles/fake-user-verified.publisher';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
@@ -41,14 +44,25 @@ describe('VerifyOtpUseCase (integration)', () => {
 
   describe('execute', () => {
     it('marks OTP used, marks user verified, publishes event and returns accessToken', async () => {
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: 'hash',
-        name: 'User',
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: 'hash',
+          name: 'User',
+        }),
+      );
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-      await otpRepository.create({ code: '123456', userId: user!.id, expiresAt });
+      await otpRepository.create(
+        new OtpCodeEntity({
+          id: crypto.randomUUID(),
+          code: '123456',
+          userId: user!.id,
+          expiresAt,
+          used: false,
+          createdAt: new Date(),
+        }),
+      );
 
       const result = await sut.execute({ email: 'user@test.com', code: '123456' });
 
@@ -75,12 +89,14 @@ describe('VerifyOtpUseCase (integration)', () => {
     });
 
     it('throws BadRequestException when OTP is not found', async () => {
-      await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: 'h',
-        name: null,
-      });
+      await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: 'h',
+          name: null,
+        }),
+      );
 
       await expect(sut.execute({ email: 'user@test.com', code: '123456' })).rejects.toThrow(
         BadRequestException,
@@ -91,15 +107,26 @@ describe('VerifyOtpUseCase (integration)', () => {
     });
 
     it('throws BadRequestException when code does not match', async () => {
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: 'h',
-        name: null,
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: 'h',
+          name: null,
+        }),
+      );
 
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-      await otpRepository.create({ code: '123456', userId: user!.id, expiresAt });
+      await otpRepository.create(
+        new OtpCodeEntity({
+          id: crypto.randomUUID(),
+          code: '123456',
+          userId: user!.id,
+          expiresAt,
+          used: false,
+          createdAt: new Date(),
+        }),
+      );
 
       await expect(sut.execute({ email: 'user@test.com', code: '999999' })).rejects.toThrow(
         BadRequestException,
@@ -110,15 +137,26 @@ describe('VerifyOtpUseCase (integration)', () => {
     });
 
     it('throws BadRequestException when code is expired', async () => {
-      const user = await authUserRepository.create({
-        emailEncrypted: 'user@test.com',
-        emailLookupHash: 'user@test.com',
-        passwordHash: 'h',
-        name: null,
-      });
+      const user = await authUserRepository.create(
+        UserEntity.create({
+          emailEncrypted: 'user@test.com',
+          emailLookupHash: 'user@test.com',
+          passwordHash: 'h',
+          name: null,
+        }),
+      );
 
       const expiresAt = new Date(Date.now() - 60 * 1000);
-      await otpRepository.create({ code: '123456', userId: user!.id, expiresAt });
+      await otpRepository.create(
+        new OtpCodeEntity({
+          id: crypto.randomUUID(),
+          code: '123456',
+          userId: user!.id,
+          expiresAt,
+          used: false,
+          createdAt: new Date(),
+        }),
+      );
 
       await expect(sut.execute({ email: 'user@test.com', code: '123456' })).rejects.toThrow(
         BadRequestException,
@@ -129,4 +167,5 @@ describe('VerifyOtpUseCase (integration)', () => {
     });
   });
 });
+
 

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
 import { OtpCodeEntity } from '../../../../domain/entities/otp-code.entity';
 import { OtpRepositoryPort } from '../../../../domain/ports/repositories/otp-repository.port';
-import { TCreateOtp } from '../../../../domain/types/otp-repository.types';
 
 @Injectable()
 export class OtpRepository extends OtpRepositoryPort {
@@ -10,12 +9,15 @@ export class OtpRepository extends OtpRepositoryPort {
     super();
   }
 
-  async create(data: TCreateOtp): Promise<OtpCodeEntity | null> {
+  async create(entity: OtpCodeEntity): Promise<OtpCodeEntity | null> {
     const row = await this.db.otpCode.create({
       data: {
-        code: data.code,
-        userId: data.userId,
-        expiresAt: data.expiresAt,
+        id: entity.id,
+        code: entity.code,
+        userId: entity.userId,
+        expiresAt: entity.expiresAt,
+        used: entity.used,
+        createdAt: entity.createdAt,
       },
     });
     return new OtpCodeEntity({

@@ -1,11 +1,10 @@
 import { InventoryEntity } from '../entities/inventory.entity';
 import {
-  ICreateInventory,
   TInventoryLowStockCursor,
 } from '../types/inventory-repository.types';
 
 export abstract class InventoryRepositoryPort {
-  abstract create(input: ICreateInventory): Promise<InventoryEntity | null>;
+  abstract create(entity: InventoryEntity): Promise<InventoryEntity | null>;
   abstract findByProductId(productId: string): Promise<InventoryEntity | null>;
   abstract findByName(name: string): Promise<InventoryEntity | null>;
   abstract findAll(): Promise<InventoryEntity[]>;

@@ -2,11 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HandleAccountLockedNotifyUseCase } from '../../../src/application/use-cases/handle-account-locked-notify.use-case';
 import { AuthNotificationTemplatePort } from '../../../src/domain/ports/auth-notification-template.port';
 import { EmailSenderPort } from '../../../src/domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
 
 describe('HandleAccountLockedNotifyUseCase', () => {
   let sut: HandleAccountLockedNotifyUseCase;
   let authNotificationTemplatePort: jest.Mocked<AuthNotificationTemplatePort>;
   let emailSender: jest.Mocked<EmailSenderPort>;
+  let notificationAuditLogPort: jest.Mocked<NotificationAuditLogPort>;
 
   const payload = {
     email: 'user@test.com',
@@ -27,12 +29,17 @@ describe('HandleAccountLockedNotifyUseCase', () => {
     emailSender = {
       send: jest.fn().mockResolvedValue({ success: true }),
     } as unknown as jest.Mocked<EmailSenderPort>;
+    notificationAuditLogPort = {
+      log: jest.fn().mockResolvedValue(undefined),
+      getByOrderId: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<NotificationAuditLogPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleAccountLockedNotifyUseCase,
         { provide: AuthNotificationTemplatePort, useValue: authNotificationTemplatePort },
         { provide: EmailSenderPort, useValue: emailSender },
+        { provide: NotificationAuditLogPort, useValue: notificationAuditLogPort },
       ],
     }).compile();
 

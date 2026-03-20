@@ -1,18 +1,16 @@
 import { UserEntity } from '../../src/domain/entities/user.entity';
 import { AuthUserRepositoryPort } from '../../src/domain/ports/repositories/auth-user-repository.port';
-import { TCreateAuthUser } from '../../src/domain/types/auth-user-repository.types';
 
 export class InMemoryAuthUserRepository extends AuthUserRepositoryPort {
   private readonly users = new Map<string, UserEntity>();
 
-  async create(data: TCreateAuthUser): Promise<UserEntity | null> {
+  async create(entity: UserEntity): Promise<UserEntity | null> {
     const existing = Array.from(this.users.values()).find(
-      (u) => u.emailLookupHash === data.emailLookupHash,
+      (u) => u.emailLookupHash === entity.emailLookupHash,
     );
     if (existing) return null;
-    const user = UserEntity.create(data);
-    this.users.set(user.id, user);
-    return user;
+    this.users.set(entity.id, entity);
+    return entity;
   }
 
   async findByEmailLookupHash(emailLookupHash: string): Promise<UserEntity | null> {

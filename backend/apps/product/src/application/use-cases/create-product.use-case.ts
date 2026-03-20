@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { ProductEntity } from '../../domain/entities/product.entity';
 import { ProductCachePort } from '../../domain/ports/product-cache.port';
 import { ProductRepositoryPort } from '../../domain/ports/product-repository.port';
-import { ICreateProduct } from '../../domain/types/product-repository.types';
 import { TCreateProduct } from '../dto/create-product.schema';
 
 @Injectable()
@@ -21,9 +20,9 @@ export class CreateProductUseCase {
       throw new BadRequestException('Product already exists');
     }
 
-    const createInput: ICreateProduct = { name, description, price, imageUrl };
-
-    const createdProduct = await this.productRepositoryPort.create(createInput);
+    const createdProduct = await this.productRepositoryPort.create(
+      ProductEntity.create({ name, description, price, imageUrl }),
+    );
 
     if (!createdProduct) {
       throw new InternalServerErrorException('Failed to create product');

@@ -15,12 +15,19 @@ describe('UpdateUserProfileUseCase', () => {
     createdAt,
     updatedAt: new Date('2025-01-02T12:00:00Z'),
   });
+  const currentProfile = new UserProfileEntity({
+    id: 'user-123',
+    email: 'user@test.com',
+    name: 'Old Name',
+    createdAt,
+    updatedAt: createdAt,
+  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
     userProfileRepository = {
       create: jest.fn(),
-      findById: jest.fn(),
+      findById: jest.fn().mockResolvedValue(currentProfile),
       update: jest.fn().mockResolvedValue(updatedProfile),
     } as unknown as jest.Mocked<UserProfileRepositoryPort>;
 
@@ -40,13 +47,15 @@ describe('UpdateUserProfileUseCase', () => {
 
       const result = await sut.execute('user-123', input);
 
-      expect(userProfileRepository.update).toHaveBeenCalledWith('user-123', { name: input.name });
+      expect(userProfileRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'user-123', name: input.name }),
+      );
       expect(result).toEqual(updatedProfile);
       expect(result.name).toBe('Updated Name');
     });
 
     it('throws NotFoundException when profile does not exist', async () => {
-      userProfileRepository.update.mockResolvedValueOnce(null);
+      userProfileRepository.findById.mockResolvedValueOnce(null);
       const input = { name: 'New Name' };
 
       await expect(sut.execute('non-existent', input)).rejects.toThrow(/User profile not found/);

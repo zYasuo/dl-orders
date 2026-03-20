@@ -1,24 +1,12 @@
 import { OtpCodeEntity } from '../../src/domain/entities/otp-code.entity';
 import { OtpRepositoryPort } from '../../src/domain/ports/repositories/otp-repository.port';
-import { TCreateOtp } from '../../src/domain/types/otp-repository.types';
 
 export class InMemoryOtpRepository extends OtpRepositoryPort {
   private readonly otps: OtpCodeEntity[] = [];
 
-  async create(data: TCreateOtp): Promise<OtpCodeEntity | null> {
-    const now = new Date();
-
-    const otp = new OtpCodeEntity({
-      id: crypto.randomUUID(),
-      code: data.code,
-      userId: data.userId,
-      expiresAt: data.expiresAt,
-      used: false,
-      createdAt: now,
-    });
-
-    this.otps.push(otp);
-    return otp;
+  async create(entity: OtpCodeEntity): Promise<OtpCodeEntity | null> {
+    this.otps.push(entity);
+    return entity;
   }
 
   async findLatestByUserId(userId: string): Promise<OtpCodeEntity | null> {

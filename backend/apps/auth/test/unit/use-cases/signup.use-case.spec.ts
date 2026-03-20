@@ -1,4 +1,4 @@
-﻿import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
 import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
@@ -83,19 +83,23 @@ describe('SignupUseCase', () => {
       expect(authUserRepository.findByEmailLookupHash).toHaveBeenCalledWith('user@test.com');
       expect(emailEncrypted.encrypt).toHaveBeenCalledWith(input.email);
       expect(passwordHasher.hash).toHaveBeenCalledWith(input.password);
-      expect(authUserRepository.create).toHaveBeenCalledWith({
-        emailEncrypted: input.email,
-        emailLookupHash: 'user@test.com',
-        passwordHash: 'hashed-password',
-        name: input.name,
-      });
+      expect(authUserRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          emailEncrypted: input.email,
+          emailLookupHash: 'user@test.com',
+          passwordHash: 'hashed-password',
+          name: input.name,
+        }),
+      );
 
       expect(otpRepository.create).toHaveBeenCalledTimes(1);
-      expect(otpRepository.create).toHaveBeenCalledWith({
-        code: expect.any(String),
-        userId: fakeUser.id,
-        expiresAt: expect.any(Date),
-      });
+      expect(otpRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: expect.any(String),
+          userId: fakeUser.id,
+          expiresAt: expect.any(Date),
+        }),
+      );
 
       expect(otpSendRequestedPublisher.publish).toHaveBeenCalledTimes(1);
       expect(otpSendRequestedPublisher.publish).toHaveBeenCalledWith({
@@ -132,12 +136,14 @@ describe('SignupUseCase', () => {
 
       await sut.execute(input);
 
-      expect(authUserRepository.create).toHaveBeenCalledWith({
-        emailEncrypted: input.email,
-        emailLookupHash: input.email,
-        passwordHash: 'hashed-password',
-        name: null,
-      });
+      expect(authUserRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          emailEncrypted: input.email,
+          emailLookupHash: input.email,
+          passwordHash: 'hashed-password',
+          name: null,
+        }),
+      );
     });
   });
 });

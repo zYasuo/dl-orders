@@ -3,7 +3,6 @@ import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
 import { ProductEntity } from '../../../../domain/entities/product.entity';
 import { ProductRepositoryPort } from '../../../../domain/ports/product-repository.port';
-import { ICreateProduct, IUpdateProduct } from '../../../../domain/types/product-repository.types';
 
 const COLLECTION = 'products';
 
@@ -23,21 +22,17 @@ export class MongoProductRepository extends ProductRepositoryPort {
     super();
   }
 
-  async create(params: ICreateProduct): Promise<ProductEntity | null> {
-    const { name, description, price, imageUrl } = params;
-    const now = new Date();
-    const id = crypto.randomUUID();
-    const image = imageUrl ?? null;
+  async create(entity: ProductEntity): Promise<ProductEntity | null> {
     await this.collection.insertOne({
-      _id: id,
-      name,
-      description,
-      price,
-      imageUrl: image,
-      createdAt: now,
-      updatedAt: now,
+      _id: entity.id,
+      name: entity.name,
+      description: entity.description,
+      price: entity.price,
+      imageUrl: entity.imageUrl ?? null,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
     });
-    return new ProductEntity(id, name, description, price, image, now, now);
+    return entity;
   }
 
   async findById(id: string): Promise<ProductEntity | null> {
@@ -58,14 +53,20 @@ export class MongoProductRepository extends ProductRepositoryPort {
     return docs.map((doc) => this.toEntity(doc));
   }
 
-  async update(id: string, data: IUpdateProduct): Promise<ProductEntity | null> {
-    const { name, description, price, imageUrl } = data;
-    const now = new Date();
-    const update: Record<string, unknown> = { name, description, price, updatedAt: now };
-    if (imageUrl !== undefined) update.imageUrl = imageUrl ?? null;
+  async update(entity: ProductEntity): Promise<ProductEntity | null> {
     const result = await this.collection.findOneAndUpdate(
-      { _id: id },
-      { $set: update },
+      {
+        _id: entity.id,
+      },
+      {
+        $set: {
+          name: entity.name,
+          description: entity.description,
+          price: entity.price,
+          imageUrl: entity.imageUrl ?? null,
+          updatedAt: entity.updatedAt,
+        },
+      },
       { returnDocument: 'after' },
     );
     if (!result) return null;

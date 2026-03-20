@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
+import { OrderEntity } from '../../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
 
@@ -23,17 +24,19 @@ describe('FindOrderByIdUseCase (integration)', () => {
 
   describe('execute', () => {
     it('returns order when found', async () => {
-      const created = await ordersRepository.create({
-        productId: '123',
-        quantity: 1,
-        description: 'order 1',
-        recipient: 'test@test.com',
-        productName: 'Product',
-        productDescription: 'Desc',
-        idempotencyKey: crypto.randomUUID(),
-        unitPrice: 10,
-        totalPrice: 10,
-      });
+      const created = await ordersRepository.create(
+        OrderEntity.create({
+          productId: '123',
+          quantity: 1,
+          description: 'order 1',
+          recipient: 'test@test.com',
+          productName: 'Product',
+          productDescription: 'Desc',
+          idempotencyKey: crypto.randomUUID(),
+          unitPrice: 10,
+          totalPrice: 10,
+        }),
+      );
 
       const result = await sut.execute(created.id);
       expect(result.id).toBe(created.id);

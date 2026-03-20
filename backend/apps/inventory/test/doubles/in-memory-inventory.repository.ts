@@ -1,37 +1,19 @@
 import { InventoryEntity } from '../../src/domain/entities/inventory.entity';
 import { InventoryRepositoryPort } from '../../src/domain/ports/inventory-repository.port';
-import { ICreateInventory } from '../../src/domain/types/inventory-repository.types';
 import { TInventoryLowStockCursor } from '../../src/domain/types/inventory-repository.types';
 
 export class InMemoryInventoryRepository extends InventoryRepositoryPort {
   private readonly inventories = new Map<string, InventoryEntity>();
 
-  async create(input: ICreateInventory): Promise<InventoryEntity | null> {
-    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } =
-      input;
-
-    const existing = await this.findByProductId(productId);
+  async create(entity: InventoryEntity): Promise<InventoryEntity | null> {
+    const existing = await this.findByProductId(entity.productId);
     if (existing) return null;
 
-    const existingByName = await this.findByName(name);
+    const existingByName = await this.findByName(entity.name);
     if (existingByName) return null;
 
-    const now = new Date();
-    const inventory = InventoryEntity.create({
-      id: crypto.randomUUID(),
-      name,
-      quantity,
-      maxQuantity,
-      minQuantity,
-      lowStockThreshold,
-      productId,
-      createdBy,
-      createdAt: now,
-      updatedAt: now,
-    });
-    this.inventories.set(inventory.id, inventory);
-
-    return inventory;
+    this.inventories.set(entity.id, entity);
+    return entity;
   }
 
   async findByProductId(productId: string): Promise<InventoryEntity | null> {

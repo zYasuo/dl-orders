@@ -1,9 +1,5 @@
 import { PaymentEntity, PaymentStatus } from '../../src/domain/entities/payment.entity';
 import { PaymentRepositoryPort } from '../../src/domain/ports/payment-repository.port';
-import {
-  ICreatePayment,
-  IUpdatePaymentStatus,
-} from '../../src/domain/types/payment-repository.types';
 
 type StoredPayment = {
   id: string;
@@ -21,8 +17,8 @@ type StoredPayment = {
 export class InMemoryPaymentRepository extends PaymentRepositoryPort {
   private readonly payments = new Map<string, StoredPayment>();
 
-  async create(input: ICreatePayment): Promise<PaymentEntity | null> {
-    const { idempotencyKey, orderId } = input;
+  async create(entity: PaymentEntity): Promise<PaymentEntity | null> {
+    const { idempotencyKey, orderId } = entity;
 
     if (idempotencyKey) {
       const byKey = await this.findByIdempotencyKey(idempotencyKey);
@@ -32,7 +28,6 @@ export class InMemoryPaymentRepository extends PaymentRepositoryPort {
     const byOrderId = await this.findByOrderId(orderId);
     if (byOrderId) return byOrderId;
 
-    const entity = PaymentEntity.create(input);
     this.payments.set(entity.id, {
       id: entity.id,
       orderId: entity.orderId,
@@ -65,29 +60,25 @@ export class InMemoryPaymentRepository extends PaymentRepositoryPort {
     return stored ? this.toDomain(stored) : null;
   }
 
-  async updateStatus(id: string, data: IUpdatePaymentStatus): Promise<PaymentEntity | null> {
-    const stored = this.payments.get(id);
+  async updateStatus(entity: PaymentEntity): Promise<PaymentEntity | null> {
+    const stored = this.payments.get(entity.id);
     if (!stored) return null;
     const updated: StoredPayment = {
       ...stored,
-      status: data.status,
-      updatedAt: new Date(),
-      externalId: data.externalId !== undefined ? data.externalId : stored.externalId,
-      preferenceId: data.preferenceId !== undefined ? data.preferenceId : stored.preferenceId,
-      gatewayResponse:
-        data.gatewayResponse !== undefined ? data.gatewayResponse : stored.gatewayResponse,
+      status: entity.status,
+      updatedAt: entity.updatedAt,
+      externalId: entity.externalId,
+      preferenceId: entity.preferenceId,
+      gatewayResponse: entity.gatewayResponse,
     };
-    this.payments.set(id, updated);
+    this.payments.set(entity.id, updated);
     return this.toDomain(updated);
   }
 
-  async updateStatusIfPending(
-    id: string,
-    data: IUpdatePaymentStatus,
-  ): Promise<PaymentEntity | null> {
-    const stored = this.payments.get(id);
+  async updateStatusIfPending(entity: PaymentEntity): Promise<PaymentEntity | null> {
+    const stored = this.payments.get(entity.id);
     if (!stored || stored.status !== PaymentStatus.PENDING) return null;
-    return this.updateStatus(id, data);
+    return this.updateStatus(entity);
   }
 
   private toDomain(stored: StoredPayment): PaymentEntity {

@@ -2,7 +2,7 @@ import { Prisma } from '.prisma/inventory-client';
 import { Injectable } from '@nestjs/common';
 import { InventoryEntity } from '../../../../domain/entities/inventory.entity';
 import { InventoryRepositoryPort } from '../../../../domain/ports/inventory-repository.port';
-import { ICreateInventory, TInventoryLowStockCursor } from '../../../../domain/types/inventory-repository.types';
+import { TInventoryLowStockCursor } from '../../../../domain/types/inventory-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
@@ -11,22 +11,19 @@ export class InventoryRepository extends InventoryRepositoryPort {
     super();
   }
 
-  async create(input: ICreateInventory): Promise<InventoryEntity | null> {
-    const { name, quantity, productId, maxQuantity, minQuantity, lowStockThreshold, createdBy } =
-      input;
-
-    const now = new Date();
+  async create(entity: InventoryEntity): Promise<InventoryEntity | null> {
     const row = await this.db.inventory.create({
       data: {
-        name,
-        quantity,
-        productId,
-        maxQuantity,
-        minQuantity,
-        lowStockThreshold,
-        createdBy,
-        createdAt: now,
-        updatedAt: now,
+        id: entity.id,
+        name: entity.name,
+        quantity: entity.quantity,
+        productId: entity.productId,
+        maxQuantity: entity.maxQuantity,
+        minQuantity: entity.minQuantity,
+        lowStockThreshold: entity.lowStockThreshold,
+        createdBy: entity.createdBy,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
       },
     });
 

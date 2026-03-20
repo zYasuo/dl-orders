@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllProductsUseCase } from '../../../src/application/use-cases/find-all-products.use-case';
+import { ProductEntity } from '../../../src/domain/entities/product.entity';
 import { ProductCachePort } from '../../../src/domain/ports/product-cache.port';
 import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 import { InMemoryProductCache } from '../../doubles/in-memory-product-cache';
@@ -33,16 +34,20 @@ describe('FindAllProductsUseCase (integration)', () => {
     });
 
     it('returns all products from repository and caches them', async () => {
-      const a = await productRepository.create({
-        name: 'Product A',
-        description: 'Desc A',
-        price: 10,
-      });
-      const b = await productRepository.create({
-        name: 'Product B',
-        description: 'Desc B',
-        price: 20,
-      });
+      const a = await productRepository.create(
+        ProductEntity.create({
+          name: 'Product A',
+          description: 'Desc A',
+          price: 10,
+        }),
+      );
+      const b = await productRepository.create(
+        ProductEntity.create({
+          name: 'Product B',
+          description: 'Desc B',
+          price: 20,
+        }),
+      );
 
       const result = await sut.execute();
 
@@ -55,7 +60,9 @@ describe('FindAllProductsUseCase (integration)', () => {
     });
 
     it('returns cached list on second call without hitting repository', async () => {
-      await productRepository.create({ name: 'Product A', description: 'Desc A', price: 10 });
+      await productRepository.create(
+        ProductEntity.create({ name: 'Product A', description: 'Desc A', price: 10 }),
+      );
       const first = await sut.execute();
       const second = await sut.execute();
 

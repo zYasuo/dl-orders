@@ -1,18 +1,14 @@
 import { OrderEntity, OrderStatus } from '../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../src/domain/ports/orders-repository.port';
-import { ICreateOrder } from '../../src/domain/types/order-repository.types';
 
 export class InMemoryOrdersRepository extends OrdersRepositoryPort {
   private readonly orders = new Map<string, OrderEntity>();
 
-  async create(input: ICreateOrder): Promise<OrderEntity> {
-    const existing = await this.findByIdempotencyKey(input.idempotencyKey);
+  async create(entity: OrderEntity): Promise<OrderEntity> {
+    const existing = await this.findByIdempotencyKey(entity.idempotencyKey);
     if (existing) return existing;
-
-    const order = OrderEntity.create(input);
-    this.orders.set(order.id, order);
-
-    return order;
+    this.orders.set(entity.id, entity);
+    return entity;
   }
 
   async findById(id: string): Promise<OrderEntity | null> {

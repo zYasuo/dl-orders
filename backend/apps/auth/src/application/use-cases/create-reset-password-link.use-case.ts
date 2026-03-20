@@ -1,9 +1,8 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PasswordResetEntity } from '../../domain/entities/password-reset.entity';
 import { ResetPasswordPublisherPort } from '../../domain/ports/publishers/reset-password-publisher.port';
 import { PasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
 import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
-import { TCreatePasswordReset } from '../../domain/types/password-repository.type';
 import { TCreateResetPasswordLink } from '../dto/create-reset-password-link.dto';
 
 @Injectable()
@@ -39,15 +38,19 @@ export class CreateResetPasswordLinkUseCase {
       return { message };
     }
 
-    const createData: TCreatePasswordReset = {
-      emailEncrypted,
-      emailLookupHash,
-      linkResetPassword,
-      expiresAt,
-    };
-
     await Promise.all([
-      this.passwordResetRepository.create(createData),
+      this.passwordResetRepository.create(
+        PasswordResetEntity.create({
+          id: token,
+          emailEncrypted,
+          emailLookupHash,
+          linkResetPassword,
+          used: false,
+          expiresAt,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      ),
       this.resetPasswordPublisher.publish({
         email,
         linkResetPassword,

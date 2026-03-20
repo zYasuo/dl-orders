@@ -7,7 +7,7 @@ import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-re
 import { OtpSendRequestedPublisherPort } from '../../../src/domain/ports/publishers/otp-send-requested-publisher.port';
 import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
-import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.port';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeOtpSendRequestedPublisher } from '../../doubles/fake-otp-send-requested.publisher';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
 import { InMemoryOtpRepository } from '../../doubles/in-memory-otp.repository';
@@ -73,4 +73,5 @@ describe('SignupUseCase (integration)', () => {
     });
   });
 });
+
 

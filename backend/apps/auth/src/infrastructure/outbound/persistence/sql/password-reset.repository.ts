@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PasswordResetEntity } from 'apps/auth/src/domain/entities/password-reset.entity';
-import { TCreatePasswordReset } from 'apps/auth/src/domain/types/password-repository.type';
 import { DbService } from '../../../db/db.service';
 import { PasswordResetRepositoryPort } from '../../../../domain/ports/repositories/password-reset-repository.port';
 
@@ -10,18 +9,17 @@ export class PasswordResetRepository extends PasswordResetRepositoryPort {
     super();
   }
 
-  async create(data: TCreatePasswordReset): Promise<PasswordResetEntity> {
-    const { emailEncrypted, emailLookupHash, linkResetPassword, expiresAt } = data;
-
+  async create(entity: PasswordResetEntity): Promise<PasswordResetEntity> {
     const passwordReset = await this.db.passwordReset.create({
       data: {
-        emailEncrypted,
-        emailLookupHash,
-        linkResetPassword,
-        expiresAt,
-        used: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        id: entity.id,
+        emailEncrypted: entity.emailEncrypted,
+        emailLookupHash: entity.emailLookupHash,
+        linkResetPassword: entity.linkResetPassword,
+        expiresAt: entity.expiresAt,
+        used: entity.used,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
       },
     });
 

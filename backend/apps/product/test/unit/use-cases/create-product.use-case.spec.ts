@@ -58,11 +58,13 @@ describe('CreateProductUseCase', () => {
       const result = await sut.execute(input);
 
       expect(productRepository.findByName).toHaveBeenCalledWith(input.name);
-      expect(productRepository.create).toHaveBeenCalledWith({
-        name: input.name,
-        description: input.description,
-        price: input.price,
-      });
+      expect(productRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: input.name,
+          description: input.description,
+          price: input.price,
+        }),
+      );
       expect(result).toEqual(fakeProduct);
       expect(productCache.invalidate).toHaveBeenCalledWith('product-123');
     });

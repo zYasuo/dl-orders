@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from '../../../../domain/entities/user.entity';
 import { AuthUserRepositoryPort } from '../../../../domain/ports/repositories/auth-user-repository.port';
-import { TCreateAuthUser } from '../../../../domain/types/auth-user-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
@@ -10,13 +9,17 @@ export class AuthUserRepository extends AuthUserRepositoryPort {
     super();
   }
 
-  async create(data: TCreateAuthUser): Promise<UserEntity | null> {
+  async create(entity: UserEntity): Promise<UserEntity | null> {
     const row = await this.db.user.create({
       data: {
-        emailEncrypted: data.emailEncrypted,
-        emailLookupHash: data.emailLookupHash,
-        passwordHash: data.passwordHash,
-        name: data.name ?? null,
+        id: entity.id,
+        emailEncrypted: entity.emailEncrypted,
+        emailLookupHash: entity.emailLookupHash,
+        passwordHash: entity.passwordHash,
+        name: entity.name ?? null,
+        emailVerified: entity.emailVerified,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
       },
     });
 

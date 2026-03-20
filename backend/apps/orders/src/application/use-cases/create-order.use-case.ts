@@ -5,7 +5,6 @@ import { OrderEventsPublisherPort } from '../../domain/ports/order-events-publis
 import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { ProductCatalogPort } from '../../domain/ports/product-catalog.port';
-import { ICreateOrder } from '../../domain/types/order-repository.types';
 import { TCreateOrder } from '../dto/create-order.dto';
 
 @Injectable()
@@ -39,7 +38,7 @@ export class CreateOrderUseCase {
       return existingOrder;
     }
 
-    const dataToCreateOrder: ICreateOrder = {
+    const orderEntity = OrderEntity.create({
       productId,
       quantity,
       description,
@@ -49,9 +48,9 @@ export class CreateOrderUseCase {
       unitPrice: product.price,
       totalPrice,
       idempotencyKey,
-    };
+    });
 
-    const order = await this.ordersRepositoryPort.create(dataToCreateOrder);
+    const order = await this.ordersRepositoryPort.create(orderEntity);
 
     const now = new Date();
     const timestamp = now.toISOString();
