@@ -2,15 +2,15 @@ import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
 import { AuthLogsEntity } from '../../../src/domain/entities/auth-logs.entity';
-import { IAccountLockedNotifyPublisherPort } from '../../../src/domain/ports/publishers/account-locked-notify-publisher.port';
-import { IAuthLogsRepositoryPort } from '../../../src/domain/ports/repositories/auth-logs-repository.port';
-import { ILockoutStorePort } from '../../../src/domain/ports/stores/lockout-store.port';
+import { AccountLockedNotifyPublisherPort } from '../../../src/domain/ports/publishers/account-locked-notify-publisher.port';
+import { AuthLogsRepositoryPort } from '../../../src/domain/ports/repositories/auth-logs-repository.port';
+import { LockoutStorePort } from '../../../src/domain/ports/stores/lockout-store.port';
 
 describe('ValidateAuthAttemptUseCase', () => {
   let sut: ValidateAuthAttemptUseCase;
-  let lockoutStore: jest.Mocked<ILockoutStorePort>;
-  let authLogsRepository: jest.Mocked<IAuthLogsRepositoryPort>;
-  let accountLockedNotifyPublisher: jest.Mocked<IAccountLockedNotifyPublisherPort>;
+  let lockoutStore: jest.Mocked<LockoutStorePort>;
+  let authLogsRepository: jest.Mocked<AuthLogsRepositoryPort>;
+  let accountLockedNotifyPublisher: jest.Mocked<AccountLockedNotifyPublisherPort>;
 
   const userId = 'user-123';
   const email = 'user@test.com';
@@ -27,7 +27,7 @@ describe('ValidateAuthAttemptUseCase', () => {
       incrementFailedAttempts: jest.fn().mockResolvedValue({ attempts: 1, shouldLock: false }),
       setLocked: jest.fn().mockResolvedValue(undefined),
       resetOnSuccess: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<ILockoutStorePort>;
+    } as unknown as jest.Mocked<LockoutStorePort>;
 
     authLogsRepository = {
       findByUserId: jest.fn().mockResolvedValue(null),
@@ -47,19 +47,19 @@ describe('ValidateAuthAttemptUseCase', () => {
             ),
           ),
         ),
-    } as unknown as jest.Mocked<IAuthLogsRepositoryPort>;
+    } as unknown as jest.Mocked<AuthLogsRepositoryPort>;
 
     accountLockedNotifyPublisher = {
       publish: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IAccountLockedNotifyPublisherPort>;
+    } as unknown as jest.Mocked<AccountLockedNotifyPublisherPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ValidateAuthAttemptUseCase,
-        { provide: ILockoutStorePort, useValue: lockoutStore },
-        { provide: IAuthLogsRepositoryPort, useValue: authLogsRepository },
+        { provide: LockoutStorePort, useValue: lockoutStore },
+        { provide: AuthLogsRepositoryPort, useValue: authLogsRepository },
         {
-          provide: IAccountLockedNotifyPublisherPort,
+          provide: AccountLockedNotifyPublisherPort,
           useValue: accountLockedNotifyPublisher,
         },
       ],

@@ -5,10 +5,10 @@ import {
   INotificationType,
   NotificationEntity,
 } from '../../../src/domain/entities/notification.entity';
-import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
-import { INotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
-import { IUserNotificationsPort } from '../../../src/domain/ports/user-notifications.port';
+import { EmailSenderPort } from '../../../src/domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
+import { NotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
+import { UserNotificationsPort } from '../../../src/domain/ports/user-notifications.port';
 
 const createdAt = new Date('2025-01-01T12:00:00Z');
 const notification = new NotificationEntity(
@@ -27,41 +27,41 @@ const notification = new NotificationEntity(
 
 describe('SendNotificationEmailUseCase', () => {
   let sut: SendNotificationEmailUseCase;
-  let emailSenderPort: jest.Mocked<IEmailSenderPort>;
-  let notificationRepositoryPort: jest.Mocked<INotificationRepositoryPort>;
-  let notificationAuditLogPort: jest.Mocked<INotificationAuditLogPort>;
-  let userNotificationsPort: jest.Mocked<IUserNotificationsPort>;
+  let emailSenderPort: jest.Mocked<EmailSenderPort>;
+  let notificationRepositoryPort: jest.Mocked<NotificationRepositoryPort>;
+  let notificationAuditLogPort: jest.Mocked<NotificationAuditLogPort>;
+  let userNotificationsPort: jest.Mocked<UserNotificationsPort>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     emailSenderPort = {
       send: jest.fn().mockResolvedValue({ success: true }),
-    } as unknown as jest.Mocked<IEmailSenderPort>;
+    } as unknown as jest.Mocked<EmailSenderPort>;
 
     notificationRepositoryPort = {
       create: jest.fn(),
       update: jest.fn().mockResolvedValue(notification),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<INotificationRepositoryPort>;
+    } as unknown as jest.Mocked<NotificationRepositoryPort>;
 
     notificationAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<INotificationAuditLogPort>;
+    } as unknown as jest.Mocked<NotificationAuditLogPort>;
 
     userNotificationsPort = {
       add: jest.fn().mockResolvedValue(undefined),
       getByUserId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IUserNotificationsPort>;
+    } as unknown as jest.Mocked<UserNotificationsPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SendNotificationEmailUseCase,
-        { provide: IEmailSenderPort, useValue: emailSenderPort },
-        { provide: INotificationRepositoryPort, useValue: notificationRepositoryPort },
-        { provide: INotificationAuditLogPort, useValue: notificationAuditLogPort },
-        { provide: IUserNotificationsPort, useValue: userNotificationsPort },
+        { provide: EmailSenderPort, useValue: emailSenderPort },
+        { provide: NotificationRepositoryPort, useValue: notificationRepositoryPort },
+        { provide: NotificationAuditLogPort, useValue: notificationAuditLogPort },
+        { provide: UserNotificationsPort, useValue: userNotificationsPort },
       ],
     }).compile();
 

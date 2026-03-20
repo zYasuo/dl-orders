@@ -1,4 +1,4 @@
-import { IAuthNotificationTemplatePort } from 'apps/notification/src/domain/ports/auth-notification-template.port';
+import { AuthNotificationTemplatePort } from 'apps/notification/src/domain/ports/auth-notification-template.port';
 import { Injectable } from '@nestjs/common';
 import { INotificationRequest } from 'apps/notification/src/domain/types/notification-request.types';
 import {
@@ -14,7 +14,7 @@ import {
 } from './auth-password-changed.template';
 
 @Injectable()
-export class AuthTemplateAdapter implements IAuthNotificationTemplatePort {
+export class AuthTemplateAdapter implements AuthNotificationTemplatePort {
   getAccountLockedMessage(payload: IAccountLockedNotifyEvent): INotificationRequest {
     const { lockedUntilMinutes } = payload;
     const content = accountLockedHtmlTemplate.replace(

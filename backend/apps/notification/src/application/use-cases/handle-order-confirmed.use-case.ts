@@ -1,7 +1,7 @@
 import { IOrderConfirmedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { INotificationType } from '../../domain/entities/notification.entity';
-import { IOrderNotificationTemplatePort } from '../../domain/ports/order-notification-template.port';
+import { OrderNotificationTemplatePort } from '../../domain/ports/order-notification-template.port';
 import { CreateNotificationUseCase } from './create-notification.use-case';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
 
@@ -10,7 +10,7 @@ export class HandleOrderConfirmedUseCase {
   constructor(
     private readonly createNotificationUseCase: CreateNotificationUseCase,
     private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
-    private readonly orderNotificationTemplatePort: IOrderNotificationTemplatePort,
+    private readonly orderNotificationTemplatePort: OrderNotificationTemplatePort,
   ) {}
 
   async execute(payload: IOrderConfirmedEvent): Promise<void> {

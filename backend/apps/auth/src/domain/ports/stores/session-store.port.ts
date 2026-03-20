@@ -3,6 +3,6 @@ export type TSessionData = {
   email: string;
 };
 
-export abstract class ISessionStorePort {
+export abstract class SessionStorePort {
   abstract set(sessionId: string, data: TSessionData, ttlSeconds: number): Promise<void>;
 }

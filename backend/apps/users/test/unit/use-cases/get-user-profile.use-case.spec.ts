@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetUserProfileUseCase } from '../../../src/application/use-cases/get-user-profile.use-case';
 import { UserProfileEntity } from '../../../src/domain/entities/user-profile.entity';
-import { IUserProfileRepositoryPort } from '../../../src/domain/ports/user-profile-repository.port';
+import { UserProfileRepositoryPort } from '../../../src/domain/ports/user-profile-repository.port';
 
 describe('GetUserProfileUseCase', () => {
   let sut: GetUserProfileUseCase;
-  let userProfileRepository: jest.Mocked<IUserProfileRepositoryPort>;
+  let userProfileRepository: jest.Mocked<UserProfileRepositoryPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const fakeProfile = new UserProfileEntity({
@@ -22,12 +22,12 @@ describe('GetUserProfileUseCase', () => {
       create: jest.fn(),
       findById: jest.fn().mockResolvedValue(fakeProfile),
       update: jest.fn(),
-    } as unknown as jest.Mocked<IUserProfileRepositoryPort>;
+    } as unknown as jest.Mocked<UserProfileRepositoryPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetUserProfileUseCase,
-        { provide: IUserProfileRepositoryPort, useValue: userProfileRepository },
+        { provide: UserProfileRepositoryPort, useValue: userProfileRepository },
       ],
     }).compile();
 

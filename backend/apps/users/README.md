@@ -12,8 +12,8 @@ Uses shared `JwtAuthGuard` and `@CurrentUser()` from `@app/shared` to validate J
 
 ## Ports
 
-- **IUserProfileRepositoryPort** — Create, findById, update profile (Postgres/Prisma).
-- **IJwtPort** — Verify token only (used by guard / optional).
+- **UserProfileRepositoryPort** — Create, findById, update profile (Postgres/Prisma).
+- **JwtPort** — Verify token only (used by guard / optional).
 
 ## Inbound
 

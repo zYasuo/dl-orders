@@ -7,7 +7,7 @@ import {
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from '../../../application/use-cases/find-all-invetory.use-case';
 import { InventoryEntity } from '../../../domain/entities/inventory.entity';
-import { IReservationAuditLogPort } from '../../../domain/ports/reservation-audit-log.port';
+import { ReservationAuditLogPort } from '../../../domain/ports/reservation-audit-log.port';
 import { InventoryDoc, ApiInventories } from './docs/inventory-doc.decorator';
 
 @ApiInventories()
@@ -15,7 +15,7 @@ import { InventoryDoc, ApiInventories } from './docs/inventory-doc.decorator';
 export class InventoryController {
   constructor(
     private readonly createInventoryUseCase: CreateInventoryUseCase,
-    private readonly reservationAuditLogPort: IReservationAuditLogPort,
+    private readonly reservationAuditLogPort: ReservationAuditLogPort,
     private readonly findAllInventoryUseCase: FindAllInventoryUseCase,
   ) {}
 

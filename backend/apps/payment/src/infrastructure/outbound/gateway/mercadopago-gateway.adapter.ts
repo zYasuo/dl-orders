@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import {
   ICreatePreferenceInput,
   IPaymentDetails,
-  IPaymentGatewayPort,
+  PaymentGatewayPort,
   IPreferenceResult,
 } from '../../../domain/ports/payment-gateway.port';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 @Injectable()
-export class MercadoPagoGatewayAdapter extends IPaymentGatewayPort {
+export class MercadoPagoGatewayAdapter extends PaymentGatewayPort {
   private readonly client: import('mercadopago').MercadoPagoConfig;
   private readonly preference: import('mercadopago').Preference;
   private readonly payment: import('mercadopago').Payment;

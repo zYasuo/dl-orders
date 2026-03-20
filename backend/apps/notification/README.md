@@ -9,10 +9,10 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Ports
 
-- **INotificationRepositoryPort** — Persist notification records (Postgres/Prisma).
-- **IEmailSenderPort** — Send email (e.g. Resend adapter).
-- **INotificationAuditLogPort** — Append notification audit entries (MongoDB).
-- **IUserNotificationsPort** — Read/write user notifications list (MongoDB).
+- **NotificationRepositoryPort** — Persist notification records (Postgres/Prisma).
+- **EmailSenderPort** — Send email (e.g. Resend adapter).
+- **NotificationAuditLogPort** — Append notification audit entries (MongoDB).
+- **UserNotificationsPort** — Read/write user notifications list (MongoDB).
 
 ## Inbound
 
@@ -22,7 +22,7 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 ## Outbound
 
 - **Persistence:** `persistence/sql/` (notifications via Prisma), `persistence/mongodb/` (notification audit log, user notifications).
-- **Email:** Outbound email via Resend (or similar) using `IEmailSenderPort`.
+- **Email:** Outbound email via Resend (or similar) using `EmailSenderPort`.
 
 ## Data
 

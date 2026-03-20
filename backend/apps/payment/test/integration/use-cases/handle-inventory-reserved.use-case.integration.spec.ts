@@ -1,11 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleInventoryReservedUseCase } from '../../../src/application/use-cases/handle-inventory-reserved.use-case';
-import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
-import { IPaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
-import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
-import { IOrderDetailsPort } from '../../../src/domain/ports/order-details.port';
+import { PaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
+import { PaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
+import { PaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
+import { OrderDetailsPort } from '../../../src/domain/ports/order-details.port';
 import { InMemoryPaymentRepository } from '../../doubles/in-memory-payment.repository';
 import { FakePaymentGateway } from '../../doubles/fake-payment-gateway';
 import { FakePaymentEventsPublisher } from '../../doubles/fake-payment-events.publisher';
@@ -20,10 +20,10 @@ describe('HandleInventoryReservedUseCase (integration)', () => {
   beforeEach(async () => {
     paymentRepository = new InMemoryPaymentRepository();
     gateway = new FakePaymentGateway();
-    const orderDetailsPort: IOrderDetailsPort = {
+    const orderDetailsPort: OrderDetailsPort = {
       getByOrderId: jest.fn().mockResolvedValue({ orderId, totalPrice }),
     };
-    const paymentAuditLogPort: IPaymentAuditLogPort = {
+    const paymentAuditLogPort: PaymentAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
     };
@@ -31,11 +31,11 @@ describe('HandleInventoryReservedUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleInventoryReservedUseCase,
-        { provide: IOrderDetailsPort, useValue: orderDetailsPort },
-        { provide: IPaymentRepositoryPort, useValue: paymentRepository },
-        { provide: IPaymentGatewayPort, useValue: gateway },
-        { provide: IPaymentEventsPublisherPort, useValue: new FakePaymentEventsPublisher() },
-        { provide: IPaymentAuditLogPort, useValue: paymentAuditLogPort },
+        { provide: OrderDetailsPort, useValue: orderDetailsPort },
+        { provide: PaymentRepositoryPort, useValue: paymentRepository },
+        { provide: PaymentGatewayPort, useValue: gateway },
+        { provide: PaymentEventsPublisherPort, useValue: new FakePaymentEventsPublisher() },
+        { provide: PaymentAuditLogPort, useValue: paymentAuditLogPort },
       ],
     }).compile();
 
@@ -54,17 +54,17 @@ describe('HandleInventoryReservedUseCase (integration)', () => {
   });
 
   it('throws when order details not found', async () => {
-    const orderDetailsPort: IOrderDetailsPort = {
+    const orderDetailsPort: OrderDetailsPort = {
       getByOrderId: jest.fn().mockResolvedValue(null),
     };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleInventoryReservedUseCase,
-        { provide: IOrderDetailsPort, useValue: orderDetailsPort },
-        { provide: IPaymentRepositoryPort, useValue: paymentRepository },
-        { provide: IPaymentGatewayPort, useValue: gateway },
-        { provide: IPaymentEventsPublisherPort, useValue: new FakePaymentEventsPublisher() },
-        { provide: IPaymentAuditLogPort, useValue: { log: jest.fn(), getByOrderId: jest.fn() } },
+        { provide: OrderDetailsPort, useValue: orderDetailsPort },
+        { provide: PaymentRepositoryPort, useValue: paymentRepository },
+        { provide: PaymentGatewayPort, useValue: gateway },
+        { provide: PaymentEventsPublisherPort, useValue: new FakePaymentEventsPublisher() },
+        { provide: PaymentAuditLogPort, useValue: { log: jest.fn(), getByOrderId: jest.fn() } },
       ],
     }).compile();
     const useCase = module.get(HandleInventoryReservedUseCase);

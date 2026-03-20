@@ -1,12 +1,12 @@
 import { Prisma } from '.prisma/inventory-client';
 import { Injectable } from '@nestjs/common';
 import { InventoryEntity } from '../../../../domain/entities/inventory.entity';
-import { IInventoryRepositoryPort } from '../../../../domain/ports/inventory-repository.port';
+import { InventoryRepositoryPort } from '../../../../domain/ports/inventory-repository.port';
 import { ICreateInventory, TInventoryLowStockCursor } from '../../../../domain/types/inventory-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
-export class InventoryRepository extends IInventoryRepositoryPort {
+export class InventoryRepository extends InventoryRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

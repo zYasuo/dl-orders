@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '.prisma/orders-client';
 import { DbService } from '../../../db/db.service';
 import { OrderEntity, OrderStatus } from '../../../../domain/entities/order.entity';
-import { IOrdersRepositoryPort } from '../../../../domain/ports/orders-repository.port';
+import { OrdersRepositoryPort } from '../../../../domain/ports/orders-repository.port';
 import { ICreateOrder } from '../../../../domain/types/order-repository.types';
 
 @Injectable()
-export class OrdersRepository extends IOrdersRepositoryPort {
+export class OrdersRepository extends OrdersRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { IInventoryNotificationTemplatePort } from '../../domain/ports/inventory-notification-template.port';
+import { InventoryNotificationTemplatePort } from '../../domain/ports/inventory-notification-template.port';
 import { IInventoryLowStockEvent } from '@app/shared';
-import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
+import { EmailSenderPort } from '../../domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
 
 @Injectable()
 export class HandleInventoryLowStockUseCase {
   constructor(
-    private readonly inventoryNotificationTemplate: IInventoryNotificationTemplatePort,
-    private readonly emailSender: IEmailSenderPort,
-    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+    private readonly inventoryNotificationTemplate: InventoryNotificationTemplatePort,
+    private readonly emailSender: EmailSenderPort,
+    private readonly notificationAuditLogPort: NotificationAuditLogPort,
   ) {}
 
   async execute(event: IInventoryLowStockEvent): Promise<void> {

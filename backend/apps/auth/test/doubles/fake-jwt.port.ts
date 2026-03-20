@@ -1,6 +1,6 @@
-import { IJwtPort, TJwtPayload } from '../../src/domain/ports/security/jwt.port';
+import { JwtPort, TJwtPayload } from '../../src/domain/ports/security/jwt.port';
 
-export class FakeJwtPort extends IJwtPort {
+export class FakeJwtPort extends JwtPort {
   private readonly tokenPrefix = 'fake-jwt-';
 
   getExpiresInSeconds(): number {

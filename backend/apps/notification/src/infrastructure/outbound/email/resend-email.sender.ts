@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
-import { IEmailSenderPort } from '../../../domain/ports/email-sender.port';
+import { EmailSenderPort } from '../../../domain/ports/email-sender.port';
 
 @Injectable()
-export class ResendEmailSender extends IEmailSenderPort {
+export class ResendEmailSender extends EmailSenderPort {
   private readonly logger = new Logger(ResendEmailSender.name);
   private readonly resend: Resend | null;
   private readonly fromEmail: string;

@@ -1,21 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+﻿import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
-import { IJwtPort } from '../../domain/ports/security/jwt.port';
-import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
-import { ISessionStorePort } from '../../domain/ports/stores/session-store.port';
+import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
+import { JwtPort } from '../../domain/ports/security/jwt.port';
+import { PasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
+import { SessionStorePort } from '../../domain/ports/stores/session-store.port';
 import { TSignin } from '../dto/signin.dto';
 import { ValidateAuthAttemptUseCase } from './validate-auth-attempt.use-case';
 
 @Injectable()
 export class SigninUseCase {
   constructor(
-    private readonly authUserRepository: IAuthUserRepositoryPort,
-    private readonly emailEncrypted: IEmailEncryptedSecurity,
-    private readonly passwordHasher: IPasswordHasherPort,
-    private readonly jwtPort: IJwtPort,
-    private readonly sessionStore: ISessionStorePort,
+    private readonly authUserRepository: AuthUserRepositoryPort,
+    private readonly emailEncrypted: EmailEncryptedSecurity,
+    private readonly passwordHasher: PasswordHasherPort,
+    private readonly jwtPort: JwtPort,
+    private readonly sessionStore: SessionStorePort,
     private readonly validateAuthAttempt: ValidateAuthAttemptUseCase,
   ) {}
 
@@ -64,3 +64,4 @@ export class SigninUseCase {
     return { accessToken };
   }
 }
+

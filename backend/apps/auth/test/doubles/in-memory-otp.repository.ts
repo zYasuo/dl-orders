@@ -1,8 +1,8 @@
 import { OtpCodeEntity } from '../../src/domain/entities/otp-code.entity';
-import { IOtpRepositoryPort } from '../../src/domain/ports/repositories/otp-repository.port';
+import { OtpRepositoryPort } from '../../src/domain/ports/repositories/otp-repository.port';
 import { TCreateOtp } from '../../src/domain/types/otp-repository.types';
 
-export class InMemoryOtpRepository extends IOtpRepositoryPort {
+export class InMemoryOtpRepository extends OtpRepositoryPort {
   private readonly otps: OtpCodeEntity[] = [];
 
   async create(data: TCreateOtp): Promise<OtpCodeEntity | null> {

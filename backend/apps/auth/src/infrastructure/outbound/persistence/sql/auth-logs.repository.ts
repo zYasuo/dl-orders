@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { AuthLogsEntity } from '../../../../domain/entities/auth-logs.entity';
-import { IAuthLogsRepositoryPort } from '../../../../domain/ports/repositories/auth-logs-repository.port';
+import { AuthLogsRepositoryPort } from '../../../../domain/ports/repositories/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../../../domain/types/auth-logs-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
-export class AuthLogsRepository extends IAuthLogsRepositoryPort {
+export class AuthLogsRepository extends AuthLogsRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

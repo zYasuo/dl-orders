@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { IOrderDetails, IOrderDetailsPort } from '../../../domain/ports/order-details.port';
+import { IOrderDetails, OrderDetailsPort } from '../../../domain/ports/order-details.port';
 
 @Injectable()
-export class OrdersHttpClient extends IOrderDetailsPort {
+export class OrdersHttpClient extends OrderDetailsPort {
   private readonly baseUrl: string;
 
   constructor(private readonly configService: ConfigService) {

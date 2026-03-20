@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllInventoryUseCase } from '../../../src/application/use-cases/find-all-invetory.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('FindAllInventoryUseCase', () => {
   const now = new Date();
@@ -36,8 +36,8 @@ describe('FindAllInventoryUseCase', () => {
   ];
 
   let sut: FindAllInventoryUseCase;
-  let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
-  let listCache: jest.Mocked<IInventoryListCachePort>;
+  let inventoryRepository: jest.Mocked<InventoryRepositoryPort>;
+  let listCache: jest.Mocked<InventoryListCachePort>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -49,19 +49,19 @@ describe('FindAllInventoryUseCase', () => {
       findByName: jest.fn(),
       decrementStock: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<IInventoryRepositoryPort>;
+    } as unknown as jest.Mocked<InventoryRepositoryPort>;
 
     listCache = {
       get: jest.fn().mockResolvedValue(null),
       set: jest.fn().mockResolvedValue(undefined),
       invalidate: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IInventoryListCachePort>;
+    } as unknown as jest.Mocked<InventoryListCachePort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 

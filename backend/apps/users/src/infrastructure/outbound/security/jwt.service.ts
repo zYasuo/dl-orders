@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { IJwtPort, TJwtPayload } from '../../../domain/ports/jwt.port';
+import { JwtPort, TJwtPayload } from '../../../domain/ports/jwt.port';
 
 @Injectable()
-export class JwtService extends IJwtPort {
+export class JwtService extends JwtPort {
   private readonly secret: string;
 
   constructor(configService: ConfigService) {

@@ -5,7 +5,7 @@ import {
 } from '@app/shared';
 import { INotificationRequest } from '../types/notification-request.types';
 
-export abstract class IAuthNotificationTemplatePort {
+export abstract class AuthNotificationTemplatePort {
   abstract getResetPasswordRequestMessage(
     payload: IResetPasswordRequestEvent,
   ): INotificationRequest;

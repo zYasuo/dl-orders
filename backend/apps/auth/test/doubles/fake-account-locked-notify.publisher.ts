@@ -1,7 +1,7 @@
 import { IAccountLockedNotifyEvent } from '@app/shared';
-import { IAccountLockedNotifyPublisherPort } from '../../src/domain/ports/publishers/account-locked-notify-publisher.port';
+import { AccountLockedNotifyPublisherPort } from '../../src/domain/ports/publishers/account-locked-notify-publisher.port';
 
-export class FakeAccountLockedNotifyPublisher extends IAccountLockedNotifyPublisherPort {
+export class FakeAccountLockedNotifyPublisher extends AccountLockedNotifyPublisherPort {
   readonly published: IAccountLockedNotifyEvent[] = [];
 
   async publish(event: IAccountLockedNotifyEvent): Promise<void> {

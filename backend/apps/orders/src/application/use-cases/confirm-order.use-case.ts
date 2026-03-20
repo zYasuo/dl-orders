@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
-import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
+import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 
 export type TConfirmOrderEvent = { orderId: string };
 
@@ -11,10 +11,10 @@ export class ConfirmOrderUseCase {
   private readonly logger = new Logger(ConfirmOrderUseCase.name);
 
   constructor(
-    private readonly ordersRepositoryPort: IOrdersRepositoryPort,
-    private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
-    private readonly orderAuditLogPort: IOrderAuditLogPort,
-    private readonly orderSummaryPort: IOrderSummaryPort,
+    private readonly ordersRepositoryPort: OrdersRepositoryPort,
+    private readonly orderEventsPublisherPort: OrderEventsPublisherPort,
+    private readonly orderAuditLogPort: OrderAuditLogPort,
+    private readonly orderSummaryPort: OrderSummaryPort,
   ) {}
 
   async execute(event: TConfirmOrderEvent): Promise<void> {

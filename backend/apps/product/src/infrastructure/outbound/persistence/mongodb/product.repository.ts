@@ -2,13 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
 import { ProductEntity } from '../../../../domain/entities/product.entity';
-import { IProductRepositoryPort } from '../../../../domain/ports/product-repository.port';
+import { ProductRepositoryPort } from '../../../../domain/ports/product-repository.port';
 import { ICreateProduct, IUpdateProduct } from '../../../../domain/types/product-repository.types';
 
 const COLLECTION = 'products';
 
 @Injectable()
-export class MongoProductRepository extends IProductRepositoryPort {
+export class MongoProductRepository extends ProductRepositoryPort {
   private readonly collection = this.db.collection<{
     _id: string;
     name: string;

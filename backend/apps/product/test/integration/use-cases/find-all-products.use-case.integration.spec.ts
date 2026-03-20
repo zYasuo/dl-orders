@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllProductsUseCase } from '../../../src/application/use-cases/find-all-products.use-case';
-import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
-import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
+import { ProductCachePort } from '../../../src/domain/ports/product-cache.port';
+import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 import { InMemoryProductCache } from '../../doubles/in-memory-product-cache';
 import { InMemoryProductRepository } from '../../doubles/in-memory-product.repository';
 
@@ -17,8 +17,8 @@ describe('FindAllProductsUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllProductsUseCase,
-        { provide: IProductRepositoryPort, useValue: productRepository },
-        { provide: IProductCachePort, useValue: productCache },
+        { provide: ProductRepositoryPort, useValue: productRepository },
+        { provide: ProductCachePort, useValue: productCache },
       ],
     }).compile();
 

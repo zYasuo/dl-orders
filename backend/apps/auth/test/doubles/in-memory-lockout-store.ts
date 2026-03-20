@@ -1,7 +1,7 @@
-import { ILockoutStorePort } from '../../src/domain/ports/stores/lockout-store.port';
+import { LockoutStorePort } from '../../src/domain/ports/stores/lockout-store.port';
 import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
 
-export class InMemoryLockoutStore extends ILockoutStorePort {
+export class InMemoryLockoutStore extends LockoutStorePort {
   private readonly attempts = new Map<string, number>();
   private readonly lockedUntil = new Map<string, Date>();
 

@@ -9,11 +9,11 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Ports
 
-- **IInventoryRepositoryPort** — Persist and load inventory/reservations (Postgres/Prisma).
-- **IInventoryListCachePort** — Cache list of inventory items (Redis); invalidated on create and on reservation.
-- **IInventoryEventsPublisherPort** — Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
-- **IInventoryLowStockPublisherPort** — Publish `inventory.low_stock` to RabbitMQ (`notification_queue`) so notification can send alert emails.
-- **IReservationAuditLogPort** — Append reservation audit entries (MongoDB).
+- **InventoryRepositoryPort** — Persist and load inventory/reservations (Postgres/Prisma).
+- **InventoryListCachePort** — Cache list of inventory items (Redis); invalidated on create and on reservation.
+- **InventoryEventsPublisherPort** — Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
+- **InventoryLowStockPublisherPort** — Publish `inventory.low_stock` to RabbitMQ (`notification_queue`) so notification can send alert emails.
+- **ReservationAuditLogPort** — Append reservation audit entries (MongoDB).
 
 ## Inbound
 

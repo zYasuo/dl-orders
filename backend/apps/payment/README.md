@@ -14,11 +14,11 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 
 ## Ports
 
-- **IPaymentRepositoryPort** — Persist and load payments (Postgres/Prisma).
-- **IPaymentGatewayPort** — Mercado Pago SDK: create preference, get payment details.
-- **IPaymentEventsPublisherPort** — Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
-- **IPaymentAuditLogPort** — Append payment audit entries (MongoDB).
-- **IOrderDetailsPort** — Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
+- **PaymentRepositoryPort** — Persist and load payments (Postgres/Prisma).
+- **PaymentGatewayPort** — Mercado Pago SDK: create preference, get payment details.
+- **PaymentEventsPublisherPort** — Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
+- **PaymentAuditLogPort** — Append payment audit entries (MongoDB).
+- **OrderDetailsPort** — Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
 
 ## Inbound
 

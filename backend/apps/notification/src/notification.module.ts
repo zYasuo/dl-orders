@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
-import { IEmailSenderPort } from './domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from './domain/ports/notification-audit-log.port';
-import { INotificationRepositoryPort } from './domain/ports/notification-repository.port';
-import { IOrderNotificationTemplatePort } from './domain/ports/order-notification-template.port';
-import { IUserNotificationsPort } from './domain/ports/user-notifications.port';
+import { EmailSenderPort } from './domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from './domain/ports/notification-audit-log.port';
+import { NotificationRepositoryPort } from './domain/ports/notification-repository.port';
+import { OrderNotificationTemplatePort } from './domain/ports/order-notification-template.port';
+import { UserNotificationsPort } from './domain/ports/user-notifications.port';
 import { NotificationsController } from './infrastructure/inbound/http/notifications.controller';
 import { AccountLockedNotifyConsumer } from './infrastructure/inbound/messaging/account-locked-notify.consumer';
 import { OrderConfirmedConsumer } from './infrastructure/inbound/messaging/order-confirmed.consumer';
@@ -28,10 +28,10 @@ import { HandleInventoryLowStockUseCase } from './application/use-cases/handle-i
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
 import { OrderTemplateAdapter } from './infrastructure/outbound/templates/order/order-template.adapter';
 import { AuthTemplateAdapter } from './infrastructure/outbound/templates/auth/auth-template.adapter';
-import { IAuthNotificationTemplatePort } from './domain/ports/auth-notification-template.port';
-import { IOtpNotificationTemplatePort } from './domain/ports/otp-notification-template.port';
+import { AuthNotificationTemplatePort } from './domain/ports/auth-notification-template.port';
+import { OtpNotificationTemplatePort } from './domain/ports/otp-notification-template.port';
 import { OtpTemplateAdapter } from './infrastructure/outbound/templates/auth/otp-template.adapter';
-import { IInventoryNotificationTemplatePort } from './domain/ports/inventory-notification-template.port';
+import { InventoryNotificationTemplatePort } from './domain/ports/inventory-notification-template.port';
 import { InventoryLowStockTemplateAdapter } from './infrastructure/outbound/templates/inventory/inventory-low-stock-template.adapter';
 
 @Module({
@@ -61,14 +61,14 @@ import { InventoryLowStockTemplateAdapter } from './infrastructure/outbound/temp
     HandleResetPasswordUseCase,
     HandlePasswordChangedUseCase,
     SendNotificationEmailUseCase,
-    { provide: INotificationRepositoryPort, useClass: NotificationRepository },
-    { provide: IOrderNotificationTemplatePort, useClass: OrderTemplateAdapter },
-    { provide: IAuthNotificationTemplatePort, useClass: AuthTemplateAdapter },
-    { provide: IOtpNotificationTemplatePort, useClass: OtpTemplateAdapter },
-    { provide: IInventoryNotificationTemplatePort, useClass: InventoryLowStockTemplateAdapter },
-    { provide: IEmailSenderPort, useClass: ResendEmailSender },
-    { provide: INotificationAuditLogPort, useClass: MongoNotificationAuditLogRepository },
-    { provide: IUserNotificationsPort, useClass: MongoUserNotificationsRepository },
+    { provide: NotificationRepositoryPort, useClass: NotificationRepository },
+    { provide: OrderNotificationTemplatePort, useClass: OrderTemplateAdapter },
+    { provide: AuthNotificationTemplatePort, useClass: AuthTemplateAdapter },
+    { provide: OtpNotificationTemplatePort, useClass: OtpTemplateAdapter },
+    { provide: InventoryNotificationTemplatePort, useClass: InventoryLowStockTemplateAdapter },
+    { provide: EmailSenderPort, useClass: ResendEmailSender },
+    { provide: NotificationAuditLogPort, useClass: MongoNotificationAuditLogRepository },
+    { provide: UserNotificationsPort, useClass: MongoUserNotificationsRepository },
   ],
 })
 export class NotificationModule {}

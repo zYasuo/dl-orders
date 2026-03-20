@@ -3,8 +3,8 @@ import { ZodValidationPipe } from '@app/shared';
 import { SCreateOrder, type TCreateOrder } from '../../../application/dto/create-order.dto';
 import { CreateOrderUseCase } from '../../../application/use-cases/create-order.use-case';
 import { FindOrderByIdUseCase } from '../../../application/use-cases/find-order-by-id.use-case';
-import { IOrderAuditLogPort } from '../../../domain/ports/order-audit-log.port';
-import { IOrderSummaryPort } from '../../../domain/ports/order-summary.port';
+import { OrderAuditLogPort } from '../../../domain/ports/order-audit-log.port';
+import { OrderSummaryPort } from '../../../domain/ports/order-summary.port';
 import { OrdersDoc, ApiOrders } from './docs/orders-doc.decorator';
 
 @ApiOrders()
@@ -13,8 +13,8 @@ export class OrdersController {
   constructor(
     private readonly createOrderUseCase: CreateOrderUseCase,
     private readonly findOrderByIdUseCase: FindOrderByIdUseCase,
-    private readonly orderAuditLogPort: IOrderAuditLogPort,
-    private readonly orderSummaryPort: IOrderSummaryPort,
+    private readonly orderAuditLogPort: OrderAuditLogPort,
+    private readonly orderSummaryPort: OrderSummaryPort,
   ) {}
 
   @OrdersDoc.Create()

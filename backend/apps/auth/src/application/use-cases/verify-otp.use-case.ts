@@ -1,19 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
-import { IJwtPort } from '../../domain/ports/security/jwt.port';
-import { IOtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../domain/ports/publishers/user-verified-publisher.port';
+﻿import { BadRequestException, Injectable } from '@nestjs/common';
+import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
+import { JwtPort } from '../../domain/ports/security/jwt.port';
+import { OtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
+import { UserVerifiedPublisherPort } from '../../domain/ports/publishers/user-verified-publisher.port';
 import { TVerifyOtp } from '../dto/verify-otp.dto';
 
 @Injectable()
 export class VerifyOtpUseCase {
   constructor(
-    private readonly authUserRepository: IAuthUserRepositoryPort,
-    private readonly emailEncrypted: IEmailEncryptedSecurity,
-    private readonly otpRepository: IOtpRepositoryPort,
-    private readonly jwtPort: IJwtPort,
-    private readonly userVerifiedPublisher: IUserVerifiedPublisherPort,
+    private readonly authUserRepository: AuthUserRepositoryPort,
+    private readonly emailEncrypted: EmailEncryptedSecurity,
+    private readonly otpRepository: OtpRepositoryPort,
+    private readonly jwtPort: JwtPort,
+    private readonly userVerifiedPublisher: UserVerifiedPublisherPort,
   ) {}
 
   async execute(input: TVerifyOtp): Promise<{ accessToken: string }> {
@@ -58,3 +58,4 @@ export class VerifyOtpUseCase {
     return { accessToken };
   }
 }
+

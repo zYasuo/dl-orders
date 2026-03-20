@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProductEntity } from '../../../../domain/entities/product.entity';
-import { IProductCachePort } from '../../../../domain/ports/product-cache.port';
+import { ProductCachePort } from '../../../../domain/ports/product-cache.port';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
 import { RedisService } from '../../../redis/redis.service';
 
@@ -9,7 +9,7 @@ function key(id: string): string {
 }
 
 @Injectable()
-export class RedisProductCacheAdapter extends IProductCachePort {
+export class RedisProductCacheAdapter extends ProductCachePort {
   constructor(private readonly redis: RedisService) {
     super();
   }

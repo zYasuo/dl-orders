@@ -1,4 +1,4 @@
-export abstract class IEmailSenderPort {
+export abstract class EmailSenderPort {
   abstract send(params: {
     to: string;
     subject: string;

@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
 import {
-  IOrderAuditLogPort,
+  OrderAuditLogPort,
   TOrderAuditEvent,
 } from '../../../../domain/ports/order-audit-log.port';
 
 const COLLECTION = 'order_audit_log';
 
 @Injectable()
-export class MongoOrderAuditLogRepository extends IOrderAuditLogPort {
+export class MongoOrderAuditLogRepository extends OrderAuditLogPort {
   private readonly collection = this.db.collection<TOrderAuditEvent & { _id?: unknown }>(
     COLLECTION,
   );

@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllProductsUseCase } from '../../../src/application/use-cases/find-all-products.use-case';
 import { ProductEntity } from '../../../src/domain/entities/product.entity';
-import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
-import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
+import { ProductCachePort } from '../../../src/domain/ports/product-cache.port';
+import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 
 describe('FindAllProductsUseCase', () => {
   let sut: FindAllProductsUseCase;
-  let productRepository: jest.Mocked<IProductRepositoryPort>;
-  let productCache: jest.Mocked<IProductCachePort>;
+  let productRepository: jest.Mocked<ProductRepositoryPort>;
+  let productCache: jest.Mocked<ProductCachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const fakeProducts = [
@@ -24,7 +24,7 @@ describe('FindAllProductsUseCase', () => {
       findByName: jest.fn(),
       findAll: jest.fn().mockResolvedValue(fakeProducts),
       update: jest.fn(),
-    } as unknown as jest.Mocked<IProductRepositoryPort>;
+    } as unknown as jest.Mocked<ProductRepositoryPort>;
 
     productCache = {
       getById: jest.fn(),
@@ -32,13 +32,13 @@ describe('FindAllProductsUseCase', () => {
       set: jest.fn(),
       setAll: jest.fn().mockResolvedValue(undefined),
       invalidate: jest.fn(),
-    } as unknown as jest.Mocked<IProductCachePort>;
+    } as unknown as jest.Mocked<ProductCachePort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllProductsUseCase,
-        { provide: IProductRepositoryPort, useValue: productRepository },
-        { provide: IProductCachePort, useValue: productCache },
+        { provide: ProductRepositoryPort, useValue: productRepository },
+        { provide: ProductCachePort, useValue: productCache },
       ],
     }).compile();
 

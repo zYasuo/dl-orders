@@ -10,7 +10,7 @@ export type TOrderSummary = {
   updatedAt: string;
 };
 
-export abstract class IOrderSummaryPort {
+export abstract class OrderSummaryPort {
   abstract put(summary: TOrderSummary): Promise<void>;
   abstract getByOrderId(orderId: string): Promise<TOrderSummary | null>;
 }

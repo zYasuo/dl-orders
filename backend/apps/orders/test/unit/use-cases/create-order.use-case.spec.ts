@@ -2,19 +2,19 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
-import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
-import { IProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
-import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
+import { ProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
+import { OrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('CreateOrderUseCase', () => {
   let sut: CreateOrderUseCase;
-  let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
-  let productCatalogPort: jest.Mocked<IProductCatalogPort>;
-  let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
-  let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
-  let orderSummary: jest.Mocked<IOrderSummaryPort>;
+  let ordersRepository: jest.Mocked<OrdersRepositoryPort>;
+  let productCatalogPort: jest.Mocked<ProductCatalogPort>;
+  let orderEventsPublisher: jest.Mocked<OrderEventsPublisherPort>;
+  let orderAuditLog: jest.Mocked<OrderAuditLogPort>;
+  let orderSummary: jest.Mocked<OrderSummaryPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
@@ -44,36 +44,36 @@ describe('CreateOrderUseCase', () => {
       updateStatus: jest.fn(),
       confirmIfPending: jest.fn(),
       findByIdempotencyKey: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<IOrdersRepositoryPort>;
+    } as unknown as jest.Mocked<OrdersRepositoryPort>;
 
     productCatalogPort = {
       findById: jest.fn().mockResolvedValue(fakeProduct),
-    } as unknown as jest.Mocked<IProductCatalogPort>;
+    } as unknown as jest.Mocked<ProductCatalogPort>;
 
     orderEventsPublisher = {
       publishOrderCreationRequested: jest.fn().mockResolvedValue(undefined),
       publishOrderConfirmed: jest.fn().mockResolvedValue(undefined),
       publishInventoryReservedToPayment: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
+    } as unknown as jest.Mocked<OrderEventsPublisherPort>;
 
     orderAuditLog = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IOrderAuditLogPort>;
+    } as unknown as jest.Mocked<OrderAuditLogPort>;
 
     orderSummary = {
       put: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<IOrderSummaryPort>;
+    } as unknown as jest.Mocked<OrderSummaryPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
-        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-        { provide: IProductCatalogPort, useValue: productCatalogPort },
-        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-        { provide: IOrderAuditLogPort, useValue: orderAuditLog },
-        { provide: IOrderSummaryPort, useValue: orderSummary },
+        { provide: OrdersRepositoryPort, useValue: ordersRepository },
+        { provide: ProductCatalogPort, useValue: productCatalogPort },
+        { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: OrderAuditLogPort, useValue: orderAuditLog },
+        { provide: OrderSummaryPort, useValue: orderSummary },
       ],
     }).compile();
 

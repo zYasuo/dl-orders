@@ -1,19 +1,19 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { IPasswordChangedPublisherPort } from '../../domain/ports/publishers/password-changed-publisher.port';
-import { IAuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
-import { IPasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
-import { IEmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.security';
-import { IPasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
+﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PasswordChangedPublisherPort } from '../../domain/ports/publishers/password-changed-publisher.port';
+import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
+import { PasswordResetRepositoryPort } from '../../domain/ports/repositories/password-reset-repository.port';
+import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
+import { PasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
 import { TChangePassword } from '../dto/change-password.dto';
 
 @Injectable()
 export class ChangePasswordUseCase {
   constructor(
-    private readonly authUserRepository: IAuthUserRepositoryPort,
-    private readonly passwordResetRepository: IPasswordResetRepositoryPort,
-    private readonly passwordHasher: IPasswordHasherPort,
-    private readonly emailEncrypted: IEmailEncryptedSecurity,
-    private readonly passwordChangedPublisher: IPasswordChangedPublisherPort,
+    private readonly authUserRepository: AuthUserRepositoryPort,
+    private readonly passwordResetRepository: PasswordResetRepositoryPort,
+    private readonly passwordHasher: PasswordHasherPort,
+    private readonly emailEncrypted: EmailEncryptedSecurity,
+    private readonly passwordChangedPublisher: PasswordChangedPublisherPort,
   ) {}
 
   async execute(input: TChangePassword): Promise<{ message: string }> {
@@ -48,3 +48,4 @@ export class ChangePasswordUseCase {
     return { message };
   }
 }
+

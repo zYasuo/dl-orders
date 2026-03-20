@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PaymentStatus } from '../../domain/entities/payment.entity';
-import { IPaymentAuditLogPort } from '../../domain/ports/payment-audit-log.port';
-import { IPaymentEventsPublisherPort } from '../../domain/ports/payment-events-publisher.port';
-import { IPaymentGatewayPort } from '../../domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from '../../domain/ports/payment-repository.port';
+import { PaymentAuditLogPort } from '../../domain/ports/payment-audit-log.port';
+import { PaymentEventsPublisherPort } from '../../domain/ports/payment-events-publisher.port';
+import { PaymentGatewayPort } from '../../domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from '../../domain/ports/payment-repository.port';
 
 export interface IWebhookPayload {
   type: string;
@@ -15,10 +15,10 @@ export class HandleWebhookUseCase {
   private readonly logger = new Logger(HandleWebhookUseCase.name);
 
   constructor(
-    private readonly paymentRepositoryPort: IPaymentRepositoryPort,
-    private readonly paymentGatewayPort: IPaymentGatewayPort,
-    private readonly paymentEventsPublisherPort: IPaymentEventsPublisherPort,
-    private readonly paymentAuditLogPort: IPaymentAuditLogPort,
+    private readonly paymentRepositoryPort: PaymentRepositoryPort,
+    private readonly paymentGatewayPort: PaymentGatewayPort,
+    private readonly paymentEventsPublisherPort: PaymentEventsPublisherPort,
+    private readonly paymentAuditLogPort: PaymentAuditLogPort,
   ) {}
 
   async execute(payload: IWebhookPayload): Promise<void> {

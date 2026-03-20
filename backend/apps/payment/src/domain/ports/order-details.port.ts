@@ -4,6 +4,6 @@ export interface IOrderDetails {
   idempotencyKey?: string | null;
 }
 
-export abstract class IOrderDetailsPort {
+export abstract class OrderDetailsPort {
   abstract getByOrderId(orderId: string): Promise<IOrderDetails | null>;
 }

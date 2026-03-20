@@ -5,7 +5,7 @@ export type TReservationAuditEvent = {
   details: Record<string, unknown>;
 };
 
-export abstract class IReservationAuditLogPort {
+export abstract class ReservationAuditLogPort {
   abstract log(event: TReservationAuditEvent): Promise<void>;
   abstract getByOrderId(orderId: string): Promise<TReservationAuditEvent[]>;
 }

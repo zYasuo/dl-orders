@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleResetPasswordUseCase } from '../../../src/application/use-cases/handle-reset-password.use-case';
-import { IAuthNotificationTemplatePort } from '../../../src/domain/ports/auth-notification-template.port';
-import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
+import { AuthNotificationTemplatePort } from '../../../src/domain/ports/auth-notification-template.port';
+import { EmailSenderPort } from '../../../src/domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
 
 const resetPasswordPayload = {
   email: 'user@test.com',
@@ -12,9 +12,9 @@ const resetPasswordPayload = {
 
 describe('HandleResetPasswordUseCase', () => {
   let sut: HandleResetPasswordUseCase;
-  let authNotificationTemplatePort: jest.Mocked<IAuthNotificationTemplatePort>;
-  let emailSender: jest.Mocked<IEmailSenderPort>;
-  let notificationAuditLogPort: jest.Mocked<INotificationAuditLogPort>;
+  let authNotificationTemplatePort: jest.Mocked<AuthNotificationTemplatePort>;
+  let emailSender: jest.Mocked<EmailSenderPort>;
+  let notificationAuditLogPort: jest.Mocked<NotificationAuditLogPort>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -24,23 +24,23 @@ describe('HandleResetPasswordUseCase', () => {
         title: 'Reset your password',
         content: '<p>Click the link to reset your password.</p>',
       }),
-    } as unknown as jest.Mocked<IAuthNotificationTemplatePort>;
+    } as unknown as jest.Mocked<AuthNotificationTemplatePort>;
 
     emailSender = {
       send: jest.fn().mockResolvedValue({ success: true }),
-    } as unknown as jest.Mocked<IEmailSenderPort>;
+    } as unknown as jest.Mocked<EmailSenderPort>;
 
     notificationAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByData: jest.fn(),
-    } as unknown as jest.Mocked<INotificationAuditLogPort>;
+    } as unknown as jest.Mocked<NotificationAuditLogPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleResetPasswordUseCase,
-        { provide: IAuthNotificationTemplatePort, useValue: authNotificationTemplatePort },
-        { provide: IEmailSenderPort, useValue: emailSender },
-        { provide: INotificationAuditLogPort, useValue: notificationAuditLogPort },
+        { provide: AuthNotificationTemplatePort, useValue: authNotificationTemplatePort },
+        { provide: EmailSenderPort, useValue: emailSender },
+        { provide: NotificationAuditLogPort, useValue: notificationAuditLogPort },
       ],
     }).compile();
 

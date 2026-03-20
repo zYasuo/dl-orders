@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfirmOrderUseCase } from '../../../src/application/use-cases/confirm-order.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
-import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
-import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
+import { OrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('ConfirmOrderUseCase', () => {
   let sut: ConfirmOrderUseCase;
-  let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
-  let orderEventsPublisher: jest.Mocked<IOrderEventsPublisherPort>;
-  let orderAuditLog: jest.Mocked<IOrderAuditLogPort>;
-  let orderSummary: jest.Mocked<IOrderSummaryPort>;
+  let ordersRepository: jest.Mocked<OrdersRepositoryPort>;
+  let orderEventsPublisher: jest.Mocked<OrderEventsPublisherPort>;
+  let orderAuditLog: jest.Mocked<OrderAuditLogPort>;
+  let orderSummary: jest.Mocked<OrderSummaryPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
@@ -54,31 +54,31 @@ describe('ConfirmOrderUseCase', () => {
       findById: jest.fn().mockResolvedValue(pendingOrder),
       updateStatus: jest.fn().mockResolvedValue(confirmedOrder),
       confirmIfPending: jest.fn().mockResolvedValue(confirmedOrder),
-    } as unknown as jest.Mocked<IOrdersRepositoryPort>;
+    } as unknown as jest.Mocked<OrdersRepositoryPort>;
 
     orderEventsPublisher = {
       publishOrderCreationRequested: jest.fn(),
       publishOrderConfirmed: jest.fn().mockResolvedValue(undefined),
       publishInventoryReservedToPayment: jest.fn(),
-    } as unknown as jest.Mocked<IOrderEventsPublisherPort>;
+    } as unknown as jest.Mocked<OrderEventsPublisherPort>;
 
     orderAuditLog = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IOrderAuditLogPort>;
+    } as unknown as jest.Mocked<OrderAuditLogPort>;
 
     orderSummary = {
       put: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<IOrderSummaryPort>;
+    } as unknown as jest.Mocked<OrderSummaryPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ConfirmOrderUseCase,
-        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-        { provide: IOrderAuditLogPort, useValue: orderAuditLog },
-        { provide: IOrderSummaryPort, useValue: orderSummary },
+        { provide: OrdersRepositoryPort, useValue: ordersRepository },
+        { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: OrderAuditLogPort, useValue: orderAuditLog },
+        { provide: OrderSummaryPort, useValue: orderSummary },
       ],
     }).compile();
 

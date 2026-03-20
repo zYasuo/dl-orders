@@ -1,5 +1,5 @@
 import { PaymentEntity, PaymentStatus } from '../../src/domain/entities/payment.entity';
-import { IPaymentRepositoryPort } from '../../src/domain/ports/payment-repository.port';
+import { PaymentRepositoryPort } from '../../src/domain/ports/payment-repository.port';
 import {
   ICreatePayment,
   IUpdatePaymentStatus,
@@ -18,7 +18,7 @@ type StoredPayment = {
   updatedAt: Date;
 };
 
-export class InMemoryPaymentRepository extends IPaymentRepositoryPort {
+export class InMemoryPaymentRepository extends PaymentRepositoryPort {
   private readonly payments = new Map<string, StoredPayment>();
 
   async create(input: ICreatePayment): Promise<PaymentEntity | null> {

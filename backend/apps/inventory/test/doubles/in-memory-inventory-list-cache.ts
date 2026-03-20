@@ -1,7 +1,7 @@
 import { InventoryEntity } from '../../src/domain/entities/inventory.entity';
-import { IInventoryListCachePort } from '../../src/domain/ports/inventory-list-cache.port';
+import { InventoryListCachePort } from '../../src/domain/ports/inventory-list-cache.port';
 
-export class InMemoryInventoryListCache extends IInventoryListCachePort {
+export class InMemoryInventoryListCache extends InventoryListCachePort {
   private items: InventoryEntity[] | null = null;
 
   async get(): Promise<InventoryEntity[] | null> {

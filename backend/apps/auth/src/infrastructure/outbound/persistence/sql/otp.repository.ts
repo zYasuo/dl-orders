@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../../../db/db.service';
 import { OtpCodeEntity } from '../../../../domain/entities/otp-code.entity';
-import { IOtpRepositoryPort } from '../../../../domain/ports/repositories/otp-repository.port';
+import { OtpRepositoryPort } from '../../../../domain/ports/repositories/otp-repository.port';
 import { TCreateOtp } from '../../../../domain/types/otp-repository.types';
 
 @Injectable()
-export class OtpRepository extends IOtpRepositoryPort {
+export class OtpRepository extends OtpRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import type { EmailEncryptionConfig } from '../../../config/email-encryption.config';
-import { IEmailEncryptedSecurity } from '../../../domain/ports/security/email-encrypted.security';
+import { EmailEncryptedSecurity } from '../../../domain/ports/security/email-encrypted.port';
 
 @Injectable()
-export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
+export class EmailEncryptedSecurityAdapter implements EmailEncryptedSecurity {
   private readonly config: EmailEncryptionConfig;
   private readonly key: Buffer;
 
@@ -78,3 +78,4 @@ export class EmailEncryptedSecurity implements IEmailEncryptedSecurity {
     };
   }
 }
+

@@ -1,8 +1,8 @@
 import { OrderEntity, OrderStatus } from '../../src/domain/entities/order.entity';
-import { IOrdersRepositoryPort } from '../../src/domain/ports/orders-repository.port';
+import { OrdersRepositoryPort } from '../../src/domain/ports/orders-repository.port';
 import { ICreateOrder } from '../../src/domain/types/order-repository.types';
 
-export class InMemoryOrdersRepository extends IOrdersRepositoryPort {
+export class InMemoryOrdersRepository extends OrdersRepositoryPort {
   private readonly orders = new Map<string, OrderEntity>();
 
   async create(input: ICreateOrder): Promise<OrderEntity> {

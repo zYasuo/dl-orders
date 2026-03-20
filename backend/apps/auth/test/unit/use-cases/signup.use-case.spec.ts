@@ -1,19 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { SignupUseCase } from '../../../src/application/use-cases/signup.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
-import { IOtpSendRequestedPublisherPort } from '../../../src/domain/ports/publishers/otp-send-requested-publisher.port';
-import { IPasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
+import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
+import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { OtpSendRequestedPublisherPort } from '../../../src/domain/ports/publishers/otp-send-requested-publisher.port';
+import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 
 describe('SignupUseCase', () => {
   let sut: SignupUseCase;
-  let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
-  let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
-  let otpRepository: jest.Mocked<IOtpRepositoryPort>;
-  let passwordHasher: jest.Mocked<IPasswordHasherPort>;
-  let otpSendRequestedPublisher: jest.Mocked<IOtpSendRequestedPublisherPort>;
+  let authUserRepository: jest.Mocked<AuthUserRepositoryPort>;
+  let emailEncrypted: jest.Mocked<EmailEncryptedSecurity>;
+  let otpRepository: jest.Mocked<OtpRepositoryPort>;
+  let passwordHasher: jest.Mocked<PasswordHasherPort>;
+  let otpSendRequestedPublisher: jest.Mocked<OtpSendRequestedPublisherPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const fakeUser = new UserEntity({
@@ -33,7 +33,7 @@ describe('SignupUseCase', () => {
       create: jest.fn().mockResolvedValue(fakeUser),
       findByEmailLookupHash: jest.fn().mockResolvedValue(null),
       markEmailVerified: jest.fn(),
-    } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+    } as unknown as jest.Mocked<AuthUserRepositoryPort>;
 
     emailEncrypted = {
       encrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
@@ -41,31 +41,31 @@ describe('SignupUseCase', () => {
       getLookupHash: jest
         .fn()
         .mockImplementation((v: string) => Promise.resolve(v.toLowerCase().trim())),
-    } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
+    } as unknown as jest.Mocked<EmailEncryptedSecurity>;
 
     otpRepository = {
       create: jest.fn().mockResolvedValue(undefined),
       findLatestByUserId: jest.fn(),
       markUsedIfUnused: jest.fn(),
-    } as unknown as jest.Mocked<IOtpRepositoryPort>;
+    } as unknown as jest.Mocked<OtpRepositoryPort>;
 
     passwordHasher = {
       hash: jest.fn().mockResolvedValue('hashed-password'),
       compare: jest.fn(),
-    } as unknown as jest.Mocked<IPasswordHasherPort>;
+    } as unknown as jest.Mocked<PasswordHasherPort>;
 
     otpSendRequestedPublisher = {
       publish: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IOtpSendRequestedPublisherPort>;
+    } as unknown as jest.Mocked<OtpSendRequestedPublisherPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SignupUseCase,
-        { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
-        { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
-        { provide: IOtpRepositoryPort, useValue: otpRepository },
-        { provide: IPasswordHasherPort, useValue: passwordHasher },
-        { provide: IOtpSendRequestedPublisherPort, useValue: otpSendRequestedPublisher },
+        { provide: AuthUserRepositoryPort, useValue: authUserRepository },
+        { provide: EmailEncryptedSecurity, useValue: emailEncrypted },
+        { provide: OtpRepositoryPort, useValue: otpRepository },
+        { provide: PasswordHasherPort, useValue: passwordHasher },
+        { provide: OtpSendRequestedPublisherPort, useValue: otpSendRequestedPublisher },
       ],
     }).compile();
 
@@ -141,3 +141,4 @@ describe('SignupUseCase', () => {
     });
   });
 });
+

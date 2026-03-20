@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleInventoryLowStockUseCase } from '../../../src/application/use-cases/handle-invetory-low-stock.use-case';
-import { IEmailSenderPort } from '../../../src/domain/ports/email-sender.port';
-import { IInventoryNotificationTemplatePort } from '../../../src/domain/ports/inventory-notification-template.port';
-import { INotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
+import { EmailSenderPort } from '../../../src/domain/ports/email-sender.port';
+import { InventoryNotificationTemplatePort } from '../../../src/domain/ports/inventory-notification-template.port';
+import { NotificationAuditLogPort } from '../../../src/domain/ports/notification-audit-log.port';
 
 describe('HandleInventoryLowStockUseCase', () => {
   let sut: HandleInventoryLowStockUseCase;
-  let inventoryNotificationTemplate: jest.Mocked<IInventoryNotificationTemplatePort>;
-  let emailSender: jest.Mocked<IEmailSenderPort>;
-  let notificationAuditLogPort: jest.Mocked<INotificationAuditLogPort>;
+  let inventoryNotificationTemplate: jest.Mocked<InventoryNotificationTemplatePort>;
+  let emailSender: jest.Mocked<EmailSenderPort>;
+  let notificationAuditLogPort: jest.Mocked<NotificationAuditLogPort>;
 
   const event = {
     id: 'inv-1',
@@ -28,23 +28,23 @@ describe('HandleInventoryLowStockUseCase', () => {
 
     inventoryNotificationTemplate = {
       getInventoryLowStockMessage: jest.fn().mockReturnValue(templateMessage),
-    } as unknown as jest.Mocked<IInventoryNotificationTemplatePort>;
+    } as unknown as jest.Mocked<InventoryNotificationTemplatePort>;
 
     emailSender = {
       send: jest.fn(),
-    } as unknown as jest.Mocked<IEmailSenderPort>;
+    } as unknown as jest.Mocked<EmailSenderPort>;
 
     notificationAuditLogPort = {
       log: jest.fn(),
       getByData: jest.fn(),
-    } as unknown as jest.Mocked<INotificationAuditLogPort>;
+    } as unknown as jest.Mocked<NotificationAuditLogPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleInventoryLowStockUseCase,
-        { provide: IInventoryNotificationTemplatePort, useValue: inventoryNotificationTemplate },
-        { provide: IEmailSenderPort, useValue: emailSender },
-        { provide: INotificationAuditLogPort, useValue: notificationAuditLogPort },
+        { provide: InventoryNotificationTemplatePort, useValue: inventoryNotificationTemplate },
+        { provide: EmailSenderPort, useValue: emailSender },
+        { provide: NotificationAuditLogPort, useValue: notificationAuditLogPort },
       ],
     }).compile();
 

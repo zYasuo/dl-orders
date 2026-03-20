@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { IPasswordHasherPort } from '../../../domain/ports/security/password-hasher.port';
+import { PasswordHasherPort } from '../../../domain/ports/security/password-hasher.port';
 
 @Injectable()
-export class Argon2PasswordHasher extends IPasswordHasherPort {
+export class Argon2PasswordHasher extends PasswordHasherPort {
   async hash(plain: string): Promise<string> {
     const hashConfig = {
       memoryCost: 19456,

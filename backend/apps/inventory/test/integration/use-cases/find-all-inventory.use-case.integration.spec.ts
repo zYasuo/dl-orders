@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllInventoryUseCase } from '../../../src/application/use-cases/find-all-invetory.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
@@ -48,8 +48,8 @@ describe('FindAllInventoryUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: repository },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: repository },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 
@@ -68,8 +68,8 @@ describe('FindAllInventoryUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: emptyRepository },
-        { provide: IInventoryListCachePort, useValue: emptyCache },
+        { provide: InventoryRepositoryPort, useValue: emptyRepository },
+        { provide: InventoryListCachePort, useValue: emptyCache },
       ],
     }).compile();
     const useCase = module.get(FindAllInventoryUseCase);

@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateInventoryUseCase } from '../../../src/application/use-cases/create-inventory.use-case';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
@@ -18,8 +18,8 @@ describe('CreateInventoryUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 

@@ -1,12 +1,12 @@
-import { BadRequestException } from '@nestjs/common';
+﻿import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
-import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
+import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
+import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { UserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
+import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.port';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
 import { FakeUserVerifiedPublisher } from '../../doubles/fake-user-verified.publisher';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
@@ -28,11 +28,11 @@ describe('VerifyOtpUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VerifyOtpUseCase,
-        { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
-        { provide: IEmailEncryptedSecurity, useClass: FakeEmailEncryptedSecurity },
-        { provide: IOtpRepositoryPort, useValue: otpRepository },
-        { provide: IJwtPort, useValue: jwtPort },
-        { provide: IUserVerifiedPublisherPort, useValue: userVerifiedPublisher },
+        { provide: AuthUserRepositoryPort, useValue: authUserRepository },
+        { provide: EmailEncryptedSecurity, useClass: FakeEmailEncryptedSecurity },
+        { provide: OtpRepositoryPort, useValue: otpRepository },
+        { provide: JwtPort, useValue: jwtPort },
+        { provide: UserVerifiedPublisherPort, useValue: userVerifiedPublisher },
       ],
     }).compile();
 
@@ -129,3 +129,4 @@ describe('VerifyOtpUseCase (integration)', () => {
     });
   });
 });
+

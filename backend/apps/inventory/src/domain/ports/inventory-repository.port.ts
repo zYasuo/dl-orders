@@ -4,7 +4,7 @@ import {
   TInventoryLowStockCursor,
 } from '../types/inventory-repository.types';
 
-export abstract class IInventoryRepositoryPort {
+export abstract class InventoryRepositoryPort {
   abstract create(input: ICreateInventory): Promise<InventoryEntity | null>;
   abstract findByProductId(productId: string): Promise<InventoryEntity | null>;
   abstract findByName(name: string): Promise<InventoryEntity | null>;

@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PATTERNS, IPasswordChangedEvent } from '@app/shared';
-import { IPasswordChangedPublisherPort } from '../../../domain/ports/publishers/password-changed-publisher.port';
+import { PasswordChangedPublisherPort } from '../../../domain/ports/publishers/password-changed-publisher.port';
 
 @Injectable()
-export class PasswordChangedRabbitMqPublisher extends IPasswordChangedPublisherPort {
+export class PasswordChangedRabbitMqPublisher extends PasswordChangedPublisherPort {
   constructor(@Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy) {
     super();
   }

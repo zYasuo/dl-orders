@@ -18,7 +18,7 @@ export interface IPaymentDetails {
   orderId?: string;
 }
 
-export abstract class IPaymentGatewayPort {
+export abstract class PaymentGatewayPort {
   abstract createPreference(input: ICreatePreferenceInput): Promise<IPreferenceResult>;
   abstract getPayment(paymentId: string): Promise<IPaymentDetails | null>;
 }

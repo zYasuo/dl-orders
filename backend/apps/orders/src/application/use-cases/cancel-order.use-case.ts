@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
-import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
+import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 
 export type TCancelOrderEvent = { orderId: string; reason: string };
 
@@ -10,9 +10,9 @@ export class CancelOrderUseCase {
   private readonly logger = new Logger(CancelOrderUseCase.name);
 
   constructor(
-    private readonly ordersRepositoryPort: IOrdersRepositoryPort,
-    private readonly orderAuditLogPort: IOrderAuditLogPort,
-    private readonly orderSummaryPort: IOrderSummaryPort,
+    private readonly ordersRepositoryPort: OrdersRepositoryPort,
+    private readonly orderAuditLogPort: OrderAuditLogPort,
+    private readonly orderSummaryPort: OrderSummaryPort,
   ) {}
 
   async execute(event: TCancelOrderEvent): Promise<void> {

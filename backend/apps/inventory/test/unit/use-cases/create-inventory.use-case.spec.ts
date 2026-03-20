@@ -2,13 +2,13 @@ import { BadRequestException, InternalServerErrorException } from '@nestjs/commo
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateInventoryUseCase } from '../../../src/application/use-cases/create-inventory.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('CreateInventoryUseCase', () => {
   let sut: CreateInventoryUseCase;
-  let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
-  let listCache: jest.Mocked<IInventoryListCachePort>;
+  let inventoryRepository: jest.Mocked<InventoryRepositoryPort>;
+  let listCache: jest.Mocked<InventoryListCachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const createdBy = 'user@test.com';
@@ -34,19 +34,19 @@ describe('CreateInventoryUseCase', () => {
       findByName: jest.fn().mockResolvedValue(null),
       decrementStock: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<IInventoryRepositoryPort>;
+    } as unknown as jest.Mocked<InventoryRepositoryPort>;
 
     listCache = {
       get: jest.fn(),
       set: jest.fn(),
       invalidate: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IInventoryListCachePort>;
+    } as unknown as jest.Mocked<InventoryListCachePort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 

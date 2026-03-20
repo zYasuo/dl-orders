@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
 import {
-  INotificationAuditLogPort,
+  NotificationAuditLogPort,
   TNotificationAuditEvent,
 } from '../../../../domain/ports/notification-audit-log.port';
 
 const COLLECTION = 'notification_audit_log';
 
 @Injectable()
-export class MongoNotificationAuditLogRepository extends INotificationAuditLogPort {
+export class MongoNotificationAuditLogRepository extends NotificationAuditLogPort {
   private readonly collection = this.db.collection<TNotificationAuditEvent & { _id?: unknown }>(
     COLLECTION,
   );

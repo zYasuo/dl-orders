@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { IResetPasswordRequestEvent } from '@app/shared';
-import { IAuthNotificationTemplatePort } from '../../domain/ports/auth-notification-template.port';
-import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
+import { AuthNotificationTemplatePort } from '../../domain/ports/auth-notification-template.port';
+import { EmailSenderPort } from '../../domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
 
 @Injectable()
 export class HandleResetPasswordUseCase {
   constructor(
-    private readonly authNotificationTemplatePort: IAuthNotificationTemplatePort,
-    private readonly emailSender: IEmailSenderPort,
-    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+    private readonly authNotificationTemplatePort: AuthNotificationTemplatePort,
+    private readonly emailSender: EmailSenderPort,
+    private readonly notificationAuditLogPort: NotificationAuditLogPort,
   ) {}
 
   async execute(payload: IResetPasswordRequestEvent): Promise<void> {

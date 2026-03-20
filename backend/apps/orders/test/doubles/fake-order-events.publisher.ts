@@ -3,9 +3,9 @@ import {
   IOrderCreationRequestedEvent,
   IOrderConfirmedEvent,
 } from '@app/shared';
-import { IOrderEventsPublisherPort } from '../../src/domain/ports/order-events-publisher.port';
+import { OrderEventsPublisherPort } from '../../src/domain/ports/order-events-publisher.port';
 
-export class FakeOrderEventsPublisher extends IOrderEventsPublisherPort {
+export class FakeOrderEventsPublisher extends OrderEventsPublisherPort {
   readonly creationRequested: IOrderCreationRequestedEvent[] = [];
   readonly confirmed: IOrderConfirmedEvent[] = [];
   readonly inventoryReservedToPayment: InventoryReservedEvent[] = [];

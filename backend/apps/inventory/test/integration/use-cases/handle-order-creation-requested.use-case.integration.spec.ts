@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
-import { IReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
+import { InventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { ReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
 import { FakeInventoryEventsPublisher } from '../../doubles/fake-inventory-events.publisher';
 import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
@@ -38,7 +38,7 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
     );
     eventsPublisher = new FakeInventoryEventsPublisher();
     listCache = new InMemoryInventoryListCache();
-    const reservationAuditLog: IReservationAuditLogPort = {
+    const reservationAuditLog: ReservationAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
     };
@@ -46,10 +46,10 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleOrderCreationRequestedUseCase,
-        { provide: IInventoryRepositoryPort, useValue: repository },
-        { provide: IInventoryEventsPublisherPort, useValue: eventsPublisher },
-        { provide: IReservationAuditLogPort, useValue: reservationAuditLog },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: repository },
+        { provide: InventoryEventsPublisherPort, useValue: eventsPublisher },
+        { provide: ReservationAuditLogPort, useValue: reservationAuditLog },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 

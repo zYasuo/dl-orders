@@ -6,17 +6,17 @@ import { SigninUseCase } from './application/use-cases/signin.use-case';
 import { SignupUseCase } from './application/use-cases/signup.use-case';
 import { ValidateAuthAttemptUseCase } from './application/use-cases/validate-auth-attempt.use-case';
 import { VerifyOtpUseCase } from './application/use-cases/verify-otp.use-case';
-import { IAccountLockedNotifyPublisherPort } from './domain/ports/publishers/account-locked-notify-publisher.port';
-import { IAuthLogsRepositoryPort } from './domain/ports/repositories/auth-logs-repository.port';
-import { ILockoutStorePort } from './domain/ports/stores/lockout-store.port';
-import { ISessionStorePort } from './domain/ports/stores/session-store.port';
-import { IAuthUserRepositoryPort } from './domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from './domain/ports/security/email-encrypted.security';
-import { IJwtPort } from './domain/ports/security/jwt.port';
-import { IOtpRepositoryPort } from './domain/ports/repositories/otp-repository.port';
-import { IOtpSendRequestedPublisherPort } from './domain/ports/publishers/otp-send-requested-publisher.port';
-import { IPasswordHasherPort } from './domain/ports/security/password-hasher.port';
-import { IUserVerifiedPublisherPort } from './domain/ports/publishers/user-verified-publisher.port';
+import { AccountLockedNotifyPublisherPort } from './domain/ports/publishers/account-locked-notify-publisher.port';
+import { AuthLogsRepositoryPort } from './domain/ports/repositories/auth-logs-repository.port';
+import { LockoutStorePort } from './domain/ports/stores/lockout-store.port';
+import { SessionStorePort } from './domain/ports/stores/session-store.port';
+import { AuthUserRepositoryPort } from './domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from './domain/ports/security/email-encrypted.port';
+import { JwtPort } from './domain/ports/security/jwt.port';
+import { OtpRepositoryPort } from './domain/ports/repositories/otp-repository.port';
+import { OtpSendRequestedPublisherPort } from './domain/ports/publishers/otp-send-requested-publisher.port';
+import { PasswordHasherPort } from './domain/ports/security/password-hasher.port';
+import { UserVerifiedPublisherPort } from './domain/ports/publishers/user-verified-publisher.port';
 import { DbModule } from './infrastructure/db/db.module';
 import { AuthController } from './infrastructure/inbound/http/auth.controller';
 import { RedisRateLimitGuard } from './infrastructure/inbound/http/guards/redis-rate-limit.guard';
@@ -29,16 +29,16 @@ import { AuthLogsRepository } from './infrastructure/outbound/persistence/sql/au
 import { AuthUserRepository } from './infrastructure/outbound/persistence/sql/auth-user.repository';
 import { OtpRepository } from './infrastructure/outbound/persistence/sql/otp.repository';
 import { Argon2PasswordHasher } from './infrastructure/outbound/security/argon2-password-hasher.security';
-import { EmailEncryptedSecurity } from './infrastructure/outbound/security/email-encrypted.security';
+import { EmailEncryptedSecurityAdapter } from './infrastructure/outbound/security/email-encrypted.security';
 import { JwtService } from './infrastructure/outbound/security/jwt.service';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { CreateResetPasswordLinkUseCase } from './application/use-cases/create-reset-password-link.use-case';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
 import { PasswordResetRepository } from './infrastructure/outbound/persistence/sql/password-reset.repository';
-import { IPasswordResetRepositoryPort } from './domain/ports/repositories/password-reset-repository.port';
-import { IResetPasswordPublisherPort } from './domain/ports/publishers/reset-password-publisher.port';
-import { IPasswordChangedPublisherPort } from './domain/ports/publishers/password-changed-publisher.port';
+import { PasswordResetRepositoryPort } from './domain/ports/repositories/password-reset-repository.port';
+import { ResetPasswordPublisherPort } from './domain/ports/publishers/reset-password-publisher.port';
+import { PasswordChangedPublisherPort } from './domain/ports/publishers/password-changed-publisher.port';
 import { PasswordResetLinkRequestRabbitMqPublisher } from './infrastructure/outbound/messaging/password-reset-link-request.publisher';
 import { PasswordChangedRabbitMqPublisher } from './infrastructure/outbound/messaging/password-changed.publisher';
 
@@ -62,20 +62,21 @@ import { PasswordChangedRabbitMqPublisher } from './infrastructure/outbound/mess
     ValidateAuthAttemptUseCase,
     CreateResetPasswordLinkUseCase,
     ChangePasswordUseCase,
-    { provide: IAuthUserRepositoryPort, useClass: AuthUserRepository },
-    { provide: ILockoutStorePort, useClass: RedisLockoutStoreAdapter },
-    { provide: ISessionStorePort, useClass: RedisSessionStoreAdapter },
-    { provide: IAuthLogsRepositoryPort, useClass: AuthLogsRepository },
-    { provide: IOtpRepositoryPort, useClass: OtpRepository },
-    { provide: IAccountLockedNotifyPublisherPort, useClass: AccountLockedNotifyRabbitMqPublisher },
-    { provide: IOtpSendRequestedPublisherPort, useClass: OtpSendRequestedRabbitMqPublisher },
-    { provide: IPasswordHasherPort, useClass: Argon2PasswordHasher },
-    { provide: IEmailEncryptedSecurity, useClass: EmailEncryptedSecurity },
-    { provide: IJwtPort, useClass: JwtService },
-    { provide: IUserVerifiedPublisherPort, useClass: UserVerifiedRabbitMqPublisher },
-    { provide: IPasswordResetRepositoryPort, useClass: PasswordResetRepository },
-    { provide: IResetPasswordPublisherPort, useClass: PasswordResetLinkRequestRabbitMqPublisher },
-    { provide: IPasswordChangedPublisherPort, useClass: PasswordChangedRabbitMqPublisher },
+    { provide: AuthUserRepositoryPort, useClass: AuthUserRepository },
+    { provide: LockoutStorePort, useClass: RedisLockoutStoreAdapter },
+    { provide: SessionStorePort, useClass: RedisSessionStoreAdapter },
+    { provide: AuthLogsRepositoryPort, useClass: AuthLogsRepository },
+    { provide: OtpRepositoryPort, useClass: OtpRepository },
+    { provide: AccountLockedNotifyPublisherPort, useClass: AccountLockedNotifyRabbitMqPublisher },
+    { provide: OtpSendRequestedPublisherPort, useClass: OtpSendRequestedRabbitMqPublisher },
+    { provide: PasswordHasherPort, useClass: Argon2PasswordHasher },
+    { provide: EmailEncryptedSecurity, useClass: EmailEncryptedSecurityAdapter },
+    { provide: JwtPort, useClass: JwtService },
+    { provide: UserVerifiedPublisherPort, useClass: UserVerifiedRabbitMqPublisher },
+    { provide: PasswordResetRepositoryPort, useClass: PasswordResetRepository },
+    { provide: ResetPasswordPublisherPort, useClass: PasswordResetLinkRequestRabbitMqPublisher },
+    { provide: PasswordChangedPublisherPort, useClass: PasswordChangedRabbitMqPublisher },
   ],
 })
 export class AuthModule {}
+

@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { MONGODB_DB } from '@app/shared';
-import { IOrderSummaryPort, TOrderSummary } from '../../../../domain/ports/order-summary.port';
+import { OrderSummaryPort, TOrderSummary } from '../../../../domain/ports/order-summary.port';
 
 const COLLECTION = 'order_summaries';
 
 @Injectable()
-export class MongoOrderSummaryRepository extends IOrderSummaryPort {
+export class MongoOrderSummaryRepository extends OrderSummaryPort {
   private readonly collection = this.db.collection<TOrderSummary>(COLLECTION);
 
   constructor(@Inject(MONGODB_DB) private readonly db: Db) {

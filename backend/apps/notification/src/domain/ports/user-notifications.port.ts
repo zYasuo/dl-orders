@@ -8,7 +8,7 @@ export type TUserNotificationItem = {
   read: boolean;
 };
 
-export abstract class IUserNotificationsPort {
+export abstract class UserNotificationsPort {
   abstract add(item: TUserNotificationItem): Promise<void>;
   abstract getByUserId(userId: string, limit?: number): Promise<TUserNotificationItem[]>;
 }

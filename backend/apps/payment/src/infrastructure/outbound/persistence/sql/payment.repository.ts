@@ -1,7 +1,7 @@
 import { Prisma } from '.prisma/payment-client';
 import { Injectable } from '@nestjs/common';
 import { PaymentEntity, PaymentStatus } from '../../../../domain/entities/payment.entity';
-import { IPaymentRepositoryPort } from '../../../../domain/ports/payment-repository.port';
+import { PaymentRepositoryPort } from '../../../../domain/ports/payment-repository.port';
 import {
   ICreatePayment,
   IUpdatePaymentStatus,
@@ -9,7 +9,7 @@ import {
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
-export class PaymentRepository extends IPaymentRepositoryPort {
+export class PaymentRepository extends PaymentRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InventoryEntity } from '../../../../domain/entities/inventory.entity';
-import { IInventoryListCachePort } from '../../../../domain/ports/inventory-list-cache.port';
+import { InventoryListCachePort } from '../../../../domain/ports/inventory-list-cache.port';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
 import { RedisService } from '../../../redis/redis.service';
 
 const LIST_KEY = `${REDIS_KEY_PREFIX}list`;
 
 @Injectable()
-export class RedisInventoryListCacheAdapter extends IInventoryListCachePort {
+export class RedisInventoryListCacheAdapter extends InventoryListCachePort {
   constructor(private readonly redis: RedisService) {
     super();
   }

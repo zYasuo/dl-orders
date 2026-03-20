@@ -1,7 +1,7 @@
 import { PaymentApprovedEvent, PaymentFailedEvent } from '@app/shared';
-import { IPaymentEventsPublisherPort } from '../../src/domain/ports/payment-events-publisher.port';
+import { PaymentEventsPublisherPort } from '../../src/domain/ports/payment-events-publisher.port';
 
-export class FakePaymentEventsPublisher extends IPaymentEventsPublisherPort {
+export class FakePaymentEventsPublisher extends PaymentEventsPublisherPort {
   readonly approved: PaymentApprovedEvent[] = [];
   readonly failed: PaymentFailedEvent[] = [];
 

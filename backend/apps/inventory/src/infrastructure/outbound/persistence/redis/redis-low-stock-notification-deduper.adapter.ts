@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '../../../redis/redis.service';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
-import { ILowStockNotificationDeduperPort } from '../../../../domain/ports/inventory-low-stock-notification-deduper.port';
+import { LowStockNotificationDeduperPort } from '../../../../domain/ports/inventory-low-stock-notification-deduper.port';
 
 const LOW_STOCK_DEDUP_TTL_SECONDS = 10 * 60;
 const LOW_STOCK_DEDUP_KEY_PREFIX = `${REDIS_KEY_PREFIX}low-stock:sent:`;
 
 @Injectable()
 export class RedisLowStockNotificationDeduperAdapter
-  extends ILowStockNotificationDeduperPort
+  extends LowStockNotificationDeduperPort
 {
   constructor(private readonly redis: RedisService) {
     super();

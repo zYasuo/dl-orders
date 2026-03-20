@@ -4,11 +4,11 @@ import { JwtAuthGuard, MongoDBModule } from '@app/shared';
 import { HandleInventoryReservedUseCase } from './application/use-cases/handle-inventory-reserved.use-case';
 import { HandleWebhookUseCase } from './application/use-cases/handle-webhook.use-case';
 import { FindPaymentByOrderIdUseCase } from './application/use-cases/find-payment-by-order-id.use-case';
-import { IPaymentAuditLogPort } from './domain/ports/payment-audit-log.port';
-import { IPaymentEventsPublisherPort } from './domain/ports/payment-events-publisher.port';
-import { IPaymentGatewayPort } from './domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from './domain/ports/payment-repository.port';
-import { IOrderDetailsPort } from './domain/ports/order-details.port';
+import { PaymentAuditLogPort } from './domain/ports/payment-audit-log.port';
+import { PaymentEventsPublisherPort } from './domain/ports/payment-events-publisher.port';
+import { PaymentGatewayPort } from './domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from './domain/ports/payment-repository.port';
+import { OrderDetailsPort } from './domain/ports/order-details.port';
 import { DbModule } from './infrastructure/db/db.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { PaymentController } from './infrastructure/inbound/http/payment.controller';
@@ -37,11 +37,11 @@ import { OrdersHttpClient } from './infrastructure/outbound/http/orders-http.cli
     HandleInventoryReservedUseCase,
     HandleWebhookUseCase,
     FindPaymentByOrderIdUseCase,
-    { provide: IPaymentRepositoryPort, useClass: PaymentRepository },
-    { provide: IPaymentGatewayPort, useClass: MercadoPagoGatewayAdapter },
-    { provide: IPaymentEventsPublisherPort, useClass: PaymentRabbitMqPublisher },
-    { provide: IPaymentAuditLogPort, useClass: MongoPaymentAuditLogRepository },
-    { provide: IOrderDetailsPort, useClass: OrdersHttpClient },
+    { provide: PaymentRepositoryPort, useClass: PaymentRepository },
+    { provide: PaymentGatewayPort, useClass: MercadoPagoGatewayAdapter },
+    { provide: PaymentEventsPublisherPort, useClass: PaymentRabbitMqPublisher },
+    { provide: PaymentAuditLogPort, useClass: MongoPaymentAuditLogRepository },
+    { provide: OrderDetailsPort, useClass: OrdersHttpClient },
   ],
 })
 export class PaymentModule {}

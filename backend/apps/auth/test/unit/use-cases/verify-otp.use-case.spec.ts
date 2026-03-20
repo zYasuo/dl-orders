@@ -1,20 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
 import { OtpCodeEntity } from '../../../src/domain/entities/otp-code.entity';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
-import { IOtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
-import { IUserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
+import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
+import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
+import { UserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
 
 describe('VerifyOtpUseCase', () => {
   let sut: VerifyOtpUseCase;
-  let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
-  let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
-  let otpRepository: jest.Mocked<IOtpRepositoryPort>;
-  let jwtPort: jest.Mocked<IJwtPort>;
-  let userVerifiedPublisher: jest.Mocked<IUserVerifiedPublisherPort>;
+  let authUserRepository: jest.Mocked<AuthUserRepositoryPort>;
+  let emailEncrypted: jest.Mocked<EmailEncryptedSecurity>;
+  let otpRepository: jest.Mocked<OtpRepositoryPort>;
+  let jwtPort: jest.Mocked<JwtPort>;
+  let userVerifiedPublisher: jest.Mocked<UserVerifiedPublisherPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const futureExpiry = new Date(Date.now() + 10 * 60 * 1000);
@@ -75,7 +75,7 @@ describe('VerifyOtpUseCase', () => {
       create: jest.fn(),
       findByEmailLookupHash: jest.fn().mockResolvedValue(fakeUser),
       markEmailVerified: jest.fn().mockResolvedValue(verifiedUserInstance),
-    } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+    } as unknown as jest.Mocked<AuthUserRepositoryPort>;
 
     emailEncrypted = {
       encrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
@@ -83,32 +83,32 @@ describe('VerifyOtpUseCase', () => {
       getLookupHash: jest
         .fn()
         .mockImplementation((v: string) => Promise.resolve(v.toLowerCase().trim())),
-    } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
+    } as unknown as jest.Mocked<EmailEncryptedSecurity>;
 
     otpRepository = {
       create: jest.fn(),
       findLatestByUserId: jest.fn().mockResolvedValue(validOtp),
       markUsedIfUnused: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<IOtpRepositoryPort>;
+    } as unknown as jest.Mocked<OtpRepositoryPort>;
 
     jwtPort = {
       sign: jest.fn().mockResolvedValue('jwt-token'),
       verify: jest.fn(),
       getExpiresInSeconds: jest.fn().mockReturnValue(86400),
-    } as unknown as jest.Mocked<IJwtPort>;
+    } as unknown as jest.Mocked<JwtPort>;
 
     userVerifiedPublisher = {
       publish: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IUserVerifiedPublisherPort>;
+    } as unknown as jest.Mocked<UserVerifiedPublisherPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VerifyOtpUseCase,
-        { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
-        { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
-        { provide: IOtpRepositoryPort, useValue: otpRepository },
-        { provide: IJwtPort, useValue: jwtPort },
-        { provide: IUserVerifiedPublisherPort, useValue: userVerifiedPublisher },
+        { provide: AuthUserRepositoryPort, useValue: authUserRepository },
+        { provide: EmailEncryptedSecurity, useValue: emailEncrypted },
+        { provide: OtpRepositoryPort, useValue: otpRepository },
+        { provide: JwtPort, useValue: jwtPort },
+        { provide: UserVerifiedPublisherPort, useValue: userVerifiedPublisher },
       ],
     }).compile();
 
@@ -186,3 +186,4 @@ describe('VerifyOtpUseCase', () => {
     });
   });
 });
+

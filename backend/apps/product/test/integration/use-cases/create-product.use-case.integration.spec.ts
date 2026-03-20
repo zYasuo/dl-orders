@@ -1,8 +1,8 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateProductUseCase } from '../../../src/application/use-cases/create-product.use-case';
-import { IProductCachePort } from '../../../src/domain/ports/product-cache.port';
-import { IProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
+import { ProductCachePort } from '../../../src/domain/ports/product-cache.port';
+import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 import { InMemoryProductCache } from '../../doubles/in-memory-product-cache';
 import { InMemoryProductRepository } from '../../doubles/in-memory-product.repository';
 
@@ -18,8 +18,8 @@ describe('CreateProductUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateProductUseCase,
-        { provide: IProductRepositoryPort, useValue: productRepository },
-        { provide: IProductCachePort, useValue: productCache },
+        { provide: ProductRepositoryPort, useValue: productRepository },
+        { provide: ProductCachePort, useValue: productCache },
       ],
     }).compile();
 
@@ -51,7 +51,7 @@ describe('CreateProductUseCase (integration)', () => {
     });
 
     it('throws InternalServerErrorException when repository returns null', async () => {
-      const failingRepo: IProductRepositoryPort = {
+      const failingRepo: ProductRepositoryPort = {
         create: async () => null,
         findById: async () => null,
         findByName: async () => null,
@@ -62,8 +62,8 @@ describe('CreateProductUseCase (integration)', () => {
       const module = await Test.createTestingModule({
         providers: [
           CreateProductUseCase,
-          { provide: IProductRepositoryPort, useValue: failingRepo },
-          { provide: IProductCachePort, useValue: cache },
+          { provide: ProductRepositoryPort, useValue: failingRepo },
+          { provide: ProductCachePort, useValue: cache },
         ],
       }).compile();
       const useCase = module.get(CreateProductUseCase);

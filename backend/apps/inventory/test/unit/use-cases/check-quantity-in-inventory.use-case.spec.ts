@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CheckQuantityInInventoryUseCase } from '../../../src/application/use-cases/check-quantity-in-inventory';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryLowStockPublisherPort } from '../../../src/domain/ports/inventory-low-stock-publisher.port';
+import { InventoryLowStockPublisherPort } from '../../../src/domain/ports/inventory-low-stock-publisher.port';
 import {
-  IInventoryRepositoryPort,
+  InventoryRepositoryPort,
 } from '../../../src/domain/ports/inventory-repository.port';
-import { ILowStockNotificationDeduperPort } from '../../../src/domain/ports/inventory-low-stock-notification-deduper.port';
+import { LowStockNotificationDeduperPort } from '../../../src/domain/ports/inventory-low-stock-notification-deduper.port';
 
 describe('CheckQuantityInInventoryUseCase', () => {
   let sut: CheckQuantityInInventoryUseCase;
-  let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
-  let inventoryLowStockPublisher: jest.Mocked<IInventoryLowStockPublisherPort>;
-  let lowStockNotificationDeduper: jest.Mocked<ILowStockNotificationDeduperPort>;
+  let inventoryRepository: jest.Mocked<InventoryRepositoryPort>;
+  let inventoryLowStockPublisher: jest.Mocked<InventoryLowStockPublisherPort>;
+  let lowStockNotificationDeduper: jest.Mocked<LowStockNotificationDeduperPort>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -25,22 +25,22 @@ describe('CheckQuantityInInventoryUseCase', () => {
       findLowStockPage: jest.fn(),
       decrementStock: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<IInventoryRepositoryPort>;
+    } as unknown as jest.Mocked<InventoryRepositoryPort>;
 
     inventoryLowStockPublisher = {
       publish: jest.fn(),
-    } as unknown as jest.Mocked<IInventoryLowStockPublisherPort>;
+    } as unknown as jest.Mocked<InventoryLowStockPublisherPort>;
 
     lowStockNotificationDeduper = {
       shouldNotify: jest.fn(),
-    } as unknown as jest.Mocked<ILowStockNotificationDeduperPort>;
+    } as unknown as jest.Mocked<LowStockNotificationDeduperPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CheckQuantityInInventoryUseCase,
-        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: IInventoryLowStockPublisherPort, useValue: inventoryLowStockPublisher },
-        { provide: ILowStockNotificationDeduperPort, useValue: lowStockNotificationDeduper },
+        { provide: InventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: InventoryLowStockPublisherPort, useValue: inventoryLowStockPublisher },
+        { provide: LowStockNotificationDeduperPort, useValue: lowStockNotificationDeduper },
       ],
     }).compile();
 

@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { IInventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
-import { IInventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
-import { IInventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
-import { IReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
+import { InventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
+import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
+import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
+import { ReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
 
 describe('HandleOrderCreationRequestedUseCase', () => {
   let sut: HandleOrderCreationRequestedUseCase;
-  let inventoryRepository: jest.Mocked<IInventoryRepositoryPort>;
-  let eventsPublisher: jest.Mocked<IInventoryEventsPublisherPort>;
-  let reservationAuditLog: jest.Mocked<IReservationAuditLogPort>;
-  let listCache: jest.Mocked<IInventoryListCachePort>;
+  let inventoryRepository: jest.Mocked<InventoryRepositoryPort>;
+  let eventsPublisher: jest.Mocked<InventoryEventsPublisherPort>;
+  let reservationAuditLog: jest.Mocked<ReservationAuditLogPort>;
+  let listCache: jest.Mocked<InventoryListCachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const createdBy = 'user@test.com';
@@ -49,31 +49,31 @@ describe('HandleOrderCreationRequestedUseCase', () => {
       create: jest.fn(),
       findByName: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<IInventoryRepositoryPort>;
+    } as unknown as jest.Mocked<InventoryRepositoryPort>;
 
     eventsPublisher = {
       publishInventoryReserved: jest.fn().mockResolvedValue(undefined),
       publishInventoryReservationFailed: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IInventoryEventsPublisherPort>;
+    } as unknown as jest.Mocked<InventoryEventsPublisherPort>;
 
     reservationAuditLog = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IReservationAuditLogPort>;
+    } as unknown as jest.Mocked<ReservationAuditLogPort>;
 
     listCache = {
       get: jest.fn(),
       set: jest.fn(),
       invalidate: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IInventoryListCachePort>;
+    } as unknown as jest.Mocked<InventoryListCachePort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleOrderCreationRequestedUseCase,
-        { provide: IInventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: IInventoryEventsPublisherPort, useValue: eventsPublisher },
-        { provide: IReservationAuditLogPort, useValue: reservationAuditLog },
-        { provide: IInventoryListCachePort, useValue: listCache },
+        { provide: InventoryRepositoryPort, useValue: inventoryRepository },
+        { provide: InventoryEventsPublisherPort, useValue: eventsPublisher },
+        { provide: ReservationAuditLogPort, useValue: reservationAuditLog },
+        { provide: InventoryListCachePort, useValue: listCache },
       ],
     }).compile();
 

@@ -1,20 +1,20 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChangePasswordUseCase } from '../../../src/application/use-cases/change-password.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IPasswordChangedPublisherPort } from '../../../src/domain/ports/publishers/password-changed-publisher.port';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
-import { IPasswordResetRepositoryPort } from '../../../src/domain/ports/repositories/password-reset-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
-import { IPasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
+import { PasswordChangedPublisherPort } from '../../../src/domain/ports/publishers/password-changed-publisher.port';
+import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { PasswordResetRepositoryPort } from '../../../src/domain/ports/repositories/password-reset-repository.port';
+import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
+import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 
 describe('ChangePasswordUseCase', () => {
   let sut: ChangePasswordUseCase;
-  let passwordResetRepository: jest.Mocked<IPasswordResetRepositoryPort>;
-  let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
-  let passwordHasher: jest.Mocked<IPasswordHasherPort>;
-  let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
-  let passwordChangedPublisher: jest.Mocked<IPasswordChangedPublisherPort>;
+  let passwordResetRepository: jest.Mocked<PasswordResetRepositoryPort>;
+  let authUserRepository: jest.Mocked<AuthUserRepositoryPort>;
+  let passwordHasher: jest.Mocked<PasswordHasherPort>;
+  let emailEncrypted: jest.Mocked<EmailEncryptedSecurity>;
+  let passwordChangedPublisher: jest.Mocked<PasswordChangedPublisherPort>;
 
   const emailLookupHash = 'lookup-hash-123';
   const fakeUser = new UserEntity({
@@ -42,38 +42,38 @@ describe('ChangePasswordUseCase', () => {
       findByLinkResetPassword: jest.fn(),
       findByEmailLookupHash: jest.fn(),
       consumeToken: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<IPasswordResetRepositoryPort>;
+    } as unknown as jest.Mocked<PasswordResetRepositoryPort>;
 
     authUserRepository = {
       create: jest.fn(),
       findByEmailLookupHash: jest.fn().mockResolvedValue(fakeUser),
       markEmailVerified: jest.fn(),
       changePassword: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+    } as unknown as jest.Mocked<AuthUserRepositoryPort>;
 
     passwordHasher = {
       hash: jest.fn().mockResolvedValue('hashedPassword'),
       compare: jest.fn(),
-    } as unknown as jest.Mocked<IPasswordHasherPort>;
+    } as unknown as jest.Mocked<PasswordHasherPort>;
 
     emailEncrypted = {
       getLookupHash: jest.fn().mockResolvedValue(emailLookupHash),
       encrypt: jest.fn(),
       decrypt: jest.fn(),
-    } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
+    } as unknown as jest.Mocked<EmailEncryptedSecurity>;
 
     passwordChangedPublisher = {
       publish: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IPasswordChangedPublisherPort>;
+    } as unknown as jest.Mocked<PasswordChangedPublisherPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChangePasswordUseCase,
-        { provide: IPasswordResetRepositoryPort, useValue: passwordResetRepository },
-        { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
-        { provide: IPasswordHasherPort, useValue: passwordHasher },
-        { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
-        { provide: IPasswordChangedPublisherPort, useValue: passwordChangedPublisher },
+        { provide: PasswordResetRepositoryPort, useValue: passwordResetRepository },
+        { provide: AuthUserRepositoryPort, useValue: authUserRepository },
+        { provide: PasswordHasherPort, useValue: passwordHasher },
+        { provide: EmailEncryptedSecurity, useValue: emailEncrypted },
+        { provide: PasswordChangedPublisherPort, useValue: passwordChangedPublisher },
       ],
     }).compile();
 
@@ -117,3 +117,4 @@ describe('ChangePasswordUseCase', () => {
     });
   });
 });
+

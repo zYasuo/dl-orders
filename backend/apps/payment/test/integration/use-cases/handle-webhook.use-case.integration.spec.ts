@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleWebhookUseCase } from '../../../src/application/use-cases/handle-webhook.use-case';
 import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
-import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
-import { IPaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
-import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
+import { PaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
+import { PaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
+import { PaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
 import { InMemoryPaymentRepository } from '../../doubles/in-memory-payment.repository';
 import { FakePaymentGateway } from '../../doubles/fake-payment-gateway';
 import { FakePaymentEventsPublisher } from '../../doubles/fake-payment-events.publisher';
@@ -21,7 +21,7 @@ describe('HandleWebhookUseCase (integration)', () => {
     paymentRepository = new InMemoryPaymentRepository();
     gateway = new FakePaymentGateway();
     eventsPublisher = new FakePaymentEventsPublisher();
-    const paymentAuditLogPort: IPaymentAuditLogPort = {
+    const paymentAuditLogPort: PaymentAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
     };
@@ -29,10 +29,10 @@ describe('HandleWebhookUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleWebhookUseCase,
-        { provide: IPaymentRepositoryPort, useValue: paymentRepository },
-        { provide: IPaymentGatewayPort, useValue: gateway },
-        { provide: IPaymentEventsPublisherPort, useValue: eventsPublisher },
-        { provide: IPaymentAuditLogPort, useValue: paymentAuditLogPort },
+        { provide: PaymentRepositoryPort, useValue: paymentRepository },
+        { provide: PaymentGatewayPort, useValue: gateway },
+        { provide: PaymentEventsPublisherPort, useValue: eventsPublisher },
+        { provide: PaymentAuditLogPort, useValue: paymentAuditLogPort },
       ],
     }).compile();
 

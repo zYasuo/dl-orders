@@ -3,13 +3,13 @@ import {
   INotificationType,
   NotificationEntity,
 } from '../../src/domain/entities/notification.entity';
-import { INotificationRepositoryPort } from '../../src/domain/ports/notification-repository.port';
+import { NotificationRepositoryPort } from '../../src/domain/ports/notification-repository.port';
 import {
   ICreateNotification,
   IUpdateNotification,
 } from '../../src/domain/types/notification-repository.types';
 
-export class InMemoryNotificationRepository extends INotificationRepositoryPort {
+export class InMemoryNotificationRepository extends NotificationRepositoryPort {
   private readonly notifications = new Map<string, NotificationEntity>();
 
   async create(params: ICreateNotification): Promise<NotificationEntity | null> {

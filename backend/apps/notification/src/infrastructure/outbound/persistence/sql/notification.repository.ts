@@ -5,14 +5,14 @@ import {
   INotificationStatus,
   INotificationType,
 } from '../../../../domain/entities/notification.entity';
-import { INotificationRepositoryPort } from '../../../../domain/ports/notification-repository.port';
+import { NotificationRepositoryPort } from '../../../../domain/ports/notification-repository.port';
 import {
   ICreateNotification,
   IUpdateNotification,
 } from '../../../../domain/types/notification-repository.types';
 
 @Injectable()
-export class NotificationRepository extends INotificationRepositoryPort {
+export class NotificationRepository extends NotificationRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

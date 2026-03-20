@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { INotificationRequest } from 'apps/notification/src/domain/types/notification-request.types';
 import { OTP_VERIFICATION_TITLE, otpVerificationHtmlTemplate } from './otp-verification.template';
 import { IOtpSendRequestedEvent } from '@app/shared';
-import { IOtpNotificationTemplatePort } from 'apps/notification/src/domain/ports/otp-notification-template.port';
+import { OtpNotificationTemplatePort } from 'apps/notification/src/domain/ports/otp-notification-template.port';
 
 @Injectable()
-export class OtpTemplateAdapter implements IOtpNotificationTemplatePort {
+export class OtpTemplateAdapter implements OtpNotificationTemplatePort {
   getOtpVerificationMessage(payload: IOtpSendRequestedEvent): INotificationRequest {
     const { code, expiresInMinutes } = payload;
 

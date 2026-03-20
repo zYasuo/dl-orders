@@ -1,4 +1,4 @@
-export abstract class ILockoutStorePort {
+export abstract class LockoutStorePort {
   abstract isLocked(userId: string): Promise<boolean>;
   abstract getLockedUntil(userId: string): Promise<Date | null>;
   abstract getFailedAttempts(userId: string): Promise<number>;

@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import ms from 'ms';
-import { IJwtPort, TJwtPayload } from '../../../domain/ports/security/jwt.port';
+import { JwtPort, TJwtPayload } from '../../../domain/ports/security/jwt.port';
 
 @Injectable()
-export class JwtService extends IJwtPort {
+export class JwtService extends JwtPort {
   private readonly secret: string;
   private readonly expiresIn: string;
 

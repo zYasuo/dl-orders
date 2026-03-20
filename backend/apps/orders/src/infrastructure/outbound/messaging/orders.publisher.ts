@@ -6,10 +6,10 @@ import {
   IOrderCreationRequestedEvent,
   IOrderConfirmedEvent,
 } from '@app/shared';
-import { IOrderEventsPublisherPort } from '../../../domain/ports/order-events-publisher.port';
+import { OrderEventsPublisherPort } from '../../../domain/ports/order-events-publisher.port';
 
 @Injectable()
-export class OrdersRabbitMqPublisher extends IOrderEventsPublisherPort {
+export class OrdersRabbitMqPublisher extends OrderEventsPublisherPort {
   constructor(
     @Inject('INVENTORY_SERVICE') private readonly inventoryClient: ClientProxy,
     @Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy,

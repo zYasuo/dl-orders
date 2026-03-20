@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from '../../../../domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../../domain/ports/repositories/auth-user-repository.port';
+import { AuthUserRepositoryPort } from '../../../../domain/ports/repositories/auth-user-repository.port';
 import { TCreateAuthUser } from '../../../../domain/types/auth-user-repository.types';
 import { DbService } from '../../../db/db.service';
 
 @Injectable()
-export class AuthUserRepository extends IAuthUserRepositoryPort {
+export class AuthUserRepository extends AuthUserRepositoryPort {
   constructor(private readonly db: DbService) {
     super();
   }

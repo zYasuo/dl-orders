@@ -2,11 +2,11 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
-import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 
 describe('FindOrderByIdUseCase', () => {
   let sut: FindOrderByIdUseCase;
-  let ordersRepository: jest.Mocked<IOrdersRepositoryPort>;
+  let ordersRepository: jest.Mocked<OrdersRepositoryPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
@@ -34,12 +34,12 @@ describe('FindOrderByIdUseCase', () => {
       findById: jest.fn().mockResolvedValue(fakeOrder),
       updateStatus: jest.fn(),
       confirmIfPending: jest.fn(),
-    } as unknown as jest.Mocked<IOrdersRepositoryPort>;
+    } as unknown as jest.Mocked<OrdersRepositoryPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindOrderByIdUseCase,
-        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
+        { provide: OrdersRepositoryPort, useValue: ordersRepository },
       ],
     }).compile();
 

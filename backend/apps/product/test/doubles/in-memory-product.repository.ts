@@ -1,8 +1,8 @@
 import { ProductEntity } from '../../src/domain/entities/product.entity';
-import { IProductRepositoryPort } from '../../src/domain/ports/product-repository.port';
+import { ProductRepositoryPort } from '../../src/domain/ports/product-repository.port';
 import { ICreateProduct, IUpdateProduct } from '../../src/domain/types/product-repository.types';
 
-export class InMemoryProductRepository extends IProductRepositoryPort {
+export class InMemoryProductRepository extends ProductRepositoryPort {
   private readonly products = new Map<string, ProductEntity>();
 
   async create(params: ICreateProduct): Promise<ProductEntity | null> {

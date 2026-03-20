@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PATTERNS, PaymentApprovedEvent, PaymentFailedEvent } from '@app/shared';
-import { IPaymentEventsPublisherPort } from '../../../domain/ports/payment-events-publisher.port';
+import { PaymentEventsPublisherPort } from '../../../domain/ports/payment-events-publisher.port';
 
 @Injectable()
-export class PaymentRabbitMqPublisher extends IPaymentEventsPublisherPort {
+export class PaymentRabbitMqPublisher extends PaymentEventsPublisherPort {
   constructor(@Inject('ORDERS_SERVICE') private readonly ordersClient: ClientProxy) {
     super();
   }

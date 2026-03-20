@@ -1,7 +1,7 @@
 import { PaymentEntity } from '../entities/payment.entity';
 import { ICreatePayment, IUpdatePaymentStatus } from '../types/payment-repository.types';
 
-export abstract class IPaymentRepositoryPort {
+export abstract class PaymentRepositoryPort {
   abstract create(input: ICreatePayment): Promise<PaymentEntity | null>;
   abstract findByOrderId(orderId: string): Promise<PaymentEntity | null>;
   abstract findByIdempotencyKey(idempotencyKey: string): Promise<PaymentEntity | null>;

@@ -1,13 +1,13 @@
 import { PATTERNS, UserVerifiedEvent } from '@app/shared';
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { IUserProfileRepositoryPort } from '../../../domain/ports/user-profile-repository.port';
+import { UserProfileRepositoryPort } from '../../../domain/ports/user-profile-repository.port';
 
 @Controller()
 export class UserVerifiedConsumer {
   private readonly logger = new Logger(UserVerifiedConsumer.name);
 
-  constructor(private readonly userProfileRepository: IUserProfileRepositoryPort) {}
+  constructor(private readonly userProfileRepository: UserProfileRepositoryPort) {}
 
   @EventPattern(PATTERNS.USER_VERIFIED)
   async handle(@Payload() payload: UserVerifiedEvent): Promise<void> {

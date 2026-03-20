@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { IOtpSendRequestedEvent } from '@app/shared';
-import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
-import { IOtpNotificationTemplatePort } from '../../domain/ports/otp-notification-template.port';
-import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
+import { EmailSenderPort } from '../../domain/ports/email-sender.port';
+import { OtpNotificationTemplatePort } from '../../domain/ports/otp-notification-template.port';
+import { NotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
 
 @Injectable()
 export class HandleOtpSendRequestedUseCase {
   constructor(
-    private readonly otpNotificationTemplatePort: IOtpNotificationTemplatePort,
-    private readonly emailSender: IEmailSenderPort,
-    private readonly notificationAuditLogPort: INotificationAuditLogPort,
+    private readonly otpNotificationTemplatePort: OtpNotificationTemplatePort,
+    private readonly emailSender: EmailSenderPort,
+    private readonly notificationAuditLogPort: NotificationAuditLogPort,
   ) {}
 
   async execute(payload: IOtpSendRequestedEvent): Promise<void> {

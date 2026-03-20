@@ -1,8 +1,8 @@
 import { AuthLogsEntity } from '../../src/domain/entities/auth-logs.entity';
-import { IAuthLogsRepositoryPort } from '../../src/domain/ports/repositories/auth-logs-repository.port';
+import { AuthLogsRepositoryPort } from '../../src/domain/ports/repositories/auth-logs-repository.port';
 import { TUpsertAuthLogs } from '../../src/domain/types/auth-logs-repository.types';
 
-export class InMemoryAuthLogsRepository extends IAuthLogsRepositoryPort {
+export class InMemoryAuthLogsRepository extends AuthLogsRepositoryPort {
   private readonly logs = new Map<string, AuthLogsEntity>();
 
   async findByUserId(userId: string): Promise<AuthLogsEntity | null> {

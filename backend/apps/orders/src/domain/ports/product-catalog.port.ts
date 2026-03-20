@@ -4,6 +4,6 @@ export type TProductCatalogItem = {
   price: number;
 };
 
-export abstract class IProductCatalogPort {
+export abstract class ProductCatalogPort {
   abstract findById(productId: string): Promise<TProductCatalogItem | null>;
 }

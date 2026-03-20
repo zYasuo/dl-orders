@@ -1,9 +1,9 @@
 import { InventoryEntity } from '../../src/domain/entities/inventory.entity';
-import { IInventoryRepositoryPort } from '../../src/domain/ports/inventory-repository.port';
+import { InventoryRepositoryPort } from '../../src/domain/ports/inventory-repository.port';
 import { ICreateInventory } from '../../src/domain/types/inventory-repository.types';
 import { TInventoryLowStockCursor } from '../../src/domain/types/inventory-repository.types';
 
-export class InMemoryInventoryRepository extends IInventoryRepositoryPort {
+export class InMemoryInventoryRepository extends InventoryRepositoryPort {
   private readonly inventories = new Map<string, InventoryEntity>();
 
   async create(input: ICreateInventory): Promise<InventoryEntity | null> {

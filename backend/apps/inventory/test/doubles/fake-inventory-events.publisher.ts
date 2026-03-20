@@ -3,9 +3,9 @@ import {
   InventoryReservationFailedEvent,
   IInventoryLowStockEvent,
 } from '@app/shared';
-import { IInventoryEventsPublisherPort } from '../../src/domain/ports/inventory-events-publisher.port';
+import { InventoryEventsPublisherPort } from '../../src/domain/ports/inventory-events-publisher.port';
 
-export class FakeInventoryEventsPublisher extends IInventoryEventsPublisherPort {
+export class FakeInventoryEventsPublisher extends InventoryEventsPublisherPort {
   readonly reserved: InventoryReservedEvent[] = [];
   readonly failed: InventoryReservationFailedEvent[] = [];
   readonly lowStock: IInventoryLowStockEvent[] = [];

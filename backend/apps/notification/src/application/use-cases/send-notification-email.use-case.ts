@@ -1,19 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { INotificationStatus, NotificationEntity } from '../../domain/entities/notification.entity';
-import { IEmailSenderPort } from '../../domain/ports/email-sender.port';
-import { INotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
-import { INotificationRepositoryPort } from '../../domain/ports/notification-repository.port';
-import { IUserNotificationsPort } from '../../domain/ports/user-notifications.port';
+import { EmailSenderPort } from '../../domain/ports/email-sender.port';
+import { NotificationAuditLogPort } from '../../domain/ports/notification-audit-log.port';
+import { NotificationRepositoryPort } from '../../domain/ports/notification-repository.port';
+import { UserNotificationsPort } from '../../domain/ports/user-notifications.port';
 
 @Injectable()
 export class SendNotificationEmailUseCase {
   private readonly logger = new Logger(SendNotificationEmailUseCase.name);
 
   constructor(
-    private readonly emailSenderPort: IEmailSenderPort,
-    private readonly notificationRepositoryPort: INotificationRepositoryPort,
-    private readonly notificationAuditLogPort: INotificationAuditLogPort,
-    private readonly userNotificationsPort: IUserNotificationsPort,
+    private readonly emailSenderPort: EmailSenderPort,
+    private readonly notificationRepositoryPort: NotificationRepositoryPort,
+    private readonly notificationAuditLogPort: NotificationAuditLogPort,
+    private readonly userNotificationsPort: UserNotificationsPort,
   ) {}
 
   async execute(notification: NotificationEntity): Promise<void> {

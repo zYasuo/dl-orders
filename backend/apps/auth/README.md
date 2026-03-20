@@ -14,17 +14,17 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 
 ## Ports
 
-- **IAuthUserRepositoryPort** — Create/find user, mark email verified (Postgres/Prisma).
-- **IAuthLogsRepositoryPort** — Find/upsert auth log per user (login attempts, lockout until).
-- **IOtpRepositoryPort** — Create/find OTP, mark used.
-- **IOtpSendRequestedPublisherPort** — Publish `otp.send_requested` (RabbitMQ → notification service sends OTP email).
-- **IAccountLockedNotifyPublisherPort** — Publish `account.locked_notify` when account is locked (RabbitMQ → notification service sends lockout email).
-- **IPasswordHasherPort** — Hash/compare password (Argon2).
-- **IJwtPort** — Sign/verify JWT.
-- **IUserVerifiedPublisherPort** — Publish `user.verified` (RabbitMQ).
-- **IPasswordResetRepositoryPort** — Create/find/consume password reset tokens (Postgres).
-- **IResetPasswordPublisherPort** — Publish `reset_password.link_requested` (RabbitMQ → notification).
-- **IPasswordChangedPublisherPort** — Publish `auth.password_changed` (RabbitMQ → notification).
+- **AuthUserRepositoryPort** — Create/find user, mark email verified (Postgres/Prisma).
+- **AuthLogsRepositoryPort** — Find/upsert auth log per user (login attempts, lockout until).
+- **OtpRepositoryPort** — Create/find OTP, mark used.
+- **OtpSendRequestedPublisherPort** — Publish `otp.send_requested` (RabbitMQ → notification service sends OTP email).
+- **AccountLockedNotifyPublisherPort** — Publish `account.locked_notify` when account is locked (RabbitMQ → notification service sends lockout email).
+- **PasswordHasherPort** — Hash/compare password (Argon2).
+- **JwtPort** — Sign/verify JWT.
+- **UserVerifiedPublisherPort** — Publish `user.verified` (RabbitMQ).
+- **PasswordResetRepositoryPort** — Create/find/consume password reset tokens (Postgres).
+- **ResetPasswordPublisherPort** — Publish `reset_password.link_requested` (RabbitMQ → notification).
+- **PasswordChangedPublisherPort** — Publish `auth.password_changed` (RabbitMQ → notification).
 
 ## Inbound
 

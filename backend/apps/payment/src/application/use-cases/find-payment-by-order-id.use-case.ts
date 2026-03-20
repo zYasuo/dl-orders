@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IPaymentRepositoryPort } from '../../domain/ports/payment-repository.port';
+import { PaymentRepositoryPort } from '../../domain/ports/payment-repository.port';
 
 export type TPaymentByOrderResult = {
   paymentId: string;
@@ -11,7 +11,7 @@ export type TPaymentByOrderResult = {
 
 @Injectable()
 export class FindPaymentByOrderIdUseCase {
-  constructor(private readonly paymentRepositoryPort: IPaymentRepositoryPort) {}
+  constructor(private readonly paymentRepositoryPort: PaymentRepositoryPort) {}
 
   async execute(orderId: string): Promise<TPaymentByOrderResult> {
     const payment = await this.paymentRepositoryPort.findByOrderId(orderId);

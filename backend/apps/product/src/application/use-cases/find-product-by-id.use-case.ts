@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductEntity } from '../../domain/entities/product.entity';
-import { IProductCachePort } from '../../domain/ports/product-cache.port';
-import { IProductRepositoryPort } from '../../domain/ports/product-repository.port';
+import { ProductCachePort } from '../../domain/ports/product-cache.port';
+import { ProductRepositoryPort } from '../../domain/ports/product-repository.port';
 
 const PRODUCT_CACHE_TTL_SECONDS = 300;
 
 @Injectable()
 export class FindProductByIdUseCase {
   constructor(
-    private readonly productRepositoryPort: IProductRepositoryPort,
-    private readonly productCache: IProductCachePort,
+    private readonly productRepositoryPort: ProductRepositoryPort,
+    private readonly productCache: ProductCachePort,
   ) {}
 
   async execute(id: string): Promise<ProductEntity> {

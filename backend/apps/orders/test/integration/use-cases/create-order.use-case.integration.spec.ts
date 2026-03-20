@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
 import { OrderStatus } from '../../../src/domain/entities/order.entity';
-import { IOrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
-import { IProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
-import { IOrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
+import { ProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
+import { OrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { FakeOrderEventsPublisher } from '../../doubles/fake-order-events.publisher';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
 
@@ -17,16 +17,16 @@ describe('CreateOrderUseCase (integration)', () => {
   beforeEach(async () => {
     ordersRepository = new InMemoryOrdersRepository();
     orderEventsPublisher = new FakeOrderEventsPublisher();
-    const productCatalog: IProductCatalogPort = {
+    const productCatalog: ProductCatalogPort = {
       findById: jest
         .fn()
         .mockResolvedValue({ name: 'Product A', description: 'Desc', price: 99.9 }),
     };
-    const orderAuditLog: IOrderAuditLogPort = {
+    const orderAuditLog: OrderAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
     };
-    const orderSummary: IOrderSummaryPort = {
+    const orderSummary: OrderSummaryPort = {
       put: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue(null),
     };
@@ -34,11 +34,11 @@ describe('CreateOrderUseCase (integration)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
-        { provide: IOrdersRepositoryPort, useValue: ordersRepository },
-        { provide: IProductCatalogPort, useValue: productCatalog },
-        { provide: IOrderEventsPublisherPort, useValue: orderEventsPublisher },
-        { provide: IOrderAuditLogPort, useValue: orderAuditLog },
-        { provide: IOrderSummaryPort, useValue: orderSummary },
+        { provide: OrdersRepositoryPort, useValue: ordersRepository },
+        { provide: ProductCatalogPort, useValue: productCatalog },
+        { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
+        { provide: OrderAuditLogPort, useValue: orderAuditLog },
+        { provide: OrderSummaryPort, useValue: orderSummary },
       ],
     }).compile();
 

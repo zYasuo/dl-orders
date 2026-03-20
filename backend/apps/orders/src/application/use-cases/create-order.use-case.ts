@@ -1,10 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OrderEntity } from '../../domain/entities/order.entity';
-import { IOrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
-import { IOrderSummaryPort } from '../../domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
-import { IProductCatalogPort } from '../../domain/ports/product-catalog.port';
+import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
+import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { ProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { ICreateOrder } from '../../domain/types/order-repository.types';
 import { TCreateOrder } from '../dto/create-order.dto';
 
@@ -13,11 +13,11 @@ export class CreateOrderUseCase {
   private readonly logger = new Logger(CreateOrderUseCase.name);
 
   constructor(
-    private readonly ordersRepositoryPort: IOrdersRepositoryPort,
-    private readonly productCatalogPort: IProductCatalogPort,
-    private readonly orderEventsPublisherPort: IOrderEventsPublisherPort,
-    private readonly orderAuditLogPort: IOrderAuditLogPort,
-    private readonly orderSummaryPort: IOrderSummaryPort,
+    private readonly ordersRepositoryPort: OrdersRepositoryPort,
+    private readonly productCatalogPort: ProductCatalogPort,
+    private readonly orderEventsPublisherPort: OrderEventsPublisherPort,
+    private readonly orderAuditLogPort: OrderAuditLogPort,
+    private readonly orderSummaryPort: OrderSummaryPort,
   ) {}
 
   async execute(input: TCreateOrder) {

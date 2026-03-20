@@ -1,11 +1,11 @@
 import { Controller, Param, Query } from '@nestjs/common';
-import { IUserNotificationsPort } from '../../../domain/ports/user-notifications.port';
+import { UserNotificationsPort } from '../../../domain/ports/user-notifications.port';
 import { NotificationsDoc, ApiNotifications } from './docs/notifications-doc.decorator';
 
 @ApiNotifications()
 @Controller()
 export class NotificationsController {
-  constructor(private readonly userNotificationsPort: IUserNotificationsPort) {}
+  constructor(private readonly userNotificationsPort: UserNotificationsPort) {}
 
   @NotificationsDoc.GetByUserId()
   getByUserId(@Param('userId') userId: string, @Query('limit') limit?: string) {

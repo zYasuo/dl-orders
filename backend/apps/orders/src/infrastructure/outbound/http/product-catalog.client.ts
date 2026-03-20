@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  IProductCatalogPort,
+  ProductCatalogPort,
   TProductCatalogItem,
 } from '../../../domain/ports/product-catalog.port';
 import { SProductCatalogResponse } from './product-catalog-response.schema';
 
 @Injectable()
-export class ProductCatalogHttpClient extends IProductCatalogPort {
+export class ProductCatalogHttpClient extends ProductCatalogPort {
   private readonly baseUrl: string;
 
   constructor(private readonly configService: ConfigService) {

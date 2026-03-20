@@ -1,5 +1,5 @@
 import { UserVerifiedEvent } from '@app/shared';
 
-export abstract class IUserVerifiedPublisherPort {
+export abstract class UserVerifiedPublisherPort {
   abstract publish(event: UserVerifiedEvent): Promise<void>;
 }

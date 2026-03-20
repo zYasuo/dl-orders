@@ -1,7 +1,7 @@
 import { UserVerifiedEvent } from '@app/shared';
-import { IUserVerifiedPublisherPort } from '../../src/domain/ports/publishers/user-verified-publisher.port';
+import { UserVerifiedPublisherPort } from '../../src/domain/ports/publishers/user-verified-publisher.port';
 
-export class FakeUserVerifiedPublisher extends IUserVerifiedPublisherPort {
+export class FakeUserVerifiedPublisher extends UserVerifiedPublisherPort {
   readonly published: UserVerifiedEvent[] = [];
 
   async publish(event: UserVerifiedEvent): Promise<void> {

@@ -4,7 +4,7 @@ export type TJwtPayload = {
   jti?: string;
 };
 
-export abstract class IJwtPort {
+export abstract class JwtPort {
   abstract sign(payload: TJwtPayload): Promise<string>;
   abstract verify(token: string): Promise<TJwtPayload | null>;
   abstract getExpiresInSeconds(): number;

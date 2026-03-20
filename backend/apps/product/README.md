@@ -8,8 +8,8 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Ports
 
-- **IProductRepositoryPort** — Persist and load products (MongoDB).
-- **IProductCachePort** — Cache product by ID (Redis); invalidated on create.
+- **ProductRepositoryPort** — Persist and load products (MongoDB).
+- **ProductCachePort** — Cache product by ID (Redis); invalidated on create.
 
 ## Inbound
 

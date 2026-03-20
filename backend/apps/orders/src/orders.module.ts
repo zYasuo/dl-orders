@@ -3,11 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
-import { IOrderAuditLogPort } from './domain/ports/order-audit-log.port';
-import { IOrderEventsPublisherPort } from './domain/ports/order-events-publisher.port';
-import { IProductCatalogPort } from './domain/ports/product-catalog.port';
-import { IOrderSummaryPort } from './domain/ports/order-summary.port';
-import { IOrdersRepositoryPort } from './domain/ports/orders-repository.port';
+import { OrderAuditLogPort } from './domain/ports/order-audit-log.port';
+import { OrderEventsPublisherPort } from './domain/ports/order-events-publisher.port';
+import { ProductCatalogPort } from './domain/ports/product-catalog.port';
+import { OrderSummaryPort } from './domain/ports/order-summary.port';
+import { OrdersRepositoryPort } from './domain/ports/orders-repository.port';
 import { OrdersController } from './infrastructure/inbound/http/orders.controller';
 import { InventoryReservedConsumer } from './infrastructure/inbound/messaging/inventory-reserved.consumer';
 import { InventoryReservationFailedConsumer } from './infrastructure/inbound/messaging/inventory-reservation-failed.consumer';
@@ -45,11 +45,11 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
     FindOrderByIdUseCase,
     ConfirmOrderUseCase,
     CancelOrderUseCase,
-    { provide: IOrdersRepositoryPort, useClass: OrdersRepository },
-    { provide: IProductCatalogPort, useClass: ProductCatalogHttpClient },
-    { provide: IOrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
-    { provide: IOrderAuditLogPort, useClass: MongoOrderAuditLogRepository },
-    { provide: IOrderSummaryPort, useClass: MongoOrderSummaryRepository },
+    { provide: OrdersRepositoryPort, useClass: OrdersRepository },
+    { provide: ProductCatalogPort, useClass: ProductCatalogHttpClient },
+    { provide: OrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },
+    { provide: OrderAuditLogPort, useClass: MongoOrderAuditLogRepository },
+    { provide: OrderSummaryPort, useClass: MongoOrderSummaryRepository },
   ],
 })
 export class OrdersModule {}

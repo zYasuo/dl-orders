@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
-  ISessionStorePort,
+  SessionStorePort,
   TSessionData,
 } from '../../../../domain/ports/stores/session-store.port';
 import { REDIS_KEY_PREFIX } from '../../../redis/constants/redis.constants';
@@ -9,7 +9,7 @@ import { RedisService } from '../../../redis/redis.service';
 const SESSION_KEY_PREFIX = `${REDIS_KEY_PREFIX}session:`;
 
 @Injectable()
-export class RedisSessionStoreAdapter extends ISessionStorePort {
+export class RedisSessionStoreAdapter extends SessionStorePort {
   constructor(private readonly redis: RedisService) {
     super();
   }

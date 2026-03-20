@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { IInventoryLowStockEvent } from '@app/shared';
 import { INotificationRequest } from 'apps/notification/src/domain/types/notification-request.types';
-import { IInventoryNotificationTemplatePort } from '../../../../domain/ports/inventory-notification-template.port';
+import { InventoryNotificationTemplatePort } from '../../../../domain/ports/inventory-notification-template.port';
 import {
   INVENTORY_LOW_STOCK_TITLE,
   inventoryLowStockHtmlTemplate,
 } from './inventory-low-stock.template';
 
 @Injectable()
-export class InventoryLowStockTemplateAdapter implements IInventoryNotificationTemplatePort {
+export class InventoryLowStockTemplateAdapter implements InventoryNotificationTemplatePort {
   getInventoryLowStockMessage(payload: IInventoryLowStockEvent): INotificationRequest {
     const { name, productId, quantity } = payload;
 

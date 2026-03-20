@@ -1,21 +1,21 @@
-import { ForbiddenException } from '@nestjs/common';
+﻿import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
-import { IEmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.security';
-import { IJwtPort } from '../../../src/domain/ports/security/jwt.port';
-import { IPasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
-import { ISessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
+import { AuthUserRepositoryPort } from '../../../src/domain/ports/repositories/auth-user-repository.port';
+import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email-encrypted.port';
+import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
+import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
+import { SessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
 
 describe('SigninUseCase', () => {
   let sut: SigninUseCase;
-  let authUserRepository: jest.Mocked<IAuthUserRepositoryPort>;
-  let emailEncrypted: jest.Mocked<IEmailEncryptedSecurity>;
-  let passwordHasher: jest.Mocked<IPasswordHasherPort>;
-  let jwtPort: jest.Mocked<IJwtPort>;
-  let sessionStore: jest.Mocked<ISessionStorePort>;
+  let authUserRepository: jest.Mocked<AuthUserRepositoryPort>;
+  let emailEncrypted: jest.Mocked<EmailEncryptedSecurity>;
+  let passwordHasher: jest.Mocked<PasswordHasherPort>;
+  let jwtPort: jest.Mocked<JwtPort>;
+  let sessionStore: jest.Mocked<SessionStorePort>;
   let validateAuthAttempt: jest.Mocked<ValidateAuthAttemptUseCase>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
@@ -47,7 +47,7 @@ describe('SigninUseCase', () => {
       create: jest.fn(),
       findByEmailLookupHash: jest.fn().mockResolvedValue(verifiedUser),
       markEmailVerified: jest.fn(),
-    } as unknown as jest.Mocked<IAuthUserRepositoryPort>;
+    } as unknown as jest.Mocked<AuthUserRepositoryPort>;
 
     emailEncrypted = {
       encrypt: jest.fn().mockImplementation((v: string) => Promise.resolve(v)),
@@ -55,22 +55,22 @@ describe('SigninUseCase', () => {
       getLookupHash: jest
         .fn()
         .mockImplementation((v: string) => Promise.resolve(v.toLowerCase().trim())),
-    } as unknown as jest.Mocked<IEmailEncryptedSecurity>;
+    } as unknown as jest.Mocked<EmailEncryptedSecurity>;
 
     passwordHasher = {
       hash: jest.fn(),
       compare: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<IPasswordHasherPort>;
+    } as unknown as jest.Mocked<PasswordHasherPort>;
 
     jwtPort = {
       sign: jest.fn().mockResolvedValue('jwt-token'),
       verify: jest.fn(),
       getExpiresInSeconds: jest.fn().mockReturnValue(86400),
-    } as unknown as jest.Mocked<IJwtPort>;
+    } as unknown as jest.Mocked<JwtPort>;
 
     sessionStore = {
       set: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<ISessionStorePort>;
+    } as unknown as jest.Mocked<SessionStorePort>;
 
     validateAuthAttempt = {
       validateBeforeLogin: jest.fn().mockResolvedValue(undefined),
@@ -81,11 +81,11 @@ describe('SigninUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SigninUseCase,
-        { provide: IAuthUserRepositoryPort, useValue: authUserRepository },
-        { provide: IEmailEncryptedSecurity, useValue: emailEncrypted },
-        { provide: IPasswordHasherPort, useValue: passwordHasher },
-        { provide: IJwtPort, useValue: jwtPort },
-        { provide: ISessionStorePort, useValue: sessionStore },
+        { provide: AuthUserRepositoryPort, useValue: authUserRepository },
+        { provide: EmailEncryptedSecurity, useValue: emailEncrypted },
+        { provide: PasswordHasherPort, useValue: passwordHasher },
+        { provide: JwtPort, useValue: jwtPort },
+        { provide: SessionStorePort, useValue: sessionStore },
         { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
       ],
     }).compile();
@@ -189,3 +189,4 @@ describe('SigninUseCase', () => {
     });
   });
 });
+

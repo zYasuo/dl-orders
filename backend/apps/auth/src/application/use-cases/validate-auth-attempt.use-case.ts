@@ -1,15 +1,15 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { IAccountLockedNotifyPublisherPort } from '../../domain/ports/publishers/account-locked-notify-publisher.port';
-import { IAuthLogsRepositoryPort } from '../../domain/ports/repositories/auth-logs-repository.port';
-import { ILockoutStorePort } from '../../domain/ports/stores/lockout-store.port';
+import { AccountLockedNotifyPublisherPort } from '../../domain/ports/publishers/account-locked-notify-publisher.port';
+import { AuthLogsRepositoryPort } from '../../domain/ports/repositories/auth-logs-repository.port';
+import { LockoutStorePort } from '../../domain/ports/stores/lockout-store.port';
 import { AuthLogsEntity } from '../../domain/entities/auth-logs.entity';
 
 @Injectable()
 export class ValidateAuthAttemptUseCase {
   constructor(
-    private readonly lockoutStore: ILockoutStorePort,
-    private readonly authLogsRepository: IAuthLogsRepositoryPort,
-    private readonly accountLockedNotifyPublisher: IAccountLockedNotifyPublisherPort,
+    private readonly lockoutStore: LockoutStorePort,
+    private readonly authLogsRepository: AuthLogsRepositoryPort,
+    private readonly accountLockedNotifyPublisher: AccountLockedNotifyPublisherPort,
   ) {}
 
   async validateBeforeLogin(userId: string): Promise<void> {

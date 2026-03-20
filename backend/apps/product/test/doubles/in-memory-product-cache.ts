@@ -1,7 +1,7 @@
 import { ProductEntity } from '../../src/domain/entities/product.entity';
-import { IProductCachePort } from '../../src/domain/ports/product-cache.port';
+import { ProductCachePort } from '../../src/domain/ports/product-cache.port';
 
-export class InMemoryProductCache extends IProductCachePort {
+export class InMemoryProductCache extends ProductCachePort {
   private readonly byId = new Map<string, ProductEntity>();
 
   async getById(id: string): Promise<ProductEntity | null> {

@@ -5,12 +5,12 @@ import {
   INotificationType,
   NotificationEntity,
 } from '../../../src/domain/entities/notification.entity';
-import { INotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
+import { NotificationRepositoryPort } from '../../../src/domain/ports/notification-repository.port';
 import { ICreateNotification } from '../../../src/domain/types/notification-repository.types';
 
 describe('CreateNotificationUseCase', () => {
   let sut: CreateNotificationUseCase;
-  let notificationRepository: jest.Mocked<INotificationRepositoryPort>;
+  let notificationRepository: jest.Mocked<NotificationRepositoryPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const fakeNotification = new NotificationEntity(
@@ -47,12 +47,12 @@ describe('CreateNotificationUseCase', () => {
       create: jest.fn().mockResolvedValue(fakeNotification),
       update: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<INotificationRepositoryPort>;
+    } as unknown as jest.Mocked<NotificationRepositoryPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateNotificationUseCase,
-        { provide: INotificationRepositoryPort, useValue: notificationRepository },
+        { provide: NotificationRepositoryPort, useValue: notificationRepository },
       ],
     }).compile();
 

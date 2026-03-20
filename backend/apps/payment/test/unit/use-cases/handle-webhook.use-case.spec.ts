@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleWebhookUseCase } from '../../../src/application/use-cases/handle-webhook.use-case';
 import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
-import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
-import { IPaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
-import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
+import { PaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
+import { PaymentEventsPublisherPort } from '../../../src/domain/ports/payment-events-publisher.port';
+import { PaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
 
 describe('HandleWebhookUseCase', () => {
   let sut: HandleWebhookUseCase;
-  let paymentRepositoryPort: jest.Mocked<IPaymentRepositoryPort>;
-  let paymentGatewayPort: jest.Mocked<IPaymentGatewayPort>;
-  let paymentEventsPublisherPort: jest.Mocked<IPaymentEventsPublisherPort>;
-  let paymentAuditLogPort: jest.Mocked<IPaymentAuditLogPort>;
+  let paymentRepositoryPort: jest.Mocked<PaymentRepositoryPort>;
+  let paymentGatewayPort: jest.Mocked<PaymentGatewayPort>;
+  let paymentEventsPublisherPort: jest.Mocked<PaymentEventsPublisherPort>;
+  let paymentAuditLogPort: jest.Mocked<PaymentAuditLogPort>;
 
   const orderId = 'order-1';
   const externalId = 'mp-123';
@@ -38,7 +38,7 @@ describe('HandleWebhookUseCase', () => {
       findByExternalId: jest.fn().mockResolvedValue(null),
       updateStatus: jest.fn().mockResolvedValue(fakePayment),
       updateStatusIfPending: jest.fn().mockResolvedValue(fakePayment),
-    } as unknown as jest.Mocked<IPaymentRepositoryPort>;
+    } as unknown as jest.Mocked<PaymentRepositoryPort>;
 
     paymentGatewayPort = {
       createPreference: jest.fn(),
@@ -49,25 +49,25 @@ describe('HandleWebhookUseCase', () => {
         dateApproved: '2025-01-01T12:00:00Z',
         orderId,
       }),
-    } as unknown as jest.Mocked<IPaymentGatewayPort>;
+    } as unknown as jest.Mocked<PaymentGatewayPort>;
 
     paymentEventsPublisherPort = {
       publishPaymentApproved: jest.fn().mockResolvedValue(undefined),
       publishPaymentFailed: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<IPaymentEventsPublisherPort>;
+    } as unknown as jest.Mocked<PaymentEventsPublisherPort>;
 
     paymentAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IPaymentAuditLogPort>;
+    } as unknown as jest.Mocked<PaymentAuditLogPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleWebhookUseCase,
-        { provide: IPaymentRepositoryPort, useValue: paymentRepositoryPort },
-        { provide: IPaymentGatewayPort, useValue: paymentGatewayPort },
-        { provide: IPaymentEventsPublisherPort, useValue: paymentEventsPublisherPort },
-        { provide: IPaymentAuditLogPort, useValue: paymentAuditLogPort },
+        { provide: PaymentRepositoryPort, useValue: paymentRepositoryPort },
+        { provide: PaymentGatewayPort, useValue: paymentGatewayPort },
+        { provide: PaymentEventsPublisherPort, useValue: paymentEventsPublisherPort },
+        { provide: PaymentAuditLogPort, useValue: paymentAuditLogPort },
       ],
     }).compile();
 

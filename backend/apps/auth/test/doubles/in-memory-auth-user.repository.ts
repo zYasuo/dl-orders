@@ -1,8 +1,8 @@
 import { UserEntity } from '../../src/domain/entities/user.entity';
-import { IAuthUserRepositoryPort } from '../../src/domain/ports/repositories/auth-user-repository.port';
+import { AuthUserRepositoryPort } from '../../src/domain/ports/repositories/auth-user-repository.port';
 import { TCreateAuthUser } from '../../src/domain/types/auth-user-repository.types';
 
-export class InMemoryAuthUserRepository extends IAuthUserRepositoryPort {
+export class InMemoryAuthUserRepository extends AuthUserRepositoryPort {
   private readonly users = new Map<string, UserEntity>();
 
   async create(data: TCreateAuthUser): Promise<UserEntity | null> {

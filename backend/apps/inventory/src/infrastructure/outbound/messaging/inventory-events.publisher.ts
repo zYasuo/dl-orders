@@ -6,10 +6,10 @@ import {
   InventoryReservationFailedEvent,
   IInventoryLowStockEvent,
 } from '@app/shared';
-import { IInventoryEventsPublisherPort } from '../../../domain/ports/inventory-events-publisher.port';
+import { InventoryEventsPublisherPort } from '../../../domain/ports/inventory-events-publisher.port';
 
 @Injectable()
-export class InventoryRabbitMqPublisher extends IInventoryEventsPublisherPort {
+export class InventoryRabbitMqPublisher extends InventoryEventsPublisherPort {
   constructor(
     @Inject('ORDERS_SERVICE') private readonly ordersClient: ClientProxy,
     @Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy,

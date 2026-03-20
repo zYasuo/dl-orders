@@ -3,6 +3,6 @@ export type TJwtPayload = {
   email: string;
 };
 
-export abstract class IJwtPort {
+export abstract class JwtPort {
   abstract verify(token: string): Promise<TJwtPayload | null>;
 }

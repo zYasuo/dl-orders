@@ -1,7 +1,7 @@
 import { IOtpSendRequestedEvent } from '@app/shared';
-import { IOtpSendRequestedPublisherPort } from '../../src/domain/ports/publishers/otp-send-requested-publisher.port';
+import { OtpSendRequestedPublisherPort } from '../../src/domain/ports/publishers/otp-send-requested-publisher.port';
 
-export class FakeOtpSendRequestedPublisher extends IOtpSendRequestedPublisherPort {
+export class FakeOtpSendRequestedPublisher extends OtpSendRequestedPublisherPort {
   readonly published: IOtpSendRequestedEvent[] = [];
 
   async publish(event: IOtpSendRequestedEvent): Promise<void> {

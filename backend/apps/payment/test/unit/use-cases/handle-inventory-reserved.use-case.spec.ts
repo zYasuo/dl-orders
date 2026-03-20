@@ -2,17 +2,17 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleInventoryReservedUseCase } from '../../../src/application/use-cases/handle-inventory-reserved.use-case';
 import { PaymentEntity, PaymentStatus } from '../../../src/domain/entities/payment.entity';
-import { IPaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
-import { IPaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
-import { IPaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
-import { IOrderDetailsPort } from '../../../src/domain/ports/order-details.port';
+import { PaymentAuditLogPort } from '../../../src/domain/ports/payment-audit-log.port';
+import { PaymentGatewayPort } from '../../../src/domain/ports/payment-gateway.port';
+import { PaymentRepositoryPort } from '../../../src/domain/ports/payment-repository.port';
+import { OrderDetailsPort } from '../../../src/domain/ports/order-details.port';
 
 describe('HandleInventoryReservedUseCase', () => {
   let sut: HandleInventoryReservedUseCase;
-  let orderDetailsPort: jest.Mocked<IOrderDetailsPort>;
-  let paymentRepositoryPort: jest.Mocked<IPaymentRepositoryPort>;
-  let paymentGatewayPort: jest.Mocked<IPaymentGatewayPort>;
-  let paymentAuditLogPort: jest.Mocked<IPaymentAuditLogPort>;
+  let orderDetailsPort: jest.Mocked<OrderDetailsPort>;
+  let paymentRepositoryPort: jest.Mocked<PaymentRepositoryPort>;
+  let paymentGatewayPort: jest.Mocked<PaymentGatewayPort>;
+  let paymentAuditLogPort: jest.Mocked<PaymentAuditLogPort>;
 
   const orderId = 'order-1';
   const totalPrice = 99.9;
@@ -37,7 +37,7 @@ describe('HandleInventoryReservedUseCase', () => {
       getByOrderId: jest
         .fn()
         .mockResolvedValue({ orderId, totalPrice, idempotencyKey: orderIdempotencyKey }),
-    } as unknown as jest.Mocked<IOrderDetailsPort>;
+    } as unknown as jest.Mocked<OrderDetailsPort>;
 
     paymentRepositoryPort = {
       create: jest.fn().mockResolvedValue(fakePayment),
@@ -46,27 +46,27 @@ describe('HandleInventoryReservedUseCase', () => {
       findByExternalId: jest.fn(),
       updateStatus: jest.fn().mockResolvedValue(fakePayment),
       updateStatusIfPending: jest.fn(),
-    } as unknown as jest.Mocked<IPaymentRepositoryPort>;
+    } as unknown as jest.Mocked<PaymentRepositoryPort>;
 
     paymentGatewayPort = {
       createPreference: jest
         .fn()
         .mockResolvedValue({ preferenceId: 'pref-123', initPoint: 'https://checkout.test/123' }),
       getPayment: jest.fn(),
-    } as unknown as jest.Mocked<IPaymentGatewayPort>;
+    } as unknown as jest.Mocked<PaymentGatewayPort>;
 
     paymentAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<IPaymentAuditLogPort>;
+    } as unknown as jest.Mocked<PaymentAuditLogPort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HandleInventoryReservedUseCase,
-        { provide: IOrderDetailsPort, useValue: orderDetailsPort },
-        { provide: IPaymentRepositoryPort, useValue: paymentRepositoryPort },
-        { provide: IPaymentGatewayPort, useValue: paymentGatewayPort },
-        { provide: IPaymentAuditLogPort, useValue: paymentAuditLogPort },
+        { provide: OrderDetailsPort, useValue: orderDetailsPort },
+        { provide: PaymentRepositoryPort, useValue: paymentRepositoryPort },
+        { provide: PaymentGatewayPort, useValue: paymentGatewayPort },
+        { provide: PaymentAuditLogPort, useValue: paymentAuditLogPort },
       ],
     }).compile();
 

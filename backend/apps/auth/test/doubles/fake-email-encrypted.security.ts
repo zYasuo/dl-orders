@@ -1,6 +1,6 @@
-import { IEmailEncryptedSecurity } from '../../src/domain/ports/security/email-encrypted.security';
+﻿import { EmailEncryptedSecurity } from '../../src/domain/ports/security/email-encrypted.port';
 
-export class FakeEmailEncryptedSecurity extends IEmailEncryptedSecurity {
+export class FakeEmailEncryptedSecurity extends EmailEncryptedSecurity {
   private normalize(email: string): string {
     return email.toLowerCase().trim();
   }
@@ -17,3 +17,4 @@ export class FakeEmailEncryptedSecurity extends IEmailEncryptedSecurity {
     return this.normalize(email);
   }
 }
+

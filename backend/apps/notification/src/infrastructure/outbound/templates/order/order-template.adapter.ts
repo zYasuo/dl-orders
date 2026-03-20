@@ -1,11 +1,11 @@
 import { IOrderConfirmedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
-import { IOrderNotificationTemplatePort } from '../../../../domain/ports/order-notification-template.port';
+import { OrderNotificationTemplatePort } from '../../../../domain/ports/order-notification-template.port';
 import { ORDER_CONFIRMED_TITLE, orderConfirmedHtmlTemplate } from './order-confirmed.template';
 import { INotificationRequest } from 'apps/notification/src/domain/types/notification-request.types';
 
 @Injectable()
-export class OrderTemplateAdapter implements IOrderNotificationTemplatePort {
+export class OrderTemplateAdapter implements OrderNotificationTemplatePort {
   getOrderConfirmedMessage(payload: IOrderConfirmedEvent): INotificationRequest {
     const { orderId, productName, quantity, totalPrice } = payload;
 
