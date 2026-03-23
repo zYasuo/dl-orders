@@ -346,6 +346,8 @@ services:
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=auth_queue
       - REDIS_URL=redis://redis:6379
+      - USERS_SERVICE_URL=http://users-service:3006
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-dev-internal-api-dl-orders}
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -353,6 +355,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      users-service:
+        condition: service_started
     networks:
       - dl-orders-network
 
@@ -371,6 +375,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=users_queue
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-dev-internal-api-dl-orders}
     depends_on:
       postgres-users:
         condition: service_healthy

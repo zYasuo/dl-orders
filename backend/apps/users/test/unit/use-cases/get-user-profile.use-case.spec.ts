@@ -20,6 +20,7 @@ describe('GetUserProfileUseCase', () => {
     jest.clearAllMocks();
     userProfileRepository = {
       create: jest.fn(),
+      ensureExists: jest.fn(),
       findById: jest.fn().mockResolvedValue(fakeProfile),
       update: jest.fn(),
     } as unknown as jest.Mocked<UserProfileRepositoryPort>;

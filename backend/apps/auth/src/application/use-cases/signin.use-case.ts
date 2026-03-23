@@ -1,10 +1,11 @@
-﻿import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
 import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
 import { JwtPort } from '../../domain/ports/security/jwt.port';
 import { PasswordHasherPort } from '../../domain/ports/security/password-hasher.port';
 import { SessionStorePort } from '../../domain/ports/stores/session-store.port';
+import { UserProfileProvisionerPort } from '../../domain/ports/user-profile-provisioner.port';
 import { TSignin } from '../dto/signin.dto';
 import { ValidateAuthAttemptUseCase } from './validate-auth-attempt.use-case';
 
@@ -17,6 +18,7 @@ export class SigninUseCase {
     private readonly jwtPort: JwtPort,
     private readonly sessionStore: SessionStorePort,
     private readonly validateAuthAttempt: ValidateAuthAttemptUseCase,
+    private readonly userProfileProvisioner: UserProfileProvisionerPort,
   ) {}
 
   async execute(input: TSignin): Promise<{ accessToken: string }> {
@@ -50,6 +52,12 @@ export class SigninUseCase {
     const plainEmail = await this.emailEncrypted.decrypt(user.emailEncrypted);
 
     await this.validateAuthAttempt.registerSuccessfulLogin(user.id, ip ?? null);
+
+    await this.userProfileProvisioner.provision({
+      userId: user.id,
+      email: plainEmail,
+      name: user.name ?? null,
+    });
 
     const sessionID = randomUUID();
     const accessToken = await this.jwtPort.sign({

@@ -11,10 +11,12 @@ import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
 import { LockoutStorePort } from '../../../src/domain/ports/stores/lockout-store.port';
 import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 import { SessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
+import { UserProfileProvisionerPort } from '../../../src/domain/ports/user-profile-provisioner.port';
 import { Argon2PasswordHasher } from '../../../src/infrastructure/outbound/security/argon2-password-hasher.security';
 import { FakeAccountLockedNotifyPublisher } from '../../doubles/fake-account-locked-notify.publisher';
 import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
+import { FakeUserProfileProvisioner } from '../../doubles/fake-user-profile-provisioner';
 import { InMemoryAuthLogsRepository } from '../../doubles/in-memory-auth-logs.repository';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
 import { InMemoryLockoutStore } from '../../doubles/in-memory-lockout-store';
@@ -28,6 +30,7 @@ describe('SigninUseCase (integration)', () => {
   let accountLockedNotifyPublisher: FakeAccountLockedNotifyPublisher;
   let jwtPort: FakeJwtPort;
   let sessionStore: InMemorySessionStore;
+  let userProfileProvisioner: FakeUserProfileProvisioner;
 
   beforeEach(async () => {
     authUserRepository = new InMemoryAuthUserRepository();
@@ -36,6 +39,7 @@ describe('SigninUseCase (integration)', () => {
     authLogsRepository = new InMemoryAuthLogsRepository();
     accountLockedNotifyPublisher = new FakeAccountLockedNotifyPublisher();
     jwtPort = new FakeJwtPort();
+    userProfileProvisioner = new FakeUserProfileProvisioner();
     const passwordHasher = new Argon2PasswordHasher();
 
     const validateAuthAttempt = new ValidateAuthAttemptUseCase(
@@ -59,6 +63,7 @@ describe('SigninUseCase (integration)', () => {
         { provide: JwtPort, useValue: jwtPort },
         { provide: SessionStorePort, useValue: sessionStore },
         { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
+        { provide: UserProfileProvisionerPort, useValue: userProfileProvisioner },
       ],
     }).compile();
 
@@ -82,6 +87,9 @@ describe('SigninUseCase (integration)', () => {
       const result = await sut.execute({ email: 'user@test.com', password });
 
       expect(result.accessToken).toBe(`fake-jwt-${user!.id}`);
+      expect(userProfileProvisioner.provisioned).toEqual([
+        { userId: user!.id, email: 'user@test.com', name: 'User' },
+      ]);
     });
 
     it('throws BadRequestException when user is not found', async () => {

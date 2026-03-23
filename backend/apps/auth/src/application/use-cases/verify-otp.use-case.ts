@@ -1,9 +1,10 @@
-﻿import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthUserRepositoryPort } from '../../domain/ports/repositories/auth-user-repository.port';
 import { EmailEncryptedSecurity } from '../../domain/ports/security/email-encrypted.port';
 import { JwtPort } from '../../domain/ports/security/jwt.port';
 import { OtpRepositoryPort } from '../../domain/ports/repositories/otp-repository.port';
 import { UserVerifiedPublisherPort } from '../../domain/ports/publishers/user-verified-publisher.port';
+import { UserProfileProvisionerPort } from '../../domain/ports/user-profile-provisioner.port';
 import { TVerifyOtp } from '../dto/verify-otp.dto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class VerifyOtpUseCase {
     private readonly otpRepository: OtpRepositoryPort,
     private readonly jwtPort: JwtPort,
     private readonly userVerifiedPublisher: UserVerifiedPublisherPort,
+    private readonly userProfileProvisioner: UserProfileProvisionerPort,
   ) {}
 
   async execute(input: TVerifyOtp): Promise<{ accessToken: string }> {
@@ -43,11 +45,15 @@ export class VerifyOtpUseCase {
     const verifiedUser = await this.authUserRepository.markEmailVerified(user.id);
 
     if (verifiedUser) {
-      await this.userVerifiedPublisher.publish({
+      const verifiedPayload = {
         userId: verifiedUser.id,
         email: input.email,
         name: verifiedUser.name,
-      });
+      };
+
+      await this.userProfileProvisioner.provision(verifiedPayload);
+      await this.userVerifiedPublisher.publish(verifiedPayload);
+      
     }
 
     const accessToken = await this.jwtPort.sign({

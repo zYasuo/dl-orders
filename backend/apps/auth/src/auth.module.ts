@@ -17,11 +17,13 @@ import { OtpRepositoryPort } from './domain/ports/repositories/otp-repository.po
 import { OtpSendRequestedPublisherPort } from './domain/ports/publishers/otp-send-requested-publisher.port';
 import { PasswordHasherPort } from './domain/ports/security/password-hasher.port';
 import { UserVerifiedPublisherPort } from './domain/ports/publishers/user-verified-publisher.port';
+import { UserProfileProvisionerPort } from './domain/ports/user-profile-provisioner.port';
 import { DbModule } from './infrastructure/db/db.module';
 import { AuthController } from './infrastructure/inbound/http/auth.controller';
 import { RedisRateLimitGuard } from './infrastructure/inbound/http/guards/redis-rate-limit.guard';
 import { AccountLockedNotifyRabbitMqPublisher } from './infrastructure/outbound/messaging/account-locked-notify.publisher';
 import { OtpSendRequestedRabbitMqPublisher } from './infrastructure/outbound/messaging/otp-send-requested.publisher';
+import { HttpUserProfileProvisioner } from './infrastructure/outbound/http/http-user-profile-provisioner.adapter';
 import { UserVerifiedRabbitMqPublisher } from './infrastructure/outbound/messaging/user-verified.publisher';
 import { RedisLockoutStoreAdapter } from './infrastructure/outbound/persistence/redis/redis-lockout-store.adapter';
 import { RedisSessionStoreAdapter } from './infrastructure/outbound/persistence/redis/redis-session-store.adapter';
@@ -73,6 +75,7 @@ import { PasswordChangedRabbitMqPublisher } from './infrastructure/outbound/mess
     { provide: EmailEncryptedSecurity, useClass: EmailEncryptedSecurityAdapter },
     { provide: JwtPort, useClass: JwtService },
     { provide: UserVerifiedPublisherPort, useClass: UserVerifiedRabbitMqPublisher },
+    { provide: UserProfileProvisionerPort, useClass: HttpUserProfileProvisioner },
     { provide: PasswordResetRepositoryPort, useClass: PasswordResetRepository },
     { provide: ResetPasswordPublisherPort, useClass: PasswordResetLinkRequestRabbitMqPublisher },
     { provide: PasswordChangedPublisherPort, useClass: PasswordChangedRabbitMqPublisher },

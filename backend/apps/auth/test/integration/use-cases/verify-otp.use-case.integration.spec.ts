@@ -9,8 +9,10 @@ import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email
 import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
 import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
 import { UserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
+import { UserProfileProvisionerPort } from '../../../src/domain/ports/user-profile-provisioner.port';
 import { FakeEmailEncryptedSecurity } from '../../doubles/fake-email-encrypted.security';
 import { FakeJwtPort } from '../../doubles/fake-jwt.port';
+import { FakeUserProfileProvisioner } from '../../doubles/fake-user-profile-provisioner';
 import { FakeUserVerifiedPublisher } from '../../doubles/fake-user-verified.publisher';
 import { InMemoryAuthUserRepository } from '../../doubles/in-memory-auth-user.repository';
 import { InMemoryOtpRepository } from '../../doubles/in-memory-otp.repository';
@@ -20,12 +22,14 @@ describe('VerifyOtpUseCase (integration)', () => {
   let authUserRepository: InMemoryAuthUserRepository;
   let otpRepository: InMemoryOtpRepository;
   let userVerifiedPublisher: FakeUserVerifiedPublisher;
+  let userProfileProvisioner: FakeUserProfileProvisioner;
   let jwtPort: FakeJwtPort;
 
   beforeEach(async () => {
     authUserRepository = new InMemoryAuthUserRepository();
     otpRepository = new InMemoryOtpRepository();
     userVerifiedPublisher = new FakeUserVerifiedPublisher();
+    userProfileProvisioner = new FakeUserProfileProvisioner();
     jwtPort = new FakeJwtPort();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -36,6 +40,7 @@ describe('VerifyOtpUseCase (integration)', () => {
         { provide: OtpRepositoryPort, useValue: otpRepository },
         { provide: JwtPort, useValue: jwtPort },
         { provide: UserVerifiedPublisherPort, useValue: userVerifiedPublisher },
+        { provide: UserProfileProvisionerPort, useValue: userProfileProvisioner },
       ],
     }).compile();
 
@@ -73,6 +78,10 @@ describe('VerifyOtpUseCase (integration)', () => {
 
       const otp = await otpRepository.findLatestByUserId(user!.id);
       expect(otp!.used).toBe(true);
+
+      expect(userProfileProvisioner.provisioned).toHaveLength(1);
+      expect(userProfileProvisioner.provisioned[0].userId).toBe(user!.id);
+      expect(userProfileProvisioner.provisioned[0].email).toBe('user@test.com');
 
       expect(userVerifiedPublisher.published).toHaveLength(1);
       expect(userVerifiedPublisher.published[0].userId).toBe(user!.id);

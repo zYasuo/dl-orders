@@ -16,8 +16,7 @@ export class JwtService extends JwtPort {
   }
 
   getExpiresInSeconds(): number {
-    const toMs = ms as (value: string) => number;
-    return Math.floor(toMs(this.expiresIn) / 1000);
+    return Math.floor(ms(this.expiresIn as ms.StringValue) / 1000);
   }
 
   sign(payload: TJwtPayload): Promise<string> {

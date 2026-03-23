@@ -1,10 +1,11 @@
-﻿# Users service
+# Users service
 
-Stores and serves user profiles (id, email, name). Listens for `user.verified` from auth and creates the profile; HTTP endpoints require JWT.
+Stores and serves user profiles (id, email, name). After email verification, auth calls `POST /api/v1/internal/user-profiles` (shared secret) to create the row immediately; it also publishes `user.verified` — the consumer remains idempotent if the event is processed later. JWT is required on public profile routes.
 
 ## Role
 
-- **Events in:** Listens for `user.verified` (from auth). Creates `UserProfile` with userId, email, name.
+- **Events in:** Listens for `user.verified` (from auth). Ensures `UserProfile` exists (idempotent).
+- **HTTP:** `POST /internal/user-profiles` â€” provisions profile (`userId`, `email`, `name`); header `x-internal-secret` must match `INTERNAL_API_SECRET` (called by auth after OTP).
 - **HTTP:** `GET /users/me` â€” returns current user profile (JWT required).
 - **HTTP:** `PATCH /users/me` â€” updates profile (e.g. name); JWT required.
 
@@ -12,12 +13,12 @@ Uses shared `JwtAuthGuard` and `@CurrentUser()` from `@app/shared` to validate J
 
 ## Ports
 
-- **UserProfileRepositoryPort** â€” Create, findById, update profile (Postgres/Prisma).
+- **UserProfileRepositoryPort** â€” Create, ensureExists (idempotent), findById, update profile (Postgres/Prisma).
 - **JwtPort** â€” Verify token only (used by guard / optional).
 
 ## Inbound
 
-- **HTTP:** `GET /users/me`, `PATCH /users/me` (protected by JwtAuthGuard).
+- **HTTP:** `GET /users/me`, `PATCH /users/me` (protected by JwtAuthGuard); `POST /internal/user-profiles` (internal secret).
 - **Messaging:** `user.verified`.
 
 ## Outbound
@@ -42,7 +43,7 @@ Or from `backend/`:
 npm run start:dev:users
 ```
 
-Requires RabbitMQ, Postgres (users DB), and env: `DATABASE_URL`, `PORT=3006`, `JWT_SECRET` (same as auth), `RABBITMQ_URL`, `QUEUE_NAME`. Copy from `apps/users/.env.example`.
+Requires RabbitMQ, Postgres (users DB), and env: `DATABASE_URL`, `PORT=3006`, `JWT_SECRET` (same as auth), `INTERNAL_API_SECRET`, `RABBITMQ_URL`, `QUEUE_NAME`. Copy from `apps/users/.env.example`.
 
 ## Regra de Ouro de Repositorio
 

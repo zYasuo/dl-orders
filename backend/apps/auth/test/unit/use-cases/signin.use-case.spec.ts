@@ -1,4 +1,4 @@
-﻿import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SigninUseCase } from '../../../src/application/use-cases/signin.use-case';
 import { ValidateAuthAttemptUseCase } from '../../../src/application/use-cases/validate-auth-attempt.use-case';
@@ -8,6 +8,7 @@ import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email
 import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
 import { PasswordHasherPort } from '../../../src/domain/ports/security/password-hasher.port';
 import { SessionStorePort } from '../../../src/domain/ports/stores/session-store.port';
+import { UserProfileProvisionerPort } from '../../../src/domain/ports/user-profile-provisioner.port';
 
 describe('SigninUseCase', () => {
   let sut: SigninUseCase;
@@ -17,6 +18,7 @@ describe('SigninUseCase', () => {
   let jwtPort: jest.Mocked<JwtPort>;
   let sessionStore: jest.Mocked<SessionStorePort>;
   let validateAuthAttempt: jest.Mocked<ValidateAuthAttemptUseCase>;
+  let userProfileProvisioner: jest.Mocked<Pick<UserProfileProvisionerPort, 'provision'>>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const verifiedUser = new UserEntity({
@@ -78,6 +80,10 @@ describe('SigninUseCase', () => {
       registerSuccessfulLogin: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<ValidateAuthAttemptUseCase>;
 
+    userProfileProvisioner = {
+      provision: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SigninUseCase,
@@ -87,6 +93,7 @@ describe('SigninUseCase', () => {
         { provide: JwtPort, useValue: jwtPort },
         { provide: SessionStorePort, useValue: sessionStore },
         { provide: ValidateAuthAttemptUseCase, useValue: validateAuthAttempt },
+        { provide: UserProfileProvisionerPort, useValue: userProfileProvisioner },
       ],
     }).compile();
 
@@ -116,6 +123,12 @@ describe('SigninUseCase', () => {
 
       expect(emailEncrypted.decrypt).toHaveBeenCalledWith(verifiedUser.emailEncrypted);
 
+      expect(userProfileProvisioner.provision).toHaveBeenCalledWith({
+        userId: verifiedUser.id,
+        email: verifiedUser.emailEncrypted,
+        name: verifiedUser.name,
+      });
+
       expect(jwtPort.sign).toHaveBeenCalledWith(
         expect.objectContaining({
           sub: verifiedUser.id,
@@ -142,6 +155,7 @@ describe('SigninUseCase', () => {
 
       await expect(sut.execute(input)).rejects.toThrow(ForbiddenException);
       expect(passwordHasher.compare).not.toHaveBeenCalled();
+      expect(userProfileProvisioner.provision).not.toHaveBeenCalled();
       expect(jwtPort.sign).not.toHaveBeenCalled();
       expect(sessionStore.set).not.toHaveBeenCalled();
     });
@@ -154,6 +168,7 @@ describe('SigninUseCase', () => {
 
       expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
       expect(passwordHasher.compare).not.toHaveBeenCalled();
+      expect(userProfileProvisioner.provision).not.toHaveBeenCalled();
       expect(jwtPort.sign).not.toHaveBeenCalled();
       expect(sessionStore.set).not.toHaveBeenCalled();
     });
@@ -167,6 +182,7 @@ describe('SigninUseCase', () => {
 
       expect(validateAuthAttempt.validateBeforeLogin).not.toHaveBeenCalled();
       expect(passwordHasher.compare).not.toHaveBeenCalled();
+      expect(userProfileProvisioner.provision).not.toHaveBeenCalled();
       expect(jwtPort.sign).not.toHaveBeenCalled();
       expect(sessionStore.set).not.toHaveBeenCalled();
     });
@@ -184,6 +200,7 @@ describe('SigninUseCase', () => {
         'user@test.com',
       );
 
+      expect(userProfileProvisioner.provision).not.toHaveBeenCalled();
       expect(jwtPort.sign).not.toHaveBeenCalled();
       expect(sessionStore.set).not.toHaveBeenCalled();
     });

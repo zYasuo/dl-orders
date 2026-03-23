@@ -1,4 +1,4 @@
-﻿import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyOtpUseCase } from '../../../src/application/use-cases/verify-otp.use-case';
 import { OtpCodeEntity } from '../../../src/domain/entities/otp-code.entity';
 import { UserEntity } from '../../../src/domain/entities/user.entity';
@@ -7,6 +7,7 @@ import { EmailEncryptedSecurity } from '../../../src/domain/ports/security/email
 import { JwtPort } from '../../../src/domain/ports/security/jwt.port';
 import { OtpRepositoryPort } from '../../../src/domain/ports/repositories/otp-repository.port';
 import { UserVerifiedPublisherPort } from '../../../src/domain/ports/publishers/user-verified-publisher.port';
+import { UserProfileProvisionerPort } from '../../../src/domain/ports/user-profile-provisioner.port';
 
 describe('VerifyOtpUseCase', () => {
   let sut: VerifyOtpUseCase;
@@ -15,6 +16,7 @@ describe('VerifyOtpUseCase', () => {
   let otpRepository: jest.Mocked<OtpRepositoryPort>;
   let jwtPort: jest.Mocked<JwtPort>;
   let userVerifiedPublisher: jest.Mocked<UserVerifiedPublisherPort>;
+  let userProfileProvisioner: jest.Mocked<UserProfileProvisionerPort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const futureExpiry = new Date(Date.now() + 10 * 60 * 1000);
@@ -101,6 +103,10 @@ describe('VerifyOtpUseCase', () => {
       publish: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<UserVerifiedPublisherPort>;
 
+    userProfileProvisioner = {
+      provision: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<UserProfileProvisionerPort>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VerifyOtpUseCase,
@@ -109,6 +115,7 @@ describe('VerifyOtpUseCase', () => {
         { provide: OtpRepositoryPort, useValue: otpRepository },
         { provide: JwtPort, useValue: jwtPort },
         { provide: UserVerifiedPublisherPort, useValue: userVerifiedPublisher },
+        { provide: UserProfileProvisionerPort, useValue: userProfileProvisioner },
       ],
     }).compile();
 
@@ -116,7 +123,7 @@ describe('VerifyOtpUseCase', () => {
   });
 
   describe('execute', () => {
-    it('marks OTP used, marks user verified, publishes event and returns accessToken', async () => {
+    it('marks OTP used, marks user verified, provisions profile, publishes event and returns accessToken', async () => {
       const input = { email: 'user@test.com', code: '123456' };
 
       const result = await sut.execute(input);
@@ -126,6 +133,11 @@ describe('VerifyOtpUseCase', () => {
       expect(otpRepository.findLatestByUserId).toHaveBeenCalledWith(fakeUser.id);
       expect(otpRepository.markUsedIfUnused).toHaveBeenCalledWith(validOtp.id);
       expect(authUserRepository.markEmailVerified).toHaveBeenCalledWith(fakeUser.id);
+      expect(userProfileProvisioner.provision).toHaveBeenCalledWith({
+        userId: verifiedUserInstance.id,
+        email: input.email,
+        name: verifiedUserInstance.name,
+      });
       expect(userVerifiedPublisher.publish).toHaveBeenCalledWith({
         userId: verifiedUserInstance.id,
         email: input.email,
