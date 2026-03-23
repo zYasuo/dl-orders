@@ -1,10 +1,10 @@
-﻿# Product service
+# Product service
 
 Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Role
 
-- **HTTP:** Create and read products. The orders service calls `GET /api/v1/products/:id` when creating an order to fetch name, description, and price so it can store a price snapshot and compute the order total (versioned contract).
+- **HTTP:** **GET** list and **GET** by id are public (orders calls `GET /api/v1/products/:id` without auth). **POST** create requires **Bearer JWT** (same `JWT_SECRET` as auth).
 
 ## Ports
 
@@ -13,7 +13,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Inbound
 
-- **HTTP:** REST API (v1) â€” `POST /api/v1/products` (create product), `GET /api/v1/products/:id` (get product by id). Global prefix `api/v1` keeps the contract stable for consumers (e.g. orders service).
+- **HTTP:** REST API (v1) â€” `POST /api/v1/products` (JWT), `GET /api/v1/products`, `GET /api/v1/products/:id` (public reads). Prefix `api/v1`.
 
 ## Outbound
 
@@ -38,7 +38,7 @@ Or from `backend/`:
 npm run start:dev:product
 ```
 
-Ensure Redis and MongoDB are up and `apps/product/.env` has `MONGODB_URI`, `REDIS_URL`. Copy from `apps/product/.env.example`. Port 3003 if exposing HTTP.
+Ensure Redis and MongoDB are up and `apps/product/.env` has `MONGODB_URI`, `REDIS_URL`, `JWT_SECRET` (for create). Copy from `apps/product/.env.example`. Port 3003 if exposing HTTP.
 
 ## Seed (populate DB from JSON)
 

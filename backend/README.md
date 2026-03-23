@@ -1,4 +1,4 @@
-﻿# Backend
+# Backend
 
 NestJS monorepo for the dl-orders system: seven apps and a shared library.
 

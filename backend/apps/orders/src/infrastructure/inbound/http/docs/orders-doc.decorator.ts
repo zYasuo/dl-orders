@@ -1,9 +1,17 @@
-import { applyDecorators, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StandardErrorResponseDto } from '@app/shared';
+import { applyDecorators, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ServiceOrJwtAuthGuard, StandardErrorResponseDto } from '@app/shared';
 import { CreateOrderDto } from '../../../../application/dto/create-order.dto';
 
-export const ApiOrders = () => applyDecorators(ApiTags('Orders'));
+export const ApiOrders = () =>
+  applyDecorators(ApiTags('Orders'), ApiBearerAuth(), UseGuards(ServiceOrJwtAuthGuard));
 
 const idParam = () => ApiParam({ name: 'id', description: 'Order ID' });
 const standardError = (status: number, description: string) =>
@@ -18,6 +26,7 @@ export const OrdersDoc = {
       ApiBody({ type: CreateOrderDto }),
       ApiResponse({ status: 202, description: 'Order accepted for processing' }),
       standardError(400, 'Invalid input'),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 
   AuditLog: () =>
@@ -26,6 +35,7 @@ export const OrdersDoc = {
       ApiOperation({ summary: 'Order audit log' }),
       idParam(),
       ApiResponse({ status: 200, description: 'List of audit events' }),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 
   Summary: () =>
@@ -35,6 +45,7 @@ export const OrdersDoc = {
       idParam(),
       ApiResponse({ status: 200, description: 'Order summary' }),
       standardError(404, 'Order not found'),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 
   GetById: () =>
@@ -44,5 +55,6 @@ export const OrdersDoc = {
       idParam(),
       ApiResponse({ status: 200, description: 'Order found' }),
       standardError(404, 'Order not found'),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 };

@@ -11,7 +11,7 @@ export class PasswordChangedConsumer {
 
   @EventPattern(PATTERNS.PASSWORD_CHANGED)
   async handle(@Payload() payload: IPasswordChangedEvent): Promise<void> {
-    this.logger.log('Received password changed', { email: payload.email });
+    this.logger.log('Received password changed event');
 
     const normalized: IPasswordChangedEvent = {
       ...payload,

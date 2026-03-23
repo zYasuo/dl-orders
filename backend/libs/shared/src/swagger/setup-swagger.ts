@@ -3,10 +3,23 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { StandardErrorResponseDto } from '../filters/standard-error.response';
 
+function isSwaggerEnabled(): boolean {
+  const flag = process.env.ENABLE_SWAGGER;
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
+  return nodeEnv !== 'production';
+}
+
 export function setupSwagger(
   app: INestApplication,
   options: { title: string; description: string; version: string },
 ) {
+
+  if (!isSwaggerEnabled()) {
+    return;
+  }
+  
   const config = new DocumentBuilder()
     .setTitle(options.title)
     .setDescription(options.description)

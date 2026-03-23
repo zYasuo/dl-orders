@@ -1,19 +1,29 @@
-import { applyDecorators, Get } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { applyDecorators, Get, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '@app/shared';
 
 export const ApiNotifications = () => applyDecorators(ApiTags('Notifications'));
 
 export const NotificationsDoc = {
-  GetByUserId: () =>
+  GetMine: () =>
     applyDecorators(
-      Get('users/:userId/notifications'),
-      ApiOperation({ summary: 'User notifications' }),
-      ApiParam({ name: 'userId', description: 'User ID' }),
+      Get('users/me/notifications'),
+      UseGuards(JwtAuthGuard),
+      ApiBearerAuth(),
+      ApiOperation({ summary: 'Notifications for the authenticated user' }),
       ApiQuery({
         name: 'limit',
         required: false,
-        description: 'Max number of notifications to return',
+        description: 'Max number of notifications to return (1–100)',
       }),
       ApiResponse({ status: 200, description: 'List of notifications' }),
+      ApiResponse({ status: 400, description: 'Invalid limit query' }),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 };

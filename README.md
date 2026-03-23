@@ -14,7 +14,7 @@ I built this to practice **hexagonal architecture** (ports & adapters) inside ea
 - **Database per service** — each app has its own Postgres (Prisma) except Product, which uses MongoDB. Orders, inventory, notification, and payment use MongoDB for audit logs and read models
 - **Shared event contracts** — `@app/shared` lib with pattern names, queues, and event payloads
 - **Zod** — request validation via a shared validation pipe
-- **API documentation** — each service exposes interactive OpenAPI docs at `/docs` (Scalar UI)
+- **API documentation** — OpenAPI at `/docs` when Swagger is enabled (non-`production` `NODE_ENV`, or `ENABLE_SWAGGER=true`; see `backend/SECURITY.md`)
 - **Standardized error responses** — all HTTP errors return a consistent JSON body: `statusCode`, `error`, `message`, optional `details`, and `timestamp`
 - **Redis** — shared instance (port 6379) for cache and lockout; Auth (lockout), Inventory (list cache), Product (by-id cache); keys namespaced by service prefix (`auth:`, `inventory:`, `product:`)
 
@@ -106,7 +106,8 @@ flowchart LR
    Repeat for `inventory`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts). Product uses MongoDB only; set `MONGODB_URI` in its `.env`.
 
 3. **Env**  
-   Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `MONGODB_URI` where applicable, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`). Copy from `.env.example` if present.
+   Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `MONGODB_URI` where applicable, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`, `JWT_SECRET` on services that enforce HTTP auth). Copy from each app’s `.env.example` if present.  
+   For **`docker compose`** at the repo root, copy [`.env.example`](.env.example) to `.env` and set at least `JWT_SECRET`, `SERVICE_AUTH_SECRET` (shared by orders and payment), and `MERCADOPAGO_WEBHOOK_SECRET` (payment webhook).
 
 4. **Run the apps**  
    From repo root, run one or all:
@@ -131,7 +132,7 @@ flowchart LR
 
 ## API documentation
 
-Each microservice serves interactive API docs (Scalar) at **`/docs`**:
+When Swagger is enabled (see [backend/SECURITY.md](backend/SECURITY.md)), each service serves interactive API docs (Scalar) at **`/docs`**:
 
 | Service      | Port | Docs URL                   |
 |--------------|------|----------------------------|
@@ -143,7 +144,7 @@ Each microservice serves interactive API docs (Scalar) at **`/docs`**:
 | Users        | 3006 | http://localhost:3006/docs |
 | Payment      | 3007 | http://localhost:3007/docs |
 
-Start the app you need, then open the URL above in a browser to explore routes, request/response schemas, and try requests. The Users API uses Bearer (JWT) auth; get a token from Auth (`/auth/signin` or `/auth/verify-otp`) and use it in the Scalar UI.
+Start the app you need, then open the URL above in a browser to explore routes, request/response schemas, and try requests. Most protected routes use **Bearer (JWT)**; get a token from Auth (`/auth/signin` or `/auth/verify-otp`). Orders, inventory, and notification HTTP APIs require JWT (or `x-service-auth` where documented). Product catalog **GET** routes stay public; **POST** create requires JWT.
 
 ## Scripts reference
 

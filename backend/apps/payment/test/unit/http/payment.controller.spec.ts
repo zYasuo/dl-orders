@@ -1,4 +1,8 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 jest.mock('@app/shared', () => ({
@@ -17,6 +21,7 @@ describe('PaymentController', () => {
 
   beforeEach(async () => {
     webhookSignatureService = {
+      isSecretConfigured: jest.fn().mockReturnValue(true),
       validate: jest.fn().mockReturnValue(true),
     } as unknown as jest.Mocked<WebhookSignatureService>;
 
@@ -67,23 +72,32 @@ describe('PaymentController', () => {
       ).rejects.toThrow('Invalid webhook signature');
     });
 
-    it('throws BadRequestException when type is payment but data.id is missing', async () => {
+    it('throws BadRequestException when data.id is missing', async () => {
       await expect(
         controller.webhook({ type: 'payment', data: {} as { id: string } }, undefined, undefined),
       ).rejects.toThrow(BadRequestException);
       await expect(
         controller.webhook({ type: 'payment', data: {} as { id: string } }, undefined, undefined),
-      ).rejects.toThrow('Webhook type payment requires data.id');
+      ).rejects.toThrow('data.id');
     });
 
-    it('accepts non-payment type without data.id and does not require signature validation', async () => {
+    it('throws ServiceUnavailableException when webhook secret is not configured', async () => {
+      webhookSignatureService.isSecretConfigured.mockReturnValue(false);
+
+      await expect(
+        controller.webhook({ type: 'payment', data: { id: 'mp-123' } }, 'ts=1,v1=abc', 'req-1'),
+      ).rejects.toThrow(ServiceUnavailableException);
+      expect(webhookSignatureService.validate).not.toHaveBeenCalled();
+    });
+
+    it('validates signature for non-payment types when data.id is present', async () => {
       const result = await controller.webhook(
-        { type: 'merchant_order', data: {} as { id: string } },
-        undefined,
-        undefined,
+        { type: 'merchant_order', data: { id: 'mo-456' } },
+        'ts=1,v1=abc',
+        'req-2',
       );
       expect(result).toEqual({ received: true });
-      expect(webhookSignatureService.validate).not.toHaveBeenCalled();
+      expect(webhookSignatureService.validate).toHaveBeenCalledWith('mo-456', 'ts=1,v1=abc', 'req-2');
     });
   });
 });

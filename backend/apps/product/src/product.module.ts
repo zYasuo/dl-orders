@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule } from '@app/shared';
+import { JwtAuthGuard, MongoDBModule } from '@app/shared';
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
 import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
 import { FindProductByIdUseCase } from './application/use-cases/find-product-by-id.use-case';
@@ -22,6 +22,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
   ],
   controllers: [ProductController],
   providers: [
+    JwtAuthGuard,
     CreateProductUseCase,
     FindAllProductsUseCase,
     FindProductByIdUseCase,

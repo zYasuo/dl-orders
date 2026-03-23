@@ -22,17 +22,21 @@ export const PaymentDoc = {
       ApiOperation({ summary: 'Mercado Pago webhook' }),
       ApiHeader({
         name: 'x-signature',
-        required: false,
-        description: 'Mercado Pago webhook signature',
+        required: true,
+        description: 'Mercado Pago webhook signature (ts=...,v1=...)',
       }),
       ApiHeader({ name: 'x-request-id', required: false, description: 'Mercado Pago request id' }),
-      ApiBody({ description: 'Webhook payload from Mercado Pago' }),
+      ApiBody({ description: 'Webhook payload from Mercado Pago (must include data.id)' }),
       ApiResponse({ status: 200, description: 'Webhook processed' }),
       ApiResponse({
         status: 400,
-        description: 'Invalid payload (e.g. type payment without data.id)',
+        description: 'Invalid payload (missing data.id for signature verification)',
       }),
       ApiResponse({ status: 401, description: 'Invalid webhook signature' }),
+      ApiResponse({
+        status: 503,
+        description: 'MERCADOPAGO_WEBHOOK_SECRET not configured',
+      }),
     ),
 
   GetByOrderId: () =>

@@ -4,4 +4,5 @@ export * from './events/account-locked-notify.event';
 export * from './events/reset-password-request.event';
 export * from './events/password-changed.event';
 export * from './jwt-auth.guard';
+export * from './service-or-jwt-auth.guard';
 export * from './current-user.decorator';

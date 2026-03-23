@@ -1,6 +1,13 @@
-import { applyDecorators, Get, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StandardErrorResponseDto } from '@app/shared';
+import { applyDecorators, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard, StandardErrorResponseDto } from '@app/shared';
 import { CreateProductDto } from '../../../../application/dto/create-product.schema';
 
 export const ApiProducts = () => applyDecorators(ApiTags('Products'));
@@ -19,10 +26,13 @@ export const ProductDoc = {
   Create: () =>
     applyDecorators(
       Post(),
-      ApiOperation({ summary: 'Create product' }),
+      UseGuards(JwtAuthGuard),
+      ApiBearerAuth(),
+      ApiOperation({ summary: 'Create product (requires JWT; catalog reads stay public)' }),
       ApiBody({ type: CreateProductDto }),
       ApiResponse({ status: 201, description: 'Product created' }),
       standardError(400, 'Invalid input'),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 
   GetById: () =>

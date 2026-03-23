@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule } from '@app/shared';
+import { MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { OrderAuditLogPort } from './domain/ports/order-audit-log.port';
@@ -41,6 +41,7 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
     PaymentFailedConsumer,
   ],
   providers: [
+    ServiceOrJwtAuthGuard,
     CreateOrderUseCase,
     FindOrderByIdUseCase,
     ConfirmOrderUseCase,

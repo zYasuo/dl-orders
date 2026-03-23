@@ -1,10 +1,10 @@
-﻿# Orders service
+# Orders service
 
 Orchestrates the order lifecycle: create, confirm, or cancel orders and coordinate with inventory via events.
 
 ## Role
 
-- **HTTP:** Create order, find by ID. Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (by `productId`) to get name, description, and price; it then stores `productName`, `productDescription`, `unitPrice`, and `totalPrice` (quantity Ã— unit price) on the order and publishes `order.creation_requested` so inventory can reserve stock.
+- **HTTP:** Create order, find by ID, audit log, summary — all require **Bearer JWT** (same `JWT_SECRET` as auth) **or** header **`x-service-auth`** matching **`SERVICE_AUTH_SECRET`** (used by the payment service to fetch order details). Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (`GET /api/v1/products/:id`, public) for name, description, and price; then publishes `order.creation_requested`.
 - **Events in:** Listens for `inventory.reserved` (confirm order) and `inventory.reservation_failed` (cancel order). On confirm, publishes `order.confirmed` (including real `totalPrice` and product data) for the notification service.
 
 ## Ports
@@ -17,7 +17,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Inbound
 
-- **HTTP:** REST API (e.g. create order, find by id).
+- **HTTP:** REST API (create order, find by id, audit log, summary) — JWT or `x-service-auth` (see `backend/SECURITY.md`).
 - **Messaging:** `inventory.reserved`, `inventory.reservation_failed` (from inventory service).
 
 ## Outbound
@@ -44,7 +44,7 @@ Or from `backend/`:
 npm run start:dev:orders
 ```
 
-Ensure RabbitMQ, Postgres, and MongoDB are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL` (e.g. `http://localhost:3003`), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.
+Ensure RabbitMQ, Postgres, and MongoDB are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL`, `JWT_SECRET`, `SERVICE_AUTH_SECRET` (shared with payment), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.
 
 ## Regra de Ouro de Repositorio
 

@@ -1,11 +1,11 @@
-﻿# Notification service
+# Notification service
 
 Sends notifications (e.g. email) when an order is confirmed or when the inventory is running low. Listens for `order.confirmed` and `inventory.low_stock` and exposes HTTP to list user notifications.
 
 ## Role
 
 - **Events in:** Listens for `order.confirmed` (from orders), `reset_password.link_requested` and `auth.password_changed` (from auth), `account.locked_notify`, `otp.send_requested`, and `inventory.low_stock`. Runs the corresponding notification use case (e.g. send email via Resend) and records the outcome in an audit log and in the user-notifications read model. For low-stock alerts, it uses the `inventory-low-stock` email template and expects an `IInventoryLowStockEvent` payload (`id`, `name`, `productId`, `quantity`, `createdBy` as the email snapshot).
-- **HTTP:** `GET /users/:userId/notifications` to list notifications for a user (e.g. by email until auth exists).
+- **HTTP:** `GET /users/me/notifications` (JWT) to list notifications for the authenticated user; optional query `limit` (1–100).
 
 ## Ports
 
@@ -16,7 +16,7 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Inbound
 
-- **HTTP:** `GET /users/:userId/notifications` (optional query `limit`, `cursor`).
+- **HTTP:** `GET /users/me/notifications` (Bearer JWT; optional query `limit`).
 - **Messaging:** `order.confirmed`, `reset_password.link_requested`, `auth.password_changed`, `account.locked_notify`, `otp.send_requested`, `inventory.low_stock` (consumed from `notification_queue`).
 
 ## Outbound
@@ -43,7 +43,7 @@ Or from `backend/`:
 npm run start:dev:notification
 ```
 
-Ensure RabbitMQ, Postgres, and MongoDB are up. Set `apps/notification/.env` with `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, and any email provider keys (e.g. Resend).
+Ensure RabbitMQ, Postgres, and MongoDB are up. Set `apps/notification/.env` with `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `JWT_SECRET` (same as auth for JWT validation), and any email provider keys (e.g. Resend).
 
 ## Regra de Ouro de Repositorio
 

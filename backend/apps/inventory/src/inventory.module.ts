@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule } from '@app/shared';
+import { MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
 import { CreateInventoryUseCase } from './application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from './application/use-cases/find-all-invetory.use-case';
 import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
@@ -38,6 +38,7 @@ import { ScheduleModule } from '@nestjs/schedule';
   ],
   controllers: [InventoryController, OrderCreationRequestedConsumer],
   providers: [
+    ServiceOrJwtAuthGuard,
     CreateInventoryUseCase,
     HandleOrderCreationRequestedUseCase,
     FindAllInventoryUseCase,

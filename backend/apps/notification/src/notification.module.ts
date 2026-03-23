@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule } from '@app/shared';
+import { JwtAuthGuard, MongoDBModule } from '@app/shared';
 import { DbModule } from './infrastructure/db/db.module';
 import { EmailSenderPort } from './domain/ports/email-sender.port';
 import { NotificationAuditLogPort } from './domain/ports/notification-audit-log.port';
@@ -53,6 +53,7 @@ import { InventoryLowStockTemplateAdapter } from './infrastructure/outbound/temp
     NotificationsController,
   ],
   providers: [
+    JwtAuthGuard,
     CreateNotificationUseCase,
     HandleAccountLockedNotifyUseCase,
     HandleInventoryLowStockUseCase,

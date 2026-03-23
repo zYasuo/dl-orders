@@ -6,13 +6,18 @@ import * as crypto from 'crypto';
 export class WebhookSignatureService {
   constructor(private readonly configService: ConfigService) {}
 
+  isSecretConfigured(): boolean {
+    const secret = this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET');
+    return typeof secret === 'string' && secret.trim().length > 0;
+  }
+
   validate(
     dataId: string,
     xSignature: string | undefined,
     xRequestId: string | undefined,
   ): boolean {
-    const secret = this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET');
-    if (!secret) return true;
+    const secret = this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET')?.trim();
+    if (!secret) return false;
     if (!xSignature) return false;
 
     const ts = this.parseHeaderValue(xSignature, 'ts');

@@ -4,6 +4,7 @@ import {
   Controller,
   Headers,
   Param,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { FindPaymentByOrderIdUseCase } from '../../../application/use-cases/find-payment-by-order-id.use-case';
@@ -29,12 +30,20 @@ export class PaymentController {
     @Headers('x-signature') xSignature: string | undefined,
     @Headers('x-request-id') xRequestId: string | undefined,
   ): Promise<{ received: boolean }> {
-    if (payload?.type === 'payment' && !payload?.data?.id) {
-      throw new BadRequestException('Webhook type payment requires data.id');
+    if (!this.webhookSignatureService.isSecretConfigured()) {
+      throw new ServiceUnavailableException(
+        'MERCADOPAGO_WEBHOOK_SECRET is not configured; webhook endpoint is disabled',
+      );
     }
 
     const dataId = payload?.data?.id;
-    if (dataId && !this.webhookSignatureService.validate(dataId, xSignature, xRequestId)) {
+    if (!dataId || String(dataId).trim() === '') {
+      throw new BadRequestException(
+        'Webhook payload must include data.id for signature verification (Mercado Pago resource id)',
+      );
+    }
+
+    if (!this.webhookSignatureService.validate(String(dataId), xSignature, xRequestId)) {
       throw new UnauthorizedException('Invalid webhook signature');
     }
 
