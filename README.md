@@ -74,7 +74,8 @@ flowchart LR
 
 ## Repo structure
 
-- **Root** — npm workspace; only `backend` is a workspace member. Scripts: Docker, dev, build, test, lint.
+- **Root** — npm workspace with `backend` and `frontend`. Scripts: Docker, dev/build/test/lint para backend e frontend.
+- **frontend/** — Next.js (App Router): catálogo público, auth (BFF + cookie httpOnly), checkout, pedidos e pagamento (Mercado Pago). Copie [`frontend/.env.local.example`](frontend/.env.local.example) para `frontend/.env.local` e defina as URLs dos serviços (`PRODUCT_SERVICE_URL`, `AUTH_SERVICE_URL`, etc.). Dev: `npm run dev:frontend` na raiz.
 - **backend/** — NestJS monorepo:
   - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`; most have Prisma schema for Postgres; Product uses MongoDB only; optional Dockerfile).
   - **libs/shared** — constants, event types, validation, MongoDB module.

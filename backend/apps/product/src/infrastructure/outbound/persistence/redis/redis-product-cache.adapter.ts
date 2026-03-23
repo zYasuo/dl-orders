@@ -46,40 +46,6 @@ export class RedisProductCacheAdapter extends ProductCachePort {
     await client.setex(key(product.id), ttlSeconds, JSON.stringify(payload));
   }
 
-  async setAll(products: ProductEntity[], ttlSeconds: number): Promise<void> {
-    const client = this.redis.getClient();
-    const pipeline = client.pipeline();
-    for (const product of products) {
-      const payload = {
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
-      };
-      pipeline.setex(key(product.id), ttlSeconds, JSON.stringify(payload));
-    }
-    await pipeline.exec();
-  }
-
-  async getAll(): Promise<ProductEntity[] | null> {
-    const client = this.redis.getClient();
-    const keys = await client.keys(`${REDIS_KEY_PREFIX}item:*`);
-
-    if (!keys.length) return null;
-
-    const products = await Promise.all(
-      keys.map(async (key) => {
-        const product = await this.getById(key.replace(`${REDIS_KEY_PREFIX}item:`, ''));
-        return product;
-      }),
-    );
-
-    return products.filter((p): p is ProductEntity => p !== null);
-  }
-
   async invalidate(id: string): Promise<void> {
     const client = this.redis.getClient();
     await client.del(key(id));

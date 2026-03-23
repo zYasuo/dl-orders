@@ -47,10 +47,19 @@ export class MongoProductRepository extends ProductRepositoryPort {
     return this.toEntity(doc);
   }
 
-  async findAll(): Promise<ProductEntity[] | null> {
-    const docs = await this.collection.find({}).toArray();
-    if (!docs.length) return null;
+  async findPage(page: number, limit: number): Promise<ProductEntity[]> {
+    const skip = (page - 1) * limit;
+    const docs = await this.collection
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
     return docs.map((doc) => this.toEntity(doc));
+  }
+
+  async count(): Promise<number> {
+    return this.collection.countDocuments({});
   }
 
   async update(entity: ProductEntity): Promise<ProductEntity | null> {

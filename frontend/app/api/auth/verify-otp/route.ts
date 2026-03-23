@@ -1,0 +1,23 @@
+import { NextResponse } from 'next/server';
+import { setSessionCookie } from '@/lib/auth-cookie';
+
+export async function POST(request: Request) {
+    const base = process.env.AUTH_SERVICE_URL;
+    if (!base) {
+        return NextResponse.json({ statusCode: 500, error: 'Config', message: 'AUTH_SERVICE_URL não configurada.' }, { status: 500 });
+    }
+    const body = await request.json();
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/v1/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+        return new NextResponse(text, { status: res.status, headers: { 'Content-Type': 'application/json' } });
+    }
+    const data = JSON.parse(text) as { accessToken: string };
+    const out = NextResponse.json({ success: true });
+    setSessionCookie(out, data.accessToken);
+    return out;
+}

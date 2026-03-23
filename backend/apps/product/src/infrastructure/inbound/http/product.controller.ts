@@ -1,9 +1,13 @@
-import { Body, Controller, Param } from '@nestjs/common';
-import { ZodValidationPipe } from '@app/shared';
+import { Body, Controller, Param, Query } from '@nestjs/common';
+import { Paginated, ZodValidationPipe } from '@app/shared';
 import {
   SCreateProduct,
   type TCreateProduct,
 } from '../../../application/dto/create-product.schema';
+import {
+  SFindAllProductsQuery,
+  type TFindAllProductsQuery,
+} from '../../../application/dto/find-all-products-query.schema';
 import { CreateProductUseCase } from '../../../application/use-cases/create-product.use-case';
 import { FindAllProductsUseCase } from '../../../application/use-cases/find-all-products.use-case';
 import { FindProductByIdUseCase } from '../../../application/use-cases/find-product-by-id.use-case';
@@ -20,8 +24,10 @@ export class ProductController {
   ) {}
 
   @ProductDoc.List()
-  async findAll(): Promise<ProductEntity[] | null> {
-    return this.findAllProductsUseCase.execute();
+  async findAll(
+    @Query(new ZodValidationPipe(SFindAllProductsQuery)) query: TFindAllProductsQuery,
+  ): Promise<Paginated<ProductEntity>> {
+    return this.findAllProductsUseCase.execute(query.page, query.limit);
   }
 
   @ProductDoc.Create()

@@ -17,9 +17,21 @@ export class InMemoryProductRepository extends ProductRepositoryPort {
     return Array.from(this.products.values()).find((p) => p.name === name) ?? null;
   }
 
-  async findAll(): Promise<ProductEntity[] | null> {
-    const list = Array.from(this.products.values());
-    return list.length ? list : null;
+  private sortedByCreatedAtDesc(): ProductEntity[] {
+    return Array.from(this.products.values()).sort((a, b) => {
+      const t = b.createdAt.getTime() - a.createdAt.getTime();
+      return t !== 0 ? t : a.id.localeCompare(b.id);
+    });
+  }
+
+  async findPage(page: number, limit: number): Promise<ProductEntity[]> {
+    const sorted = this.sortedByCreatedAtDesc();
+    const start = (page - 1) * limit;
+    return sorted.slice(start, start + limit);
+  }
+
+  async count(): Promise<number> {
+    return this.products.size;
   }
 
   async update(entity: ProductEntity): Promise<ProductEntity | null> {

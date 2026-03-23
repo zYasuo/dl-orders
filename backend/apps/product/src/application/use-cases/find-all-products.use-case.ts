@@ -1,27 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { Paginated } from '@app/shared';
 import { ProductRepositoryPort } from '../../domain/ports/product-repository.port';
 import { ProductEntity } from '../../domain/entities/product.entity';
-import { ProductCachePort } from '../../domain/ports/product-cache.port';
-
-const PRODUCT_CACHE_TTL_SECONDS = 300;
 
 @Injectable()
 export class FindAllProductsUseCase {
-  constructor(
-    private readonly productRepositoryPort: ProductRepositoryPort,
-    private readonly productCache: ProductCachePort,
-  ) {}
+  constructor(private readonly productRepositoryPort: ProductRepositoryPort) {}
 
-  async execute(): Promise<ProductEntity[] | null> {
-    const cached = await this.productCache.getAll();
-    if (cached !== null) return cached;
+  async execute(page: number, limit: number): Promise<Paginated<ProductEntity>> {
+    const [data, total] = await Promise.all([
+      this.productRepositoryPort.findPage(page, limit),
+      this.productRepositoryPort.count(),
+    ]);
 
-    const products = await this.productRepositoryPort.findAll();
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
 
-    if (products) {
-      await this.productCache.setAll(products, PRODUCT_CACHE_TTL_SECONDS);
-    }
-
-    return products;
+    return {
+      data,
+      meta: { page, limit, total, totalPages },
+    };
   }
 }

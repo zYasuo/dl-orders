@@ -4,6 +4,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -19,8 +20,15 @@ export const ProductDoc = {
   List: () =>
     applyDecorators(
       Get(),
-      ApiOperation({ summary: 'List all products' }),
-      ApiResponse({ status: 200, description: 'Products list' }),
+      ApiOperation({ summary: 'List products (paginated)' }),
+      ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default 1)' }),
+      ApiQuery({
+        name: 'limit',
+        required: false,
+        type: Number,
+        description: 'Items per page (default 12, max 50)',
+      }),
+      ApiResponse({ status: 200, description: 'Paginated products list' }),
     ),
 
   Create: () =>

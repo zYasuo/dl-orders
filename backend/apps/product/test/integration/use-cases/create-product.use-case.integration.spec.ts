@@ -55,7 +55,8 @@ describe('CreateProductUseCase (integration)', () => {
         create: async () => null,
         findById: async () => null,
         findByName: async () => null,
-        findAll: async () => null,
+        findPage: async () => [],
+        count: async () => 0,
         update: async () => null,
       };
       const cache = new InMemoryProductCache();

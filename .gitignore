@@ -42,6 +42,7 @@ lerna-debug.log*
 
 .cursor/*.md
 .cursor/rules/
+.cursor/skills/
 
 # dotenv environment variable files
 .env
