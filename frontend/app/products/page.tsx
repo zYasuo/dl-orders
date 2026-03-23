@@ -29,29 +29,29 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Se
     const emptyPage = !emptyCatalog && products.length === 0;
 
     return (
-        <div className="flex flex-col gap-8">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Catalog</h1>
-                <p className="mt-1 text-muted-foreground">Products available to order.</p>
+        <div className="flex flex-col gap-10">
+            <header className="space-y-1">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">Catálogo</h1>
+                <p className="max-w-2xl text-sm text-muted-foreground">Produtos disponíveis para pedido.</p>
                 {!emptyCatalog ? (
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        {total} {total === 1 ? 'product' : 'products'}
-                        {totalPages > 1 ? ` · Page ${page} of ${totalPages}` : null}
+                    <p className="pt-2 text-sm text-muted-foreground">
+                        {total} {total === 1 ? 'produto' : 'produtos'}
+                        {totalPages > 1 ? ` · Página ${page} de ${totalPages}` : null}
                     </p>
                 ) : null}
-            </div>
+            </header>
             {emptyCatalog ? (
                 <EmptyState
-                    title="No products"
-                    description="Start the Product service (port 3003), set PRODUCT_SERVICE_URL, and in production NEXT_PUBLIC_APP_URL."
+                    title="Nenhum produto"
+                    description="Inicie o serviço Product (porta 3003), defina PRODUCT_SERVICE_URL e, em produção, NEXT_PUBLIC_APP_URL."
                 />
             ) : emptyPage ? (
                 <EmptyState
-                    title="No products on this page"
-                    description="Try another page or return to the start of the catalog."
+                    title="Nenhum produto nesta página"
+                    description="Tente outra página ou volte ao início do catálogo."
                     action={
                         <Link href="/products" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
-                            Go to page 1
+                            Ir para a página 1
                         </Link>
                     }
                 />

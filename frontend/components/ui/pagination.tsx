@@ -66,13 +66,13 @@ export function CatalogPagination({ page, totalPages, limit }: CatalogPagination
     const items = getCatalogPaginationItems(page, totalPages);
 
     return (
-        <nav aria-label="Catalog pagination" className="flex flex-wrap items-center justify-center gap-1">
+        <nav aria-label="Paginação do catálogo" className="flex flex-wrap items-center justify-center gap-1">
             {page > 1 ? (
                 <Link href={catalogHref(page - 1, limit)} className={cn(linkBase, 'px-2 sm:min-w-auto sm:px-3')}>
-                    Previous
+                    Anterior
                 </Link>
             ) : (
-                <span className={cn(linkBase, 'pointer-events-none opacity-40', 'px-2 sm:px-3')}>Previous</span>
+                <span className={cn(linkBase, 'pointer-events-none opacity-40', 'px-2 sm:px-3')}>Anterior</span>
             )}
 
             {items.map((item, idx) =>
@@ -97,10 +97,10 @@ export function CatalogPagination({ page, totalPages, limit }: CatalogPagination
 
             {page < totalPages ? (
                 <Link href={catalogHref(page + 1, limit)} className={cn(linkBase, 'px-2 sm:min-w-auto sm:px-3')}>
-                    Next
+                    Próxima
                 </Link>
             ) : (
-                <span className={cn(linkBase, 'pointer-events-none opacity-40', 'px-2 sm:px-3')}>Next</span>
+                <span className={cn(linkBase, 'pointer-events-none opacity-40', 'px-2 sm:px-3')}>Próxima</span>
             )}
         </nav>
     );

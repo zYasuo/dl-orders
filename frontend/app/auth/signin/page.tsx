@@ -5,18 +5,16 @@ import { SigninForm } from '@/modules/auth/components/signin-form';
 
 export default function SigninPage() {
     return (
-        <div className="mx-auto w-full max-w-md">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Entrar</CardTitle>
-                    <CardDescription>Use o e-mail e a senha da sua conta.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Suspense fallback={<Skeleton className="h-48" />}>
-                        <SigninForm />
-                    </Suspense>
-                </CardContent>
-            </Card>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Entrar</CardTitle>
+                <CardDescription>Use o e-mail e a senha da sua conta.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Suspense fallback={<Skeleton className="h-48" />}>
+                    <SigninForm />
+                </Suspense>
+            </CardContent>
+        </Card>
     );
 }

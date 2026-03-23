@@ -29,7 +29,7 @@ export default function RootLayout({
             <body className="flex min-h-full flex-col bg-background text-foreground">
                 <AppProviders>
                     <SiteHeader />
-                    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8">{children}</main>
+                    <main className="flex min-w-0 w-full flex-1 flex-col">{children}</main>
                 </AppProviders>
             </body>
         </html>

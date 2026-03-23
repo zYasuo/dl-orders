@@ -26,7 +26,7 @@ export class SignupUseCase {
     const existing = await this.authUserRepository.findByEmailLookupHash(emailLookupHash);
 
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('Registration failed');
     }
 
     const [emailEncrypted, passwordHash] = await Promise.all([
@@ -70,4 +70,3 @@ export class SignupUseCase {
     return { userId: user.id, email };
   }
 }
-

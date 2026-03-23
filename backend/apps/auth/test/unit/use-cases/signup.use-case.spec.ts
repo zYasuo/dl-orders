@@ -115,7 +115,7 @@ describe('SignupUseCase', () => {
       authUserRepository.findByEmailLookupHash.mockResolvedValueOnce(fakeUser);
       const input = { email: 'user@test.com', password: 'password1234', name: 'User' };
 
-      await expect(sut.execute(input)).rejects.toThrow(/Email already registered/);
+      await expect(sut.execute(input)).rejects.toThrow(/Registration failed/);
 
       expect(authUserRepository.create).not.toHaveBeenCalled();
       expect(otpRepository.create).not.toHaveBeenCalled();
@@ -147,4 +147,3 @@ describe('SignupUseCase', () => {
     });
   });
 });
-

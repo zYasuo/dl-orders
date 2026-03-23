@@ -69,9 +69,7 @@ describe('SignupUseCase (integration)', () => {
       await sut.execute(input);
 
       await expect(sut.execute(input)).rejects.toThrow(ConflictException);
-      await expect(sut.execute(input)).rejects.toThrow(/Email already registered/);
+      await expect(sut.execute(input)).rejects.toThrow(/Registration failed/);
     });
   });
 });
-
-
