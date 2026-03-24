@@ -1,3 +1,4 @@
+export * from './domain';
 export * from './pagination';
 export * from './constants/queues';
 export * from './constants/patterns';

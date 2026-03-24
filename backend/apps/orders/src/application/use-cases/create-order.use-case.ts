@@ -30,8 +30,6 @@ export class CreateOrderUseCase {
       throw new NotFoundException('Product not found');
     }
 
-    const totalPrice = OrderEntity.calculateTotalPrice(quantity, product.price);
-
     const existingOrder = await this.ordersRepositoryPort.findByIdempotencyKey(idempotencyKey);
 
     if (existingOrder) {
@@ -46,7 +44,6 @@ export class CreateOrderUseCase {
       productName: product.name,
       productDescription: product.description ?? '',
       unitPrice: product.price,
-      totalPrice,
       idempotencyKey,
     });
 

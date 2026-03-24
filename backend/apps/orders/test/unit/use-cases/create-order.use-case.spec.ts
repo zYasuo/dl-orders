@@ -43,6 +43,7 @@ describe('CreateOrderUseCase', () => {
       findById: jest.fn(),
       updateStatus: jest.fn(),
       confirmIfPending: jest.fn(),
+      cancelIfPending: jest.fn(),
       findByIdempotencyKey: jest.fn().mockResolvedValue(null),
     } as unknown as jest.Mocked<OrdersRepositoryPort>;
 

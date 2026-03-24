@@ -131,8 +131,8 @@ describe('SignupUseCase', () => {
       expect(otpSendRequestedPublisher.publish).not.toHaveBeenCalled();
     });
 
-    it('accepts optional name', async () => {
-      const input = { email: 'user@test.com', password: 'password1234' };
+    it('sets name from input', async () => {
+      const input = { email: 'user@test.com', password: 'password1234', name: 'Test User' };
 
       await sut.execute(input);
 
@@ -141,7 +141,7 @@ describe('SignupUseCase', () => {
           emailEncrypted: input.email,
           emailLookupHash: input.email,
           passwordHash: 'hashed-password',
-          name: null,
+          name: 'Test User',
         }),
       );
     });

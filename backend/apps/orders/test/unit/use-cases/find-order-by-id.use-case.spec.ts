@@ -34,6 +34,7 @@ describe('FindOrderByIdUseCase', () => {
       findById: jest.fn().mockResolvedValue(fakeOrder),
       updateStatus: jest.fn(),
       confirmIfPending: jest.fn(),
+      cancelIfPending: jest.fn(),
     } as unknown as jest.Mocked<OrdersRepositoryPort>;
 
     const module: TestingModule = await Test.createTestingModule({

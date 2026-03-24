@@ -16,7 +16,7 @@ export class CancelOrderUseCase {
   ) {}
 
   async execute(event: TCancelOrderEvent): Promise<void> {
-    const order = await this.ordersRepositoryPort.confirmIfPending(event.orderId);
+    const order = await this.ordersRepositoryPort.cancelIfPending(event.orderId);
 
     if (!order) {
       this.logger.warn(`Order ${event.orderId} already processed`);

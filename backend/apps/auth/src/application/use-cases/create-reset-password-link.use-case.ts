@@ -31,11 +31,7 @@ export class CreateResetPasswordLinkUseCase {
       this.emailEncrypted.encrypt(email),
     ]);
 
-    if (
-      existing &&
-      !PasswordResetEntity.isExpired(existing.expiresAt) &&
-      !PasswordResetEntity.isUsed(existing.used)
-    ) {
+    if (existing && existing.isValid()) {
       return { message };
     }
 

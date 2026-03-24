@@ -1,4 +1,5 @@
 import * as crypto from 'node:crypto';
+import { DomainError } from '@app/shared/domain';
 
 export type TOtpCodeParams = {
   readonly id: string;
@@ -33,6 +34,20 @@ export class OtpCodeEntity {
 
   isExpired(): boolean {
     return new Date() > this.params.expiresAt;
+  }
+
+  isUsed(): boolean {
+    return this.params.used;
+  }
+
+  assertValid(): void {
+    if (this.isExpired()) {
+      throw new DomainError('OTP code has expired');
+    }
+
+    if (this.isUsed()) {
+      throw new DomainError('OTP code has already been used');
+    }
   }
 
   static generateCode(): string {

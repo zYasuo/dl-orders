@@ -43,6 +43,12 @@ export class InMemoryOrdersRepository extends OrdersRepositoryPort {
     return this.updateStatus(orderId, OrderStatus.CONFIRMED);
   }
 
+  async cancelIfPending(orderId: string): Promise<OrderEntity | null> {
+    const order = this.orders.get(orderId);
+    if (!order || order.status !== OrderStatus.PENDING) return null;
+    return this.updateStatus(orderId, OrderStatus.CANCELLED);
+  }
+
   async findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null> {
     for (const order of this.orders.values()) {
       if (order.idempotencyKey === idempotencyKey) return order;

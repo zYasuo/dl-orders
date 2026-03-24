@@ -5,5 +5,6 @@ export abstract class OrdersRepositoryPort {
   abstract findById(id: string): Promise<OrderEntity | null>;
   abstract updateStatus(id: string, status: string): Promise<OrderEntity | null>;
   abstract confirmIfPending(orderId: string): Promise<OrderEntity | null>;
+  abstract cancelIfPending(orderId: string): Promise<OrderEntity | null>;
   abstract findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null>;
 }

@@ -54,6 +54,7 @@ describe('ConfirmOrderUseCase', () => {
       findById: jest.fn().mockResolvedValue(pendingOrder),
       updateStatus: jest.fn().mockResolvedValue(confirmedOrder),
       confirmIfPending: jest.fn().mockResolvedValue(confirmedOrder),
+      cancelIfPending: jest.fn(),
     } as unknown as jest.Mocked<OrdersRepositoryPort>;
 
     orderEventsPublisher = {

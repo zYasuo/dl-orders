@@ -138,6 +138,44 @@ export class OrdersRepository extends OrdersRepositoryPort {
     });
   }
 
+  async cancelIfPending(orderId: string): Promise<OrderEntity | null> {
+    const result = await this.db.order.updateMany({
+      where: {
+        id: orderId,
+        status: OrderStatus.PENDING,
+      },
+      data: {
+        status: OrderStatus.CANCELLED,
+      },
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const item = await this.db.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!item) return null;
+
+    return new OrderEntity({
+      id: item.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      description: item.description,
+      recipient: item.recipient,
+      productName: item.productName,
+      productDescription: item.productDescription,
+      unitPrice: item.unitPrice,
+      totalPrice: item.totalPrice,
+      status: item.status as OrderStatus,
+      idempotencyKey: item.idempotencyKey,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    });
+  }
+
   async findByIdempotencyKey(idempotencyKey: string): Promise<OrderEntity | null> {
     const item = await this.db.order.findUnique({ where: { idempotencyKey } });
     if (!item) return null;

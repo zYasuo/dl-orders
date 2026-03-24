@@ -1,3 +1,5 @@
+import { DomainError, Email, Money, Quantity } from '@app/shared/domain';
+
 export enum OrderStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
@@ -20,41 +22,68 @@ export type TOrderParams = {
   readonly updatedAt: Date;
 };
 
+type TOrderCreateInput = {
+  productId: string;
+  quantity: number;
+  description: string;
+  recipient: string;
+  productName: string;
+  productDescription: string;
+  idempotencyKey: string;
+  unitPrice: number;
+};
+
 export class OrderEntity {
   constructor(private params: TOrderParams) {}
 
-  static create(params: {
-    productId: string;
-    quantity: number;
-    description: string;
-    recipient: string;
-    productName: string;
-    productDescription: string;
-    idempotencyKey: string;
-    unitPrice: number;
-    totalPrice: number;
-  }): OrderEntity {
+  static create(params: TOrderCreateInput): OrderEntity {
+    OrderEntity.assertRequiredStrings(params);
+    Email.create(params.recipient);
+    const qty = Quantity.create(params.quantity);
+    const unit = Money.create(params.unitPrice);
+    const total = unit.multiply(qty.value);
+
     const now = new Date();
 
     return new OrderEntity({
       id: crypto.randomUUID(),
       productId: params.productId,
-      quantity: params.quantity,
+      quantity: qty.value,
       description: params.description,
       recipient: params.recipient,
       productName: params.productName,
-      productDescription: params.productDescription,
+      productDescription: params.productDescription ?? '',
       idempotencyKey: params.idempotencyKey,
-      unitPrice: params.unitPrice,
-      totalPrice: params.totalPrice,
+      unitPrice: unit.value,
+      totalPrice: total.value,
       status: OrderStatus.PENDING,
       createdAt: now,
       updatedAt: now,
     });
   }
 
-  static calculateTotalPrice(quantity: number, unitPrice: number): number {
-    return quantity * unitPrice;
+  confirm(): OrderEntity {
+    if (!this.isPending()) {
+      throw new DomainError(`Cannot confirm order in status ${this.params.status}`);
+    }
+
+    return new OrderEntity({
+      ...this.params,
+      status: OrderStatus.CONFIRMED,
+      updatedAt: new Date(),
+    });
+  }
+
+  cancel(): OrderEntity {
+    if (!this.isPending()) {
+      throw new DomainError(`Cannot cancel order in status ${this.params.status}`);
+    }
+
+    return new OrderEntity({
+      ...this.params,
+      status: OrderStatus.CANCELLED,
+      updatedAt: new Date(),
+    });
   }
 
   get id() {
@@ -119,5 +148,20 @@ export class OrderEntity {
 
   isCancelled(): boolean {
     return this.params.status === OrderStatus.CANCELLED;
+  }
+
+  private static assertRequiredStrings(params: TOrderCreateInput): void {
+    const rules: [keyof Pick<TOrderCreateInput, 'productId' | 'description' | 'productName' | 'idempotencyKey'>, string][] = [
+      ['productId', 'productId is required'],
+      ['description', 'description is required'],
+      ['productName', 'productName is required'],
+      ['idempotencyKey', 'idempotencyKey is required'],
+    ];
+
+    for (const [key, message] of rules) {
+      if (!params[key]) {
+        throw new DomainError(message);
+      }
+    }
   }
 }

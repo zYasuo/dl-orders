@@ -1,3 +1,5 @@
+import { DomainError, Email, Quantity } from '@app/shared/domain';
+
 export interface IInventoryParams {
   readonly id: string;
   name: string;
@@ -26,27 +28,44 @@ export class InventoryEntity {
   ) {}
 
   static create(params: IInventoryParams): InventoryEntity {
+    if (!params.productId) {
+      throw new DomainError('productId is required');
+    }
+
+    if (!params.name) {
+      throw new DomainError('name is required');
+    }
+
+    Email.create(params.createdBy);
+
+    Quantity.create(params.quantity);
+    Quantity.create(params.maxQuantity);
+    Quantity.create(params.minQuantity);
+    Quantity.create(params.lowStockThreshold);
+
+    if (params.minQuantity >= params.maxQuantity) {
+      throw new DomainError('minQuantity must be less than maxQuantity');
+    }
+
+    if (params.lowStockThreshold > params.minQuantity) {
+      throw new DomainError('lowStockThreshold must be less than or equal to minQuantity');
+    }
+
+    if (params.quantity > params.maxQuantity) {
+      throw new DomainError('quantity must be less than or equal to maxQuantity');
+    }
+
     const now = new Date();
-    const {
-      id,
-      name,
-      quantity,
-      maxQuantity,
-      minQuantity,
-      lowStockThreshold,
-      productId,
-      createdBy,
-    } = params;
 
     return new InventoryEntity(
-      id,
-      name,
-      quantity,
-      maxQuantity,
-      minQuantity,
-      lowStockThreshold,
-      productId,
-      createdBy,
+      params.id,
+      params.name,
+      params.quantity,
+      params.maxQuantity,
+      params.minQuantity,
+      params.lowStockThreshold,
+      params.productId,
+      params.createdBy,
       now,
       now,
     );

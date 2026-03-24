@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { DomainError } from '@app/shared/domain';
 
 export interface IPasswordResetEntity {
   id: string;
@@ -42,12 +43,26 @@ export class PasswordResetEntity implements IPasswordResetEntity {
     );
   }
 
-  static isExpired(expiresAt: Date): boolean {
-    return expiresAt < new Date();
+  isExpired(): boolean {
+    return this.expiresAt < new Date();
   }
 
-  static isUsed(used: boolean): boolean {
-    return used;
+  isUsed(): boolean {
+    return this.used;
+  }
+
+  isValid(): boolean {
+    return !this.isExpired() && !this.isUsed();
+  }
+
+  assertValid(): void {
+    if (this.isExpired()) {
+      throw new DomainError('Password reset link has expired');
+    }
+
+    if (this.isUsed()) {
+      throw new DomainError('Password reset link has already been used');
+    }
   }
 
   static expiresAtFromNow(): Date {

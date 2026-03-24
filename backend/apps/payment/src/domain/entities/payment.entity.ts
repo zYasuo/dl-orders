@@ -1,3 +1,5 @@
+import { DomainError, Money } from '@app/shared/domain';
+
 export enum PaymentStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
@@ -29,6 +31,12 @@ export class PaymentEntity {
     preferenceId?: string | null;
     externalId?: string | null;
   }): PaymentEntity {
+    if (!params.orderId) {
+      throw new DomainError('orderId is required');
+    }
+
+    Money.create(params.amount);
+
     const now = new Date();
     return new PaymentEntity({
       id: crypto.randomUUID(),
@@ -41,6 +49,40 @@ export class PaymentEntity {
       gatewayResponse: null,
       createdAt: now,
       updatedAt: now,
+    });
+  }
+
+  approve(
+    externalId: string,
+    gatewayResponse: Record<string, unknown>,
+  ): PaymentEntity {
+    if (!this.isPending()) {
+      throw new DomainError(`Cannot approve payment in status ${this.params.status}`);
+    }
+
+    return new PaymentEntity({
+      ...this.params,
+      externalId,
+      status: PaymentStatus.APPROVED,
+      gatewayResponse,
+      updatedAt: new Date(),
+    });
+  }
+
+  reject(
+    externalId: string,
+    gatewayResponse: Record<string, unknown>,
+  ): PaymentEntity {
+    if (!this.isPending()) {
+      throw new DomainError(`Cannot reject payment in status ${this.params.status}`);
+    }
+
+    return new PaymentEntity({
+      ...this.params,
+      externalId,
+      status: PaymentStatus.REJECTED,
+      gatewayResponse,
+      updatedAt: new Date(),
     });
   }
 

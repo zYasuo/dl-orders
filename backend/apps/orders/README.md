@@ -9,7 +9,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Ports
 
-- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma).
+- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma). Includes `confirmIfPending` and `cancelIfPending` for atomic status transitions.
 - **ProductCatalogPort** - Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
 - **OrderEventsPublisherPort** - Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
 - **OrderAuditLogPort** - Append audit entries (MongoDB).

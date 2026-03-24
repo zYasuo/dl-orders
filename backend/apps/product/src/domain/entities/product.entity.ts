@@ -1,3 +1,5 @@
+import { DomainError, Money } from '@app/shared/domain';
+
 export interface IProduct {
   readonly id: string;
   name: string;
@@ -25,6 +27,16 @@ export class ProductEntity implements IProduct {
     price: number;
     imageUrl?: string | null;
   }): ProductEntity {
+    if (!params.name) {
+      throw new DomainError('name is required');
+    }
+
+    if (!params.description) {
+      throw new DomainError('description is required');
+    }
+
+    Money.create(params.price);
+
     const now = new Date();
     return new ProductEntity(
       crypto.randomUUID(),

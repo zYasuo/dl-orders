@@ -49,6 +49,15 @@ export class AuthLogsEntity implements IAuthLogs {
     );
   }
 
+  isLocked(): boolean {
+    if (!this.lockedUntil) return false;
+    return this.lockedUntil > new Date();
+  }
+
+  shouldLockAfterFailure(): boolean {
+    return this.loginAttempts + 1 >= AuthLogsEntity.MAX_LOGIN_ATTEMPTS;
+  }
+
   static addMinutesToDate(date: Date, minutes: number): Date {
     return new Date(date.getTime() + minutes * MS_PER_MINUTE);
   }

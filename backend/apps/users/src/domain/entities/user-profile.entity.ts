@@ -1,3 +1,5 @@
+import { DomainError, Email } from '@app/shared/domain';
+
 export type TUserProfileParams = {
   readonly id: string;
   readonly email: string;
@@ -10,6 +12,12 @@ export class UserProfileEntity {
   constructor(private params: TUserProfileParams) {}
 
   static create(params: TUserProfileParams): UserProfileEntity {
+    if (!params.id) {
+      throw new DomainError('id is required');
+    }
+
+    Email.create(params.email);
+
     return new UserProfileEntity(params);
   }
 

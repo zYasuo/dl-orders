@@ -17,8 +17,8 @@ describe('CreateInventoryUseCase', () => {
     'Warehouse 1',
     10,
     100,
-    1,
     5,
+    3,
     'product-123',
     createdBy,
     createdAt,
@@ -60,8 +60,8 @@ describe('CreateInventoryUseCase', () => {
         name: 'Warehouse 1',
         quantity: 10,
         maxQuantity: 100,
-        minQuantity: 1,
-        lowStockThreshold: 5,
+        minQuantity: 5,
+        lowStockThreshold: 3,
         createdBy,
       };
 
@@ -93,8 +93,8 @@ describe('CreateInventoryUseCase', () => {
           name: 'W',
           quantity: 10,
           maxQuantity: 100,
-          minQuantity: 1,
-          lowStockThreshold: 5,
+          minQuantity: 5,
+          lowStockThreshold: 3,
           createdBy,
         }),
       ).rejects.toThrow(new BadRequestException('Inventory already exists for this product'));
@@ -110,8 +110,8 @@ describe('CreateInventoryUseCase', () => {
           name: 'Existing',
           quantity: 10,
           maxQuantity: 100,
-          minQuantity: 1,
-          lowStockThreshold: 5,
+          minQuantity: 5,
+          lowStockThreshold: 3,
           createdBy,
         }),
       ).rejects.toThrow(new BadRequestException('An inventory with this name already exists'));
@@ -127,8 +127,8 @@ describe('CreateInventoryUseCase', () => {
           name: 'W',
           quantity: 10,
           maxQuantity: 100,
-          minQuantity: 1,
-          lowStockThreshold: 5,
+          minQuantity: 5,
+          lowStockThreshold: 3,
           createdBy,
         }),
       ).rejects.toThrow(new InternalServerErrorException('Failed to create inventory'));

@@ -1,3 +1,5 @@
+import { DomainError, Email, Money, Quantity } from '@app/shared/domain';
+
 export enum INotificationType {
   EMAIL = 'EMAIL',
 }
@@ -57,32 +59,36 @@ export class NotificationEntity implements INotification {
     totalPrice: number;
     quantity: number;
   }): NotificationEntity {
-    const {
-      title,
-      content,
-      type,
-      sourceEventId,
-      recipient,
-      userId,
-      productName,
-      productDescription,
-      totalPrice,
-      quantity,
-    } = params;
+    if (!params.title) {
+      throw new DomainError('title is required');
+    }
+
+    if (!params.content) {
+      throw new DomainError('content is required');
+    }
+
+    if (!params.sourceEventId) {
+      throw new DomainError('sourceEventId is required');
+    }
+
+    Email.create(params.recipient);
+    Money.create(params.totalPrice);
+    Quantity.create(params.quantity);
+
     const now = new Date();
     return new NotificationEntity(
       crypto.randomUUID(),
-      title,
-      content,
-      type,
+      params.title,
+      params.content,
+      params.type,
       INotificationStatus.PENDING,
-      sourceEventId,
-      recipient,
-      userId,
-      productName,
-      productDescription,
-      totalPrice,
-      quantity,
+      params.sourceEventId,
+      params.recipient,
+      params.userId,
+      params.productName,
+      params.productDescription,
+      params.totalPrice,
+      params.quantity,
       null,
       now,
       now,

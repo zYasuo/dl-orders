@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PaymentEntity, PaymentStatus } from '../../domain/entities/payment.entity';
 import { PaymentAuditLogPort } from '../../domain/ports/payment-audit-log.port';
 import { PaymentEventsPublisherPort } from '../../domain/ports/payment-events-publisher.port';
 import { PaymentGatewayPort } from '../../domain/ports/payment-gateway.port';
@@ -67,20 +66,9 @@ export class HandleWebhookUseCase {
         return;
       }
 
-      const updated = await this.paymentRepositoryPort.updateStatusIfPending(
-        new PaymentEntity({
-          id: paymentRecord.id,
-          orderId: paymentRecord.orderId,
-          idempotencyKey: paymentRecord.idempotencyKey,
-          externalId,
-          preferenceId: paymentRecord.preferenceId,
-          amount: paymentRecord.amount,
-          status: PaymentStatus.APPROVED,
-          gatewayResponse: { ...details },
-          createdAt: paymentRecord.createdAt,
-          updatedAt: new Date(),
-        }),
-      );
+      const approved = paymentRecord.approve(externalId, { ...details });
+
+      const updated = await this.paymentRepositoryPort.updateStatusIfPending(approved);
 
       if (!updated) {
         this.logger.log('Duplicate webhook ignored', {
@@ -131,20 +119,9 @@ export class HandleWebhookUseCase {
         return;
       }
 
-      const updated = await this.paymentRepositoryPort.updateStatusIfPending(
-        new PaymentEntity({
-          id: paymentRecord.id,
-          orderId: paymentRecord.orderId,
-          idempotencyKey: paymentRecord.idempotencyKey,
-          externalId,
-          preferenceId: paymentRecord.preferenceId,
-          amount: paymentRecord.amount,
-          status: PaymentStatus.REJECTED,
-          gatewayResponse: { ...details },
-          createdAt: paymentRecord.createdAt,
-          updatedAt: new Date(),
-        }),
-      );
+      const rejected = paymentRecord.reject(externalId, { ...details });
+
+      const updated = await this.paymentRepositoryPort.updateStatusIfPending(rejected);
 
       if (!updated) {
         this.logger.log('Duplicate webhook ignored', {
