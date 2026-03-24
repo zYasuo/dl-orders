@@ -26,19 +26,21 @@ export class MercadoPagoGatewayAdapter extends PaymentGatewayPort {
   }
 
   async createPreference(input: ICreatePreferenceInput): Promise<IPreferenceResult> {
+    const {orderId, amount, title, description} = input;
+    
     const response = await this.preference.create({
       body: {
         items: [
           {
-            id: input.orderId,
-            title: input.title ?? `Order ${input.orderId}`,
-            description: input.description ?? '',
+            id: orderId,
+            title: title ?? `Order ${orderId}`,
+            description: description ?? '',
             quantity: 1,
-            unit_price: input.amount,
+            unit_price: amount,
             currency_id: 'BRL',
           },
         ],
-        external_reference: input.orderId,
+        external_reference: orderId,
 
         back_urls: {
           success: this.configService.get<string>('MERCADOPAGO_BACK_URL_SUCCESS'),

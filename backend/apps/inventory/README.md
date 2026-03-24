@@ -9,11 +9,11 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Ports
 
-- **InventoryRepositoryPort** â€” Persist and load inventory/reservations (Postgres/Prisma).
-- **InventoryListCachePort** â€” Cache list of inventory items (Redis); invalidated on create and on reservation.
-- **InventoryEventsPublisherPort** â€” Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
-- **InventoryLowStockPublisherPort** â€” Publish `inventory.low_stock` to RabbitMQ (`notification_queue`) so notification can send alert emails.
-- **ReservationAuditLogPort** â€” Append reservation audit entries (MongoDB).
+- **InventoryRepositoryPort** - Persist and load inventory/reservations (Postgres/Prisma).
+- **InventoryListCachePort** - Cache list of inventory items (Redis); invalidated on create and on reservation.
+- **InventoryEventsPublisherPort** - Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
+- **InventoryLowStockPublisherPort** - Publish `inventory.low_stock` to RabbitMQ (`notification_queue`) so notification can send alert emails.
+- **ReservationAuditLogPort** - Append reservation audit entries (MongoDB).
 
 ## Inbound
 
@@ -27,9 +27,9 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Data
 
-- **Postgres** â€” Inventory and reservations; connection via `DATABASE_URL` in `apps/inventory/.env`.
-- **MongoDB** â€” Reservation audit log; connection via `MONGODB_URI` in `apps/inventory/.env`.
-- **Redis** â€” Shared instance; `REDIS_URL` in `apps/inventory/.env`. Port 6379 in Docker. Keys use prefix `inventory:` (e.g. list cache).
+- **Postgres** - Inventory and reservations; connection via `DATABASE_URL` in `apps/inventory/.env`.
+- **MongoDB** - Reservation audit log; connection via `MONGODB_URI` in `apps/inventory/.env`.
+- **Redis** - Shared instance; `REDIS_URL` in `apps/inventory/.env`. Port 6379 in Docker. Keys use prefix `inventory:` (e.g. list cache).
 
 ## Run locally
 

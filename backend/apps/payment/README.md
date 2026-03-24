@@ -4,21 +4,21 @@ Creates payment preferences (Mercado Pago), receives webhooks, and publishes pay
 
 ## Flow in the system
 
-After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved` event to Payment. This service creates a Payment record and a Mercado Pago preference (or reuses the existing one if the same order was already processedâ€”see **Idempotency** below). When the user pays (or payment fails), the Mercado Pago webhook triggers; Payment publishes `payment.approved` or `payment.failed`. **Orders** then confirms the order (and notifies) or cancels and returns stock.
+After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved` event to Payment. This service creates a Payment record and a Mercado Pago preference (or reuses the existing one if the same order was already processed - see **Idempotency** below). When the user pays (or payment fails), the Mercado Pago webhook triggers; Payment publishes `payment.approved` or `payment.failed`. **Orders** then confirms the order (and notifies) or cancels and returns stock.
 
 ## Role
 
-- **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service (including the orderâ€™s `idempotencyKey`), creates a Payment record (PENDING) or returns the existing one when the same idempotency key or orderId is used, then creates a Mercado Pago Preference (or skips if one already exists) and stores the checkout URL (`initPoint`).
+- **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service (including the order's `idempotencyKey`), creates a Payment record (PENDING) or returns the existing one when the same idempotency key or orderId is used, then creates a Mercado Pago Preference (or skips if one already exists) and stores the checkout URL (`initPoint`).
 - **HTTP:** Mercado Pago webhook (`POST /payments/webhook`, assinatura obrigatória e `MERCADOPAGO_WEBHOOK_SECRET` configurado); GET payment by order ID (`GET /payments/order/:orderId`, JWT) for the checkout link. Chamadas HTTP ao orders usam `SERVICE_AUTH_SECRET` no header `x-service-auth`.
-- **Events out:** On webhook `approved` â†’ `payment.approved` (orders confirms); on `rejected`/cancelled â†’ `payment.failed` (orders cancels and returns stock).
+- **Events out:** On webhook `approved` -> `payment.approved` (orders confirms); on `rejected`/cancelled -> `payment.failed` (orders cancels and returns stock).
 
 ## Ports
 
-- **PaymentRepositoryPort** â€” Persist and load payments (Postgres/Prisma).
-- **PaymentGatewayPort** â€” Mercado Pago SDK: create preference, get payment details.
-- **PaymentEventsPublisherPort** â€” Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
-- **PaymentAuditLogPort** â€” Append payment audit entries (MongoDB).
-- **OrderDetailsPort** â€” Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
+- **PaymentRepositoryPort** - Persist and load payments (Postgres/Prisma).
+- **PaymentGatewayPort** - Mercado Pago SDK: create preference, get payment details.
+- **PaymentEventsPublisherPort** - Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
+- **PaymentAuditLogPort** - Append payment audit entries (MongoDB).
+- **OrderDetailsPort** - Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
 
 ## Inbound
 
@@ -38,12 +38,12 @@ The `inventory.reserved` event can be delivered more than once (e.g. at-least-on
 
 ## Data
 
-- **Postgres** â€” Payments (orderId, idempotencyKey, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
-- **MongoDB** â€” Payment audit log; connection via `MONGODB_URI` in `apps/payment/.env`.
+- **Postgres** - Payments (orderId, idempotencyKey, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
+- **MongoDB** - Payment audit log; connection via `MONGODB_URI` in `apps/payment/.env`.
 
 ## Credentials (Mercado Pago)
 
-1. **Access token:** [Mercado Pago Developers](https://www.mercadopago.com.br/developers) â†’ Your app â†’ Credentials. Use **test** credentials (`TEST-...`) for development.
+1. **Access token:** [Mercado Pago Developers](https://www.mercadopago.com.br/developers) -> Your app -> Credentials. Use **test** credentials (`TEST-...`) for development.
 2. **Webhook secret:** Configure Webhooks with your `POST /payments/webhook` URL; Mercado Pago provides a secret. Set **`MERCADOPAGO_WEBHOOK_SECRET`** in `.env` (required for the webhook to accept traffic).
 
 3. **Orders HTTP:** Set **`SERVICE_AUTH_SECRET`** to the same value as the orders service so `GET /api/v1/orders/:id` succeeds with header `x-service-auth`.

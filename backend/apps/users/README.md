@@ -5,16 +5,16 @@ Stores and serves user profiles (id, email, name). After email verification, aut
 ## Role
 
 - **Events in:** Listens for `user.verified` (from auth). Ensures `UserProfile` exists (idempotent).
-- **HTTP:** `POST /internal/user-profiles` â€” provisions profile (`userId`, `email`, `name`); header `x-internal-secret` must match `INTERNAL_API_SECRET` (called by auth after OTP).
-- **HTTP:** `GET /users/me` â€” returns current user profile (JWT required).
-- **HTTP:** `PATCH /users/me` â€” updates profile (e.g. name); JWT required.
+- **HTTP:** `POST /internal/user-profiles` - provisions profile (`userId`, `email`, `name`); header `x-internal-secret` must match `INTERNAL_API_SECRET` (called by auth after OTP).
+- **HTTP:** `GET /users/me` - returns current user profile (JWT required).
+- **HTTP:** `PATCH /users/me` - updates profile (e.g. name); JWT required.
 
 Uses shared `JwtAuthGuard` and `@CurrentUser()` from `@app/shared` to validate JWT and inject user into request.
 
 ## Ports
 
-- **UserProfileRepositoryPort** â€” Create, ensureExists (idempotent), findById, update profile (Postgres/Prisma).
-- **JwtPort** â€” Verify token only (used by guard / optional).
+- **UserProfileRepositoryPort** - Create, ensureExists (idempotent), findById, update profile (Postgres/Prisma).
+- **JwtPort** - Verify token only (used by guard / optional).
 
 ## Inbound
 
@@ -27,7 +27,7 @@ Uses shared `JwtAuthGuard` and `@CurrentUser()` from `@app/shared` to validate J
 
 ## Data
 
-- **Postgres** â€” User profiles; `DATABASE_URL` in `apps/users/.env`. Port 5437 in Docker.
+- **Postgres** - User profiles; `DATABASE_URL` in `apps/users/.env`. Port 5437 in Docker.
 
 ## Run locally
 

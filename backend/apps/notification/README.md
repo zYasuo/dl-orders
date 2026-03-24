@@ -9,10 +9,10 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Ports
 
-- **NotificationRepositoryPort** â€” Persist notification records (Postgres/Prisma).
-- **EmailSenderPort** â€” Send email (e.g. Resend adapter).
-- **NotificationAuditLogPort** â€” Append notification audit entries (MongoDB).
-- **UserNotificationsPort** â€” Read/write user notifications list (MongoDB).
+- **NotificationRepositoryPort** - Persist notification records (Postgres/Prisma).
+- **EmailSenderPort** - Send email (e.g. Resend adapter).
+- **NotificationAuditLogPort** - Append notification audit entries (MongoDB).
+- **UserNotificationsPort** - Read/write user notifications list (MongoDB).
 
 ## Inbound
 
@@ -26,8 +26,8 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 
 ## Data
 
-- **Postgres** â€” Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
-- **MongoDB** â€” Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
+- **Postgres** - Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
+- **MongoDB** - Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
 
 ## Run locally
 

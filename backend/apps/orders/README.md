@@ -9,11 +9,11 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Ports
 
-- **OrdersRepositoryPort** â€” Persist and load orders (Postgres/Prisma).
-- **ProductCatalogPort** â€” Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
-- **OrderEventsPublisherPort** â€” Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
-- **OrderAuditLogPort** â€” Append audit entries (MongoDB).
-- **OrderSummaryPort** â€” Read/write order summary read model (MongoDB).
+- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma).
+- **ProductCatalogPort** - Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
+- **OrderEventsPublisherPort** - Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
+- **OrderAuditLogPort** - Append audit entries (MongoDB).
+- **OrderSummaryPort** - Read/write order summary read model (MongoDB).
 
 ## Inbound
 
@@ -27,8 +27,8 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Data
 
-- **Postgres** â€” Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
-- **MongoDB** â€” Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
+- **Postgres** - Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
+- **MongoDB** - Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
 
 ## Run locally
 
