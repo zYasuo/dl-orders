@@ -30,6 +30,17 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 - **Postgres** - Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
 - **MongoDB** - Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Run locally
 
 From repo root:

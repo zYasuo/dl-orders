@@ -11,3 +11,4 @@ export * from './middleware/snake-to-camel-body.middleware';
 export * from './swagger/setup-swagger';
 export * from './filters/http-exception.filter';
 export * from './filters/standard-error.response';
+export * from './interceptors/transform.interceptor';

@@ -10,13 +10,13 @@ datasource db {
 model Inventory {
   id         String   @id @default(uuid())
   sequenceId Int      @unique @default(autoincrement()) @map("sequence_id")
-  name       String   @unique
+  name       String   @db.VarChar(200) @unique
   quantity   Int
-  productId  String   @unique @map("product_id")
+  productId  String   @db.VarChar(36) @unique @map("product_id")
   maxQuantity Int      @default(100) @map("max_quantity")
   minQuantity Int      @default(1) @map("min_quantity")
   lowStockThreshold Int      @default(5) @map("low_stock_threshold")
-  createdBy String   @map("created_by")
+  createdBy String   @db.VarChar(254) @map("created_by")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 

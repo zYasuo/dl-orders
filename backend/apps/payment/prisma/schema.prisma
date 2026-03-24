@@ -10,10 +10,10 @@ datasource db {
 model Payment {
   id              String        @id @default(uuid())
   sequenceId      Int           @unique @default(autoincrement()) @map("sequence_id")
-  orderId         String        @unique @map("order_id")
-  idempotencyKey  String?       @unique @map("idempotency_key")
-  externalId      String?       @unique @map("external_id")
-  preferenceId    String?       @unique @map("preference_id")
+  orderId         String        @db.VarChar(36) @unique @map("order_id")
+  idempotencyKey  String?       @db.VarChar(36) @unique @map("idempotency_key")
+  externalId      String?       @db.VarChar(255) @unique @map("external_id")
+  preferenceId    String?       @db.VarChar(255) @unique @map("preference_id")
   amount          Float
   status          PaymentStatus @default(PENDING)
   gatewayResponse Json?        @map("gateway_response")

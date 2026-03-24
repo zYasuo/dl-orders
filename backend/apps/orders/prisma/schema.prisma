@@ -10,14 +10,14 @@ datasource db {
 model Order {
   id                 String      @id @default(uuid())
   sequenceId         Int         @unique @default(autoincrement()) @map("sequence_id")
-  description        String
+  description        String      @db.VarChar(500)
   status             OrderStatus @default(PENDING)
-  productId          String      @map("product_id")
+  productId          String      @db.VarChar(36) @map("product_id")
   quantity           Int
-  recipient          String
-  productName        String   @default("") @map("product_name")
-  productDescription String   @default("") @map("product_description")
-  idempotencyKey     String    @unique @map("idempotency_key")
+  recipient          String      @db.VarChar(254)
+  productName        String      @db.VarChar(200) @default("") @map("product_name")
+  productDescription String      @db.VarChar(2000) @default("") @map("product_description")
+  idempotencyKey     String      @db.VarChar(36) @unique @map("idempotency_key")
   unitPrice          Float    @default(0) @map("unit_price")
   totalPrice         Float    @default(0) @map("total_price")
   createdAt          DateTime    @default(now()) @map("created_at")

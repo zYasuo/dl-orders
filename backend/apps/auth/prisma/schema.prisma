@@ -9,10 +9,10 @@ datasource db {
 
 model User {
   id               String   @id @default(uuid())
-  emailEncrypted   String   @map("email_encrypted")
-  emailLookupHash  String   @unique @map("email_lookup_hash")
-  passwordHash     String   @map("password_hash")
-  name             String?
+  emailEncrypted   String   @db.VarChar(600) @map("email_encrypted")
+  emailLookupHash  String   @db.VarChar(64) @unique @map("email_lookup_hash")
+  passwordHash     String   @db.VarChar(255) @map("password_hash")
+  name             String   @db.VarChar(200)
   emailVerified    Boolean  @default(false) @map("email_verified")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -23,8 +23,8 @@ model User {
 
 model OtpCode {
   id        String   @id @default(uuid())
-  code      String
-  userId    String   @map("user_id")
+  code      String   @db.VarChar(6)
+  userId    String   @db.VarChar(36) @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
@@ -35,9 +35,9 @@ model OtpCode {
 
 model PasswordReset {
   id        String   @id @default(uuid())
-  emailEncrypted   String   @map("email_encrypted")
-  emailLookupHash  String   @unique @map("email_lookup_hash")
-  linkResetPassword     String   @unique @map("link_reset_password")
+  emailEncrypted   String   @db.VarChar(600) @map("email_encrypted")
+  emailLookupHash  String   @db.VarChar(64) @unique @map("email_lookup_hash")
+  linkResetPassword     String   @db.VarChar(500) @unique @map("link_reset_password")
   used      Boolean  @default(false) @map("used")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
@@ -48,11 +48,11 @@ model PasswordReset {
 
 model AuthLogs {
   id        String   @id @default(uuid())
-  userId    String   @unique @map("user_id")
+  userId    String   @db.VarChar(36) @unique @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   loginAttempts Int    @default(0) @map("login_attempts")
   lastLoginAttempt DateTime @map("last_login_attempt")
-  lastLoginAttemptIp String? @map("last_login_attempt_ip")
+  lastLoginAttemptIp String? @db.VarChar(45) @map("last_login_attempt_ip")
   lastLoginAttemptSuccess Boolean @default(false) @map("last_login_attempt_success")
   lockedUntil DateTime? @map("locked_until")
   createdAt DateTime @default(now()) @map("created_at")

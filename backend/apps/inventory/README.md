@@ -31,6 +31,17 @@ Reserves stock when an order is created and tells the orders service whether the
 - **MongoDB** - Reservation audit log; connection via `MONGODB_URI` in `apps/inventory/.env`.
 - **Redis** - Shared instance; `REDIS_URL` in `apps/inventory/.env`. Port 6379 in Docker. Keys use prefix `inventory:` (e.g. list cache).
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Run locally
 
 From repo root:

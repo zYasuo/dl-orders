@@ -61,6 +61,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const body: StandardErrorResponse = {
+      success: false,
       statusCode,
       error: getErrorText(statusCode),
       message,

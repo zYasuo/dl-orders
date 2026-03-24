@@ -43,6 +43,17 @@ JWT payload: `{ sub: userId, email }`; other services validate it with the same 
 - **Postgres** - Users, OTP codes, auth_logs (per-user login attempts and lockout); `DATABASE_URL` in `apps/auth/.env`. Port 5436 in Docker.
 - **Redis** - Shared instance; `REDIS_URL` in `apps/auth/.env`. Port 6379 in Docker. All keys use the `auth:` prefix (lockout attempts/until, rate limit per endpoint and IP). Rate limit is configurable via optional env vars: `RATE_LIMIT_SIGNUP_MAX`, `RATE_LIMIT_SIGNUP_WINDOW_SECONDS`, `RATE_LIMIT_VERIFY_OTP_*`, `RATE_LIMIT_SIGNIN_*` (defaults: signup 5/hour, verify-otp 10/15min, signin 10/1min).
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Run locally
 
 From repo root:

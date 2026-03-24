@@ -1,4 +1,5 @@
 import { throwIfNotOk } from '@/lib/errors';
+import type { ApiSuccessResponse } from '@/types/api';
 
 export type BffFetchOptions = Omit<RequestInit, 'headers'> & {
     headers?: HeadersInit;
@@ -32,5 +33,15 @@ export async function bffJson<T>(path: string, init?: BffFetchOptions): Promise<
     if (res.status === 204) {
         return undefined as T;
     }
-    return (await res.json()) as T;
+    const payload = (await res.json()) as unknown;
+    if (
+        payload !== null &&
+        typeof payload === 'object' &&
+        'success' in payload &&
+        'data' in payload &&
+        (payload as Record<string, unknown>).success === true
+    ) {
+        return (payload as ApiSuccessResponse<T>).data;
+    }
+    return payload as T;
 }

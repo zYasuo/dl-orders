@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export interface StandardErrorResponse {
+  success: false;
   statusCode: number;
   error: string;
   message: string;
@@ -9,6 +10,9 @@ export interface StandardErrorResponse {
 }
 
 export class StandardErrorResponseDto implements StandardErrorResponse {
+  @ApiProperty({ example: false, description: 'Indicates a failed response' })
+  success!: false;
+
   @ApiProperty({ example: 404, description: 'HTTP status code' })
   statusCode!: number;
 

@@ -41,6 +41,17 @@ The `inventory.reserved` event can be delivered more than once (e.g. at-least-on
 - **Postgres** - Payments (orderId, idempotencyKey, externalId, preferenceId, amount, status, etc.); connection via `DATABASE_URL` in `apps/payment/.env`.
 - **MongoDB** - Payment audit log; connection via `MONGODB_URI` in `apps/payment/.env`.
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Credentials (Mercado Pago)
 
 1. **Access token:** [Mercado Pago Developers](https://www.mercadopago.com.br/developers) -> Your app -> Credentials. Use **test** credentials (`TEST-...`) for development.

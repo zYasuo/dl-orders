@@ -39,7 +39,7 @@ export class SignupUseCase {
         emailEncrypted,
         emailLookupHash,
         passwordHash,
-        name: name ?? null,
+        name,
       }),
     );
 

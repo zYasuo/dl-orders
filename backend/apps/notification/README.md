@@ -29,6 +29,17 @@ Sends notifications (e.g. email) when an order is confirmed or when the inventor
 - **Postgres** - Notifications; connection via `DATABASE_URL` in `apps/notification/.env`.
 - **MongoDB** - Notification audit log and user notifications; connection via `MONGODB_URI` in `apps/notification/.env`.
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Run locally
 
 From repo root:

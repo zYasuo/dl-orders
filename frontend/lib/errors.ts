@@ -14,6 +14,14 @@ export async function throwIfNotOk(response: Response): Promise<void> {
             message: response.statusText || 'Não foi possível processar a resposta.',
         });
     }
+    const isFailure = body.success === false || body.success === undefined;
+    if (!isFailure) {
+        throw new ApiError({
+            statusCode: response.status,
+            error: response.statusText || 'Error',
+            message: response.statusText || 'Não foi possível processar a resposta.',
+        });
+    }
     throw new ApiError({
         statusCode: body.statusCode ?? response.status,
         error: body.error ?? 'Error',

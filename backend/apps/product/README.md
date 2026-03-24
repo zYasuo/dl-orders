@@ -13,7 +13,7 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Inbound
 
-- **HTTP:** REST API (v1) — `POST /api/v1/products` (JWT), `GET /api/v1/products` (public, **paginated**: query `page` default 1, `limit` default 12, max 50; response `{ data, meta: { page, limit, total, totalPages } }`), `GET /api/v1/products/:id` (public). Prefix `api/v1`.
+- **HTTP:** REST API (v1) — `POST /api/v1/products` (JWT), `GET /api/v1/products` (public, **paginated**: query `page` default 1, `limit` default 12, max 50; response `{ success, timestamp, data, meta: { page, limit, total, totalPages } }`), `GET /api/v1/products/:id` (public). Prefix `api/v1`.
 
 ## Outbound
 
@@ -23,6 +23,17 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 - **MongoDB** — Product catalog; connection via `MONGODB_URI` in `apps/product/.env`.
 - **Redis** — Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Keys use prefix `product:` (e.g. item by id).
+
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+Paginated listing (`GET /api/v1/products`) returns:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
 
 ## Run locally
 

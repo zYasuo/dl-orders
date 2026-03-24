@@ -1,7 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { HttpExceptionFilter, setupSwagger, snakeToCamelBody } from '@app/shared';
+import {
+  HttpExceptionFilter,
+  setupSwagger,
+  snakeToCamelBody,
+  TransformInterceptor,
+} from '@app/shared';
 import { PaymentModule } from './payment.module';
 
 async function bootstrap() {
@@ -10,6 +15,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
   app.use(snakeToCamelBody);
 
   setupSwagger(app, {

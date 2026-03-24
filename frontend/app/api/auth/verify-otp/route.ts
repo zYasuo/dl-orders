@@ -16,8 +16,15 @@ export async function POST(request: Request) {
     if (!res.ok) {
         return new NextResponse(text, { status: res.status, headers: { 'Content-Type': 'application/json' } });
     }
-    const data = JSON.parse(text) as { accessToken: string };
+    const parsed = JSON.parse(text) as { accessToken?: string; data?: { accessToken?: string } };
+    const accessToken = parsed.data?.accessToken ?? parsed.accessToken;
+    if (!accessToken) {
+        return NextResponse.json(
+            { statusCode: 502, error: 'BadGateway', message: 'Resposta de autenticação inválida.' },
+            { status: 502 },
+        );
+    }
     const out = NextResponse.json({ success: true });
-    setSessionCookie(out, data.accessToken);
+    setSessionCookie(out, accessToken);
     return out;
 }

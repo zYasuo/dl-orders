@@ -1,5 +1,6 @@
 import { throwIfNotOk } from '@/lib/errors';
 import { ApiError } from '@/types/api';
+import type { ApiPaginatedSuccessResponse, ApiSuccessResponse } from '@/types/api';
 import type { PaginatedResponse } from '@/types/pagination';
 import type { Product } from '@/types/product';
 
@@ -43,6 +44,29 @@ function isPaginatedProductPayload(body: unknown): body is PaginatedResponse<Pro
     );
 }
 
+function unwrapProductListPayload(body: unknown): PaginatedResponse<Product> | null {
+    if (isPaginatedProductPayload(body)) {
+        return body;
+    }
+    if (body !== null && typeof body === 'object') {
+        const maybeEnvelope = body as Partial<ApiPaginatedSuccessResponse<Product>>;
+        if (maybeEnvelope.success === true && isPaginatedProductPayload({ data: maybeEnvelope.data, meta: maybeEnvelope.meta })) {
+            return { data: maybeEnvelope.data!, meta: maybeEnvelope.meta! };
+        }
+    }
+    return null;
+}
+
+function unwrapProductPayload(body: unknown): Product | null {
+    if (body !== null && typeof body === 'object' && 'success' in body && 'data' in body && (body as Record<string, unknown>).success === true) {
+        return (body as ApiSuccessResponse<Product>).data;
+    }
+    if (body !== null && typeof body === 'object') {
+        return body as Product;
+    }
+    return null;
+}
+
 export async function fetchProductList(page = 1, limit = DEFAULT_PRODUCTS_PAGE_SIZE): Promise<PaginatedResponse<Product>> {
     const origin = serverBffOrigin();
     if (!origin) {
@@ -61,8 +85,9 @@ export async function fetchProductList(page = 1, limit = DEFAULT_PRODUCTS_PAGE_S
         }
         await throwIfNotOk(res);
         const data = (await res.json()) as unknown;
-        if (isPaginatedProductPayload(data)) {
-            return data;
+        const unwrapped = unwrapProductListPayload(data);
+        if (unwrapped) {
+            return unwrapped;
         }
         return emptyPaginated(page, limit);
     } catch (e) {
@@ -87,7 +112,8 @@ export async function fetchProductById(id: string): Promise<Product | null> {
             return null;
         }
         await throwIfNotOk(res);
-        return (await res.json()) as Product;
+        const data = (await res.json()) as unknown;
+        return unwrapProductPayload(data);
     } catch (e) {
         if (e instanceof ApiError) {
             throw e;

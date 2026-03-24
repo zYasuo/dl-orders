@@ -17,6 +17,12 @@ export type Order = {
 };
 
 export function normalizeOrder(raw: unknown): Order {
+    if (raw && typeof raw === 'object' && 'success' in raw && 'data' in raw) {
+        const data = (raw as { data: unknown }).data;
+        if (data && typeof data === 'object') {
+            return data as Order;
+        }
+    }
     if (raw && typeof raw === 'object' && 'params' in raw) {
         const p = (raw as { params: unknown }).params;
         if (p && typeof p === 'object') {

@@ -29,6 +29,17 @@ Uses shared `JwtAuthGuard` and `@CurrentUser()` from `@app/shared` to validate J
 
 - **Postgres** - User profiles; `DATABASE_URL` in `apps/users/.env`. Port 5437 in Docker.
 
+## HTTP response contract
+
+All HTTP endpoints in this service return:
+
+- Success: `{ success: true, timestamp, data }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+For paginated responses, `meta` is included at top level:
+
+- Paginated success: `{ success: true, timestamp, data, meta }`
+
 ## Run locally
 
 From repo root:

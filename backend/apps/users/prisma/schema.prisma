@@ -8,9 +8,9 @@ datasource db {
 }
 
 model UserProfile {
-  id        String   @id
-  email     String   @unique
-  name      String?
+  id        String   @id @db.VarChar(36)
+  email     String   @db.VarChar(254) @unique
+  name      String?  @db.VarChar(200)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   @@map("user_profiles")

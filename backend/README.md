@@ -29,6 +29,54 @@ Run from this directory or via `npm run <script> -w backend` from the repo root.
 
 Full list: [package.json](package.json).
 
+## HTTP response contract
+
+All backend HTTP routes follow the same envelope:
+
+- Success: `{ success: true, timestamp, data }`
+- Paginated success: `{ success: true, timestamp, data, meta }`
+- Error: `{ success: false, timestamp, statusCode, error, message, details? }`
+
+Examples:
+
+```json
+{
+  "success": true,
+  "timestamp": "2026-03-24T12:00:00.000Z",
+  "data": {
+    "id": "ord_123"
+  }
+}
+```
+
+```json
+{
+  "success": true,
+  "timestamp": "2026-03-24T12:00:00.000Z",
+  "data": [
+    {
+      "id": "prod_1"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 12,
+    "total": 50,
+    "totalPages": 5
+  }
+}
+```
+
+```json
+{
+  "success": false,
+  "timestamp": "2026-03-24T12:00:00.000Z",
+  "statusCode": 404,
+  "error": "Not Found",
+  "message": "Order not found"
+}
+```
+
 ## Regra de Ouro de Repositorio
 
 - Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
