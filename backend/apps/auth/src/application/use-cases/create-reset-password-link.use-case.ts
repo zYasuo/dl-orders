@@ -18,6 +18,7 @@ export class CreateResetPasswordLinkUseCase {
 
     const token = PasswordResetEntity.generateToken();
     const expiresAt = PasswordResetEntity.expiresAtFromNow();
+    const now = new Date();
 
     const message =
       'If this email addres is registered, you will receive a reset password link in a few minutes.';
@@ -47,8 +48,8 @@ export class CreateResetPasswordLinkUseCase {
           linkResetPassword,
           used: false,
           expiresAt,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: now,
+          updatedAt: now,
         }),
       ),
       this.resetPasswordPublisher.publish({
@@ -65,4 +66,3 @@ export class CreateResetPasswordLinkUseCase {
     return `${process.env.FRONTEND_URL_RESET_PASSWORD}?token=${token}`;
   }
 }
-
