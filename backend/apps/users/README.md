@@ -55,10 +55,3 @@ npm run start:dev:users
 ```
 
 Requires RabbitMQ, Postgres (users DB), and env: `DATABASE_URL`, `PORT=3006`, `JWT_SECRET` (same as auth), `INTERNAL_API_SECRET`, `RABBITMQ_URL`, `QUEUE_NAME`. Copy from `apps/users/.env.example`.
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

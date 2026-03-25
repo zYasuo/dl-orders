@@ -55,10 +55,3 @@ npm run start:dev:notification
 ```
 
 Ensure RabbitMQ, Postgres, and MongoDB are up. Set `apps/notification/.env` with `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `JWT_SECRET` (same as auth for JWT validation), and any email provider keys (e.g. Resend).
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

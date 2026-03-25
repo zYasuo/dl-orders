@@ -73,10 +73,3 @@ npm run seed:product -- "C:\path\to\your.json"
 Or set `SEED_JSON_PATH` (PowerShell: `$env:SEED_JSON_PATH="C:\path\to\your.json"; npm run seed:product`).
 
 The script maps: `title` → `name`, `description` → `description`, `final_price` (or `initial_price`) → `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).
-
-## Repository guidelines
-
-- Write repositories accept domain entities, not application DTOs.
-- Expected pattern: `create(entity)` and `update(entity)`.
-- The use case builds the domain entity before calling the repository.
-- The persistence adapter only maps entity ↔ database.

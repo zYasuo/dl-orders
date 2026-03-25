@@ -76,10 +76,3 @@ Examples:
   "message": "Order not found"
 }
 ```
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

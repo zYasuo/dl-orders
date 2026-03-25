@@ -56,10 +56,3 @@ npm run start:dev:orders
 ```
 
 Ensure RabbitMQ, Postgres, and MongoDB are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL`, `JWT_SECRET`, `SERVICE_AUTH_SECRET` (shared with payment), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

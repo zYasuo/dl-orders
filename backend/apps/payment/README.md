@@ -9,7 +9,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 ## Role
 
 - **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service (including the order's `idempotencyKey`), creates a Payment record (PENDING) or returns the existing one when the same idempotency key or orderId is used, then creates a Mercado Pago Preference (or skips if one already exists) and stores the checkout URL (`initPoint`).
-- **HTTP:** Mercado Pago webhook (`POST /payments/webhook`, assinatura obrigatória e `MERCADOPAGO_WEBHOOK_SECRET` configurado); GET payment by order ID (`GET /payments/order/:orderId`, JWT) for the checkout link. Chamadas HTTP ao orders usam `SERVICE_AUTH_SECRET` no header `x-service-auth`.
+- **HTTP:** Mercado Pago webhook (`POST /payments/webhook`, signature verification required and `MERCADOPAGO_WEBHOOK_SECRET` set); GET payment by order ID (`GET /payments/order/:orderId`, JWT) for the checkout link. HTTP calls to the orders service use `SERVICE_AUTH_SECRET` in the `x-service-auth` header.
 - **Events out:** On webhook `approved` -> `payment.approved` (orders confirms); on `rejected`/cancelled -> `payment.failed` (orders cancels and returns stock).
 
 ## Ports
@@ -22,7 +22,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 
 ## Inbound
 
-- **HTTP:** `POST /payments/webhook` (Mercado Pago; `data.id` + `x-signature` obrigatórios; sem `MERCADOPAGO_WEBHOOK_SECRET` o endpoint responde 503), `GET /payments/order/:orderId` (JWT).
+- **HTTP:** `POST /payments/webhook` (Mercado Pago; `data.id` + `x-signature` required; without `MERCADOPAGO_WEBHOOK_SECRET` the endpoint returns 503), `GET /payments/order/:orderId` (JWT).
 - **Messaging:** `inventory.reserved` (forwarded by the orders service to the payment queue).
 
 ## Outbound
@@ -78,10 +78,3 @@ npm run start:dev:payment
 Ensure RabbitMQ, Postgres (payment DB on port 5438), and LocalStack (if using DynamoDB) are up. Set `apps/payment/.env` with `DATABASE_URL`, `RABBITMQ_URL`, `QUEUE_NAME`, `ORDERS_SERVICE_URL`, `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `JWT_SECRET`, `SERVICE_AUTH_SECRET` (same as orders), and `MONGODB_URI`.
 
 Port: **3007** (HTTP + Swagger).
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

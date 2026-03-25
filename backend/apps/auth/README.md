@@ -69,10 +69,3 @@ npm run start:dev:auth
 ```
 
 Requires RabbitMQ, Redis, Postgres (auth DB), and env: `DATABASE_URL`, `PORT=3005`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `OTP_EXPIRES_IN_MINUTES`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`, `USERS_SERVICE_URL`, `INTERNAL_API_SECRET` (must match users service). Copy from `apps/auth/.env.example`.
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.

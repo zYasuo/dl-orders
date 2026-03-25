@@ -57,10 +57,3 @@ npm run start:dev:inventory
 ```
 
 Ensure RabbitMQ, Redis, Postgres, and MongoDB are up, and that `apps/inventory/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`, `JWT_SECRET`. Copy from `apps/inventory/.env.example`. Port 3002 if exposing HTTP.
-
-## Regra de Ouro de Repositorio
-
-- Repositorios de escrita recebem entidade de dominio, nao DTO de aplicacao.
-- Padrao esperado: `create(entity)` e `update(entity)`.
-- Use case monta entidade de dominio antes de chamar repositorio.
-- Adapter de persistencia faz apenas mapeamento entidade <-> banco.
