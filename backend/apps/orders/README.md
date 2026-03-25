@@ -4,31 +4,33 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Role
 
-- **HTTP:** Create order, find by ID, audit log, summary — all require **Bearer JWT** (same `JWT_SECRET` as auth) **or** header **`x-service-auth`** matching **`SERVICE_AUTH_SECRET`** (used by the payment service to fetch order details). Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (`GET /api/v1/products/:id`, public) for name, description, and price; then publishes `order.creation_requested`.
+- **HTTP:** Create order, list paginada, find by ID, audit log, summary — all require **Bearer JWT** (same `JWT_SECRET` as auth) **or** header **`x-service-auth`** matching **`SERVICE_AUTH_SECRET`** (used by the payment service to fetch order details). Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (`GET /api/v1/products/:id`, public) for name, description, and price; then publishes `order.creation_requested`.
 - **Events in:** Listens for `inventory.reserved` (confirm order) and `inventory.reservation_failed` (cancel order). On confirm, publishes `order.confirmed` (including real `totalPrice` and product data) for the notification service.
 
 ## Ports
 
-- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma). Includes `confirmIfPending` and `cancelIfPending` for atomic status transitions.
+- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma). Includes `findPage`, `count`, `confirmIfPending` e `cancelIfPending` for atomic status transitions.
 - **ProductCatalogPort** - Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
 - **OrderEventsPublisherPort** - Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
 - **OrderAuditLogPort** - Append audit entries (MongoDB).
 - **OrderSummaryPort** - Read/write order summary read model (MongoDB).
+- **CachePort** - Cache genérico para listagem paginada versionada e cache por id.
 
 ## Inbound
 
-- **HTTP:** REST API (create order, find by id, audit log, summary) — JWT or `x-service-auth` (see `backend/SECURITY.md`).
+- **HTTP:** REST API (create order, list paginada, find by id, audit log, summary) — JWT or `x-service-auth` (see `backend/SECURITY.md`).
 - **Messaging:** `inventory.reserved`, `inventory.reservation_failed` (from inventory service).
 
 ## Outbound
 
-- **Persistence:** `persistence/sql/` (orders via Prisma), `persistence/mongodb/` (order audit log, order summary).
+- **Persistence:** `persistence/sql/` (orders via Prisma), `persistence/mongodb/` (order audit log, order summary), cache Redis via `CachePort`.
 - **Events:** `order.creation_requested` (after create), `order.confirmed` (after confirm).
 
 ## Data
 
 - **Postgres** - Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
 - **MongoDB** - Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
+- **Redis** - Shared cache instance; connection via `REDIS_URL` in `apps/orders/.env`. Chaves: item por id (`orders:{id}`), listas paginadas versionadas (`orders:all:v{version}:page:{page}:limit:{limit}`) e versão (`orders:all:version`).
 
 ## HTTP response contract
 
@@ -55,4 +57,4 @@ Or from `backend/`:
 npm run start:dev:orders
 ```
 
-Ensure RabbitMQ, Postgres, and MongoDB are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL`, `JWT_SECRET`, `SERVICE_AUTH_SECRET` (shared with payment), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.
+Ensure RabbitMQ, Postgres, MongoDB, and Redis are up, and that `apps/orders/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `PRODUCT_SERVICE_URL`, `REDIS_URL`, `JWT_SECRET`, `SERVICE_AUTH_SECRET` (shared with payment), and optionally `PORT` (default 3001). The product service must be reachable when creating orders.

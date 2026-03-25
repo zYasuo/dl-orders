@@ -1,20 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { CachePort } from '@app/shared';
 import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { OrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { orderCacheKey } from '../cache/order-cache-key';
 
 export type TConfirmOrderEvent = { orderId: string };
 
 @Injectable()
 export class ConfirmOrderUseCase {
   private readonly logger = new Logger(ConfirmOrderUseCase.name);
+  private readonly listVersionKey = 'orders:all:version';
 
   constructor(
     private readonly ordersRepositoryPort: OrdersRepositoryPort,
     private readonly orderEventsPublisherPort: OrderEventsPublisherPort,
     private readonly orderAuditLogPort: OrderAuditLogPort,
     private readonly orderSummaryPort: OrderSummaryPort,
+    private readonly cache: CachePort,
   ) {}
 
   async execute(event: TConfirmOrderEvent): Promise<void> {
@@ -73,5 +77,8 @@ export class ConfirmOrderUseCase {
         });
       }
     });
+
+    await this.cache.incr(this.listVersionKey);
+    await this.cache.del(orderCacheKey(order.id));
   }
 }

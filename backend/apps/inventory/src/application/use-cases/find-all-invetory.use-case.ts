@@ -1,24 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { CachePort, Paginated } from '@app/shared';
+import { InventoryCacheKeyBuilder } from '../cache/inventory-cache-key-builder';
+import { TFindAllInventoryQuery } from '../dto/find-all-inventory-query.schema';
 import { InventoryEntity } from '../../domain/entities/inventory.entity';
-import { InventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { InventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
-
-const LIST_CACHE_TTL_SECONDS = 60;
 
 @Injectable()
 export class FindAllInventoryUseCase {
+  private readonly cacheTtlSeconds = 60 * 10;
+
   constructor(
     private readonly inventoryRepositoryPort: InventoryRepositoryPort,
-    private readonly listCache: InventoryListCachePort,
+    private readonly cache: CachePort,
+    private readonly cacheKeyBuilder: InventoryCacheKeyBuilder,
   ) {}
 
-  async execute(): Promise<InventoryEntity[]> {
-    const cached = await this.listCache.get();
-    if (cached !== null) return cached;
+  async execute(input: TFindAllInventoryQuery): Promise<Paginated<InventoryEntity>> {
+    const { page, limit } = input;
 
-    const items = await this.inventoryRepositoryPort.findAll();
-    await this.listCache.set(items, LIST_CACHE_TTL_SECONDS);
+    const cacheKey = await this.cacheKeyBuilder.buildListKey(page, limit);
+    const cached = await this.cache.getJson<Paginated<InventoryEntity>>(cacheKey);
 
-    return items;
+    if (cached) return cached;
+
+    const [data, total] = await Promise.all([
+      this.inventoryRepositoryPort.findPage(page, limit),
+      this.inventoryRepositoryPort.count(),
+    ]);
+
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
+    const result = {
+      data,
+      meta: { page, limit, total, totalPages },
+    };
+
+    await this.cache.setJson(cacheKey, result, this.cacheTtlSeconds);
+
+    return result;
   }
 }

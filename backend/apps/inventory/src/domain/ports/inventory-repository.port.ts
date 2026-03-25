@@ -8,6 +8,8 @@ export abstract class InventoryRepositoryPort {
   abstract findByProductId(productId: string): Promise<InventoryEntity | null>;
   abstract findByName(name: string): Promise<InventoryEntity | null>;
   abstract findAll(): Promise<InventoryEntity[]>;
+  abstract findPage(page: number, limit: number): Promise<InventoryEntity[]>;
+  abstract count(): Promise<number>;
   abstract findLowStock(): Promise<InventoryEntity[]>;
   abstract findLowStockPage(
     limit: number,

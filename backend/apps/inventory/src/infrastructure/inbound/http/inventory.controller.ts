@@ -1,9 +1,13 @@
-import { ZodValidationPipe } from '@app/shared';
-import { Body, Controller, Param } from '@nestjs/common';
+import { Paginated, ZodValidationPipe } from '@app/shared';
+import { Body, Controller, Param, Query } from '@nestjs/common';
 import {
   SCreateInventory,
   type TCreateInventory,
 } from '../../../application/dto/create-inventory.schema';
+import {
+  SFindAllInventoryQuery,
+  type TFindAllInventoryQuery,
+} from '../../../application/dto/find-all-inventory-query.schema';
 import { CreateInventoryUseCase } from '../../../application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from '../../../application/use-cases/find-all-invetory.use-case';
 import { InventoryEntity } from '../../../domain/entities/inventory.entity';
@@ -32,7 +36,9 @@ export class InventoryController {
   }
 
   @InventoryDoc.List()
-  async findAll(): Promise<InventoryEntity[]> {
-    return this.findAllInventoryUseCase.execute();
+  async findAll(
+    @Query(new ZodValidationPipe(SFindAllInventoryQuery)) query: TFindAllInventoryQuery,
+  ): Promise<Paginated<InventoryEntity>> {
+    return this.findAllInventoryUseCase.execute(query);
   }
 }

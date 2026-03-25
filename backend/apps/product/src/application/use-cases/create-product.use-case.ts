@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CachePort } from '@app/shared';
 import { ProductEntity } from '../../domain/entities/product.entity';
 import { ProductCachePort } from '../../domain/ports/product-cache.port';
 import { ProductRepositoryPort } from '../../domain/ports/product-repository.port';
@@ -6,9 +7,12 @@ import { TCreateProduct } from '../dto/create-product.schema';
 
 @Injectable()
 export class CreateProductUseCase {
+  private readonly listVersionKey = 'products:all:version';
+
   constructor(
     private readonly productRepositoryPort: ProductRepositoryPort,
     private readonly productCache: ProductCachePort,
+    private readonly cache: CachePort,
   ) {}
 
   async execute(input: TCreateProduct): Promise<ProductEntity> {
@@ -29,6 +33,7 @@ export class CreateProductUseCase {
     }
 
     await this.productCache.invalidate(createdProduct.id);
+    await this.cache.incr(this.listVersionKey);
     return createdProduct;
   }
 }

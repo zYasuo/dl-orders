@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
+import { CacheModule, MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
+import { OrdersCacheKeyBuilder } from './application/cache/orders-cache-key-builder';
 import { DbModule } from './infrastructure/db/db.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { OrderAuditLogPort } from './domain/ports/order-audit-log.port';
@@ -20,6 +21,7 @@ import { MongoOrderAuditLogRepository } from './infrastructure/outbound/persiste
 import { MongoOrderSummaryRepository } from './infrastructure/outbound/persistence/mongodb/order-summary.repository';
 import { CreateOrderUseCase } from './application/use-cases/create-order.use-case';
 import { FindOrderByIdUseCase } from './application/use-cases/find-order-by-id.use-case';
+import { FindAllOrdersUseCase } from './application/use-cases/find-all-orders.use-case';
 import { ConfirmOrderUseCase } from './application/use-cases/confirm-order.use-case';
 import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-case';
 
@@ -32,6 +34,7 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
     DbModule,
     RabbitMQModule,
     MongoDBModule.forRoot(),
+    CacheModule,
   ],
   controllers: [
     OrdersController,
@@ -43,9 +46,11 @@ import { CancelOrderUseCase } from './application/use-cases/cancel-order.use-cas
   providers: [
     ServiceOrJwtAuthGuard,
     CreateOrderUseCase,
+    FindAllOrdersUseCase,
     FindOrderByIdUseCase,
     ConfirmOrderUseCase,
     CancelOrderUseCase,
+    OrdersCacheKeyBuilder,
     { provide: OrdersRepositoryPort, useClass: OrdersRepository },
     { provide: ProductCatalogPort, useClass: ProductCatalogHttpClient },
     { provide: OrderEventsPublisherPort, useClass: OrdersRabbitMqPublisher },

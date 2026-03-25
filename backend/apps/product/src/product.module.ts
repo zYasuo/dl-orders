@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { JwtAuthGuard, MongoDBModule } from '@app/shared';
+import { CacheModule, JwtAuthGuard, MongoDBModule } from '@app/shared';
+import { ProductCacheKeyBuilder } from './application/cache/product-cache-key-builder';
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
 import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
 import { FindProductByIdUseCase } from './application/use-cases/find-product-by-id.use-case';
@@ -19,6 +20,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
     }),
     MongoDBModule.forRoot(),
     RedisModule,
+    CacheModule,
   ],
   controllers: [ProductController],
   providers: [
@@ -26,6 +28,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
     CreateProductUseCase,
     FindAllProductsUseCase,
     FindProductByIdUseCase,
+    ProductCacheKeyBuilder,
     { provide: ProductCachePort, useClass: RedisProductCacheAdapter },
     { provide: ProductRepositoryPort, useClass: MongoProductRepository },
   ],

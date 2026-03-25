@@ -9,7 +9,8 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 ## Ports
 
 - **ProductRepositoryPort** — Persist and load products (MongoDB); paginated listing via `findPage` + `count`.
-- **ProductCachePort** — Cache by product ID (Redis); invalidated on create. No full-list cache.
+- **ProductCachePort** — Cache by product ID (Redis).
+- **CachePort** — Cache genérico para listagem paginada com versionamento (`products:all:version`).
 
 ## Inbound
 
@@ -17,12 +18,12 @@ Product catalog: create and manage products. HTTP-only; no messaging.
 
 ## Outbound
 
-- **Persistence:** `persistence/mongodb/` (products), `persistence/redis/` (product cache); no events.
+- **Persistence:** `persistence/mongodb/` (products), `persistence/redis/` (product cache por id), cache de lista versionado via `CachePort`; no events.
 
 ## Data
 
 - **MongoDB** — Product catalog; connection via `MONGODB_URI` in `apps/product/.env`.
-- **Redis** — Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Keys use prefix `product:` (e.g. item by id).
+- **Redis** — Shared instance; `REDIS_URL` in `apps/product/.env`. Port 6379 in Docker. Chaves: item por id (`product:item:{id}`) e lista paginada versionada (`products:all:v{version}:page:{page}:limit:{limit}` + `products:all:version`).
 
 ## HTTP response contract
 

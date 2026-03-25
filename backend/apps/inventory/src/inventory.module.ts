@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
+import { CacheModule, MongoDBModule, ServiceOrJwtAuthGuard } from '@app/shared';
+import { InventoryCacheKeyBuilder } from './application/cache/inventory-cache-key-builder';
 import { CreateInventoryUseCase } from './application/use-cases/create-inventory.use-case';
 import { FindAllInventoryUseCase } from './application/use-cases/find-all-invetory.use-case';
 import { HandleOrderCreationRequestedUseCase } from './application/use-cases/handle-order-creation-requested.use-case';
@@ -35,6 +36,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     RabbitMQModule,
     RedisModule,
     MongoDBModule.forRoot(),
+    CacheModule,
   ],
   controllers: [InventoryController, OrderCreationRequestedConsumer],
   providers: [
@@ -44,6 +46,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     FindAllInventoryUseCase,
     CheckQuantityInInventoryUseCase,
     LowStockCronService,
+    InventoryCacheKeyBuilder,
     { provide: InventoryLowStockPublisherPort, useClass: InventoryRabbitMqPublisher },
     { provide: LowStockNotificationDeduperPort, useClass: RedisLowStockNotificationDeduperAdapter },
     { provide: InventoryListCachePort, useClass: RedisInventoryListCacheAdapter },

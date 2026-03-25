@@ -1,15 +1,19 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CachePort } from '@app/shared';
 import { OrderEntity } from '../../domain/entities/order.entity';
 import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { OrderEventsPublisherPort } from '../../domain/ports/order-events-publisher.port';
 import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { ProductCatalogPort } from '../../domain/ports/product-catalog.port';
+import { orderCacheKey } from '../cache/order-cache-key';
 import { TCreateOrder } from '../dto/create-order.dto';
 
 @Injectable()
 export class CreateOrderUseCase {
   private readonly logger = new Logger(CreateOrderUseCase.name);
+  private readonly listVersionKey = 'orders:all:version';
+  private readonly itemCacheTtlSeconds = 60 * 5;
 
   constructor(
     private readonly ordersRepositoryPort: OrdersRepositoryPort,
@@ -17,6 +21,7 @@ export class CreateOrderUseCase {
     private readonly orderEventsPublisherPort: OrderEventsPublisherPort,
     private readonly orderAuditLogPort: OrderAuditLogPort,
     private readonly orderSummaryPort: OrderSummaryPort,
+    private readonly cache: CachePort,
   ) {}
 
   async execute(input: TCreateOrder) {
@@ -99,6 +104,9 @@ export class CreateOrderUseCase {
         });
       }
     });
+
+    await this.cache.incr(this.listVersionKey);
+    await this.cache.setJson(orderCacheKey(order.id), order, this.itemCacheTtlSeconds);
 
     return order;
   }

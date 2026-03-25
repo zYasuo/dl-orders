@@ -1,18 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { CachePort } from '@app/shared';
 import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
 import { OrderSummaryPort } from '../../domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
+import { orderCacheKey } from '../cache/order-cache-key';
 
 export type TCancelOrderEvent = { orderId: string; reason: string };
 
 @Injectable()
 export class CancelOrderUseCase {
   private readonly logger = new Logger(CancelOrderUseCase.name);
+  private readonly listVersionKey = 'orders:all:version';
 
   constructor(
     private readonly ordersRepositoryPort: OrdersRepositoryPort,
     private readonly orderAuditLogPort: OrderAuditLogPort,
     private readonly orderSummaryPort: OrderSummaryPort,
+    private readonly cache: CachePort,
   ) {}
 
   async execute(event: TCancelOrderEvent): Promise<void> {
@@ -56,5 +60,8 @@ export class CancelOrderUseCase {
         });
       }
     });
+
+    await this.cache.incr(this.listVersionKey);
+    await this.cache.del(orderCacheKey(order.id));
   }
 }

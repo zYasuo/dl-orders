@@ -133,6 +133,34 @@ export class InventoryRepository extends InventoryRepositoryPort {
     );
   }
 
+  async findPage(page: number, limit: number): Promise<InventoryEntity[]> {
+    const skip = (page - 1) * limit;
+    const rows = await this.db.inventory.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(
+      (row) =>
+        new InventoryEntity(
+          row.id,
+          row.name,
+          row.quantity,
+          row.maxQuantity,
+          row.minQuantity,
+          row.lowStockThreshold,
+          row.productId,
+          row.createdBy,
+          row.createdAt,
+          row.updatedAt,
+        ),
+    );
+  }
+
+  async count(): Promise<number> {
+    return this.db.inventory.count();
+  }
+
   async findLowStock(): Promise<InventoryEntity[]> {
     type Row = {
       id: string;

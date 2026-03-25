@@ -29,6 +29,14 @@ export const OrdersDoc = {
       ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 
+  List: () =>
+    applyDecorators(
+      Get(),
+      ApiOperation({ summary: 'List orders with pagination' }),
+      ApiResponse({ status: 200, description: 'Paginated list of orders' }),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
+    ),
+
   AuditLog: () =>
     applyDecorators(
       Get(':id/audit-log'),

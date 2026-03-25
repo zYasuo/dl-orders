@@ -1,17 +1,18 @@
-import { IOrderCreationRequestedEvent } from '@app/shared';
+import { CachePort, IOrderCreationRequestedEvent } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { InventoryEventsPublisherPort } from '../../domain/ports/inventory-events-publisher.port';
-import { InventoryListCachePort } from '../../domain/ports/inventory-list-cache.port';
 import { InventoryRepositoryPort } from '../../domain/ports/inventory-repository.port';
 import { ReservationAuditLogPort } from '../../domain/ports/reservation-audit-log.port';
 
 @Injectable()
 export class HandleOrderCreationRequestedUseCase {
+  private readonly listVersionKey = 'inventories:all:version';
+
   constructor(
     private readonly inventoryRepositoryPort: InventoryRepositoryPort,
     private readonly inventoryEventsPublisherPort: InventoryEventsPublisherPort,
     private readonly reservationAuditLogPort: ReservationAuditLogPort,
-    private readonly listCache: InventoryListCachePort,
+    private readonly cache: CachePort,
   ) {}
 
   async execute(event: IOrderCreationRequestedEvent): Promise<void> {
@@ -71,6 +72,6 @@ export class HandleOrderCreationRequestedUseCase {
       productId,
       quantity,
     });
-    await this.listCache.invalidate();
+    await this.cache.incr(this.listVersionKey);
   }
 }
