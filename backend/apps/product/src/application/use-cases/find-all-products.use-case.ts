@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CachePort, Paginated } from '@app/shared';
+import { CachePort, Paginated, runWithCacheReadLock } from '@app/shared';
 import { ProductCacheKeyBuilder } from '../cache/product-cache-key-builder';
 import { ProductRepositoryPort } from '../../domain/ports/product-repository.port';
 import { ProductEntity } from '../../domain/entities/product.entity';
@@ -22,20 +22,28 @@ export class FindAllProductsUseCase {
       return cached;
     }
 
+    return runWithCacheReadLock<Paginated<ProductEntity>>(
+      this.cache,
+      cacheKey,
+      () => this.readFromSourceAndCache(cacheKey, page, limit),
+    );
+  }
+
+  private async readFromSourceAndCache(
+    cacheKey: string,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<ProductEntity>> {
     const [data, total] = await Promise.all([
       this.productRepositoryPort.findPage(page, limit),
       this.productRepositoryPort.count(),
     ]);
-
     const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
-
     const result = {
       data,
       meta: { page, limit, total, totalPages },
     };
-
     await this.cache.setJson(cacheKey, result, this.cacheTtlSeconds);
-
     return result;
   }
 }

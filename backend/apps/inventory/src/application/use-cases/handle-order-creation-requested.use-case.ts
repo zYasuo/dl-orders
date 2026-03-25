@@ -28,18 +28,21 @@ export class HandleOrderCreationRequestedUseCase {
     const inventory = await this.inventoryRepositoryPort.findByProductId(productId);
 
     if (!inventory) {
+
       await this.reservationAuditLogPort.log({
         orderId,
         action: 'RESERVATION_FAILED',
         timestamp: new Date().toISOString(),
         details: { productId, quantity, reason: 'Inventory not available for this product' },
       });
+
       await this.inventoryEventsPublisherPort.publishInventoryReservationFailed({
         orderId,
         productId,
         quantity,
         reason: 'Inventory not available for this product',
       });
+      
       return;
     }
 

@@ -9,6 +9,7 @@ export * from './inventory';
 export * from './payment';
 export * from './auth';
 export * from './ports/cache';
+export * from './cache';
 export * from './pipes/zod-validation.pipe';
 export * from './middleware/snake-to-camel-body.middleware';
 export * from './swagger/setup-swagger';

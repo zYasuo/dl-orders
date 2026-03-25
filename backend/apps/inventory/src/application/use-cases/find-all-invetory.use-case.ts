@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CachePort, Paginated } from '@app/shared';
+import { CachePort, Paginated, runWithCacheReadLock } from '@app/shared';
 import { InventoryCacheKeyBuilder } from '../cache/inventory-cache-key-builder';
 import { TFindAllInventoryQuery } from '../dto/find-all-inventory-query.schema';
 import { InventoryEntity } from '../../domain/entities/inventory.entity';
@@ -23,19 +23,28 @@ export class FindAllInventoryUseCase {
 
     if (cached) return cached;
 
+    return runWithCacheReadLock<Paginated<InventoryEntity>>(
+      this.cache,
+      cacheKey,
+      () => this.readFromSourceAndCache(cacheKey, page, limit),
+    );
+  }
+
+  private async readFromSourceAndCache(
+    cacheKey: string,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<InventoryEntity>> {
     const [data, total] = await Promise.all([
       this.inventoryRepositoryPort.findPage(page, limit),
       this.inventoryRepositoryPort.count(),
     ]);
-
     const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
     const result = {
       data,
       meta: { page, limit, total, totalPages },
     };
-
     await this.cache.setJson(cacheKey, result, this.cacheTtlSeconds);
-
     return result;
   }
 }

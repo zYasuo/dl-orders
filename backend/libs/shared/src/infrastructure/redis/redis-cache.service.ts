@@ -39,8 +39,23 @@ export class RedisCacheService implements OnModuleInit, OnModuleDestroy, CachePo
     await this.redis.set(this.ns(key), value, 'EX', ttl);
   }
 
+  async setIfNotExists(key: string, value: string, ttl: number): Promise<boolean> {
+    const result = await this.redis.set(this.ns(key), value, 'EX', ttl, 'NX');
+    return result === 'OK';
+  }
+
   async del(key: string): Promise<void> {
     await this.redis.del(this.ns(key));
+  }
+
+  async delIfEquals(key: string, value: string): Promise<boolean> {
+    const result = await this.redis.eval(
+      "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end",
+      1,
+      this.ns(key),
+      value,
+    );
+    return result === 1;
   }
 
   async exists(key: string): Promise<boolean> {

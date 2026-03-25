@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CachePort, Paginated } from '@app/shared';
+import { CachePort, Paginated, runWithCacheReadLock } from '@app/shared';
 import { OrderEntity } from '../../domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { OrdersCacheKeyBuilder } from '../cache/orders-cache-key-builder';
@@ -25,19 +25,28 @@ export class FindAllOrdersUseCase {
       return cached;
     }
 
+    return runWithCacheReadLock<Paginated<OrderEntity>>(
+      this.cache,
+      cacheKey,
+      () => this.readFromSourceAndCache(cacheKey, page, limit),
+    );
+  }
+
+  private async readFromSourceAndCache(
+    cacheKey: string,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<OrderEntity>> {
     const [data, total] = await Promise.all([
       this.ordersRepositoryPort.findPage(page, limit),
       this.ordersRepositoryPort.count(),
     ]);
-
     const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
     const result = {
       data,
       meta: { page, limit, total, totalPages },
     };
-
     await this.cache.setJson(cacheKey, result, this.cacheTtlSeconds);
-
     return result;
   }
 }
