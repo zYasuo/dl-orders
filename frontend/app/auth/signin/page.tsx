@@ -12,7 +12,7 @@ export default function SigninPage() {
                 </span>
                 dl-orders
             </Link>
-            <Suspense fallback={<Skeleton className="h-[32rem] w-full rounded-xl border border-border bg-card" />}>
+            <Suspense fallback={<Skeleton className="h-128 w-full rounded-xl border border-border bg-card" />}>
                 <SigninForm />
             </Suspense>
         </>

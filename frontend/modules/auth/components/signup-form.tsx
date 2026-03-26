@@ -31,8 +31,11 @@ export function SignupForm() {
             router.push(`/auth/verify-otp?email=${encodeURIComponent(values.email)}`);
 
         } catch (e) {
-
-            const msg = e instanceof ApiError ? e.message : 'Não foi possível cadastrar.';
+            let msg = 'Não foi possível cadastrar.';
+            if (e instanceof ApiError) {
+                msg =
+                    e.statusCode === 409 ? 'Não foi possível concluir o cadastro.' : e.message;
+            }
             toast({ message: msg, variant: 'error' });
         }
     }

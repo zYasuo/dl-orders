@@ -4,7 +4,20 @@ import {
   ProductCatalogPort,
   TProductCatalogItem,
 } from '../../../domain/ports/product-catalog.port';
-import { SProductCatalogResponse } from './product-catalog-response.schema';
+import { SProductCatalogPayload } from './product-catalog-response.schema';
+
+function payloadFromProductServiceJson(raw: unknown): unknown {
+  if (
+    typeof raw === 'object' &&
+    raw !== null &&
+    'success' in raw &&
+    (raw as { success: unknown }).success === true &&
+    'data' in raw
+  ) {
+    return (raw as { data: unknown }).data;
+  }
+  return raw;
+}
 
 @Injectable()
 export class ProductCatalogHttpClient extends ProductCatalogPort {
@@ -26,8 +39,7 @@ export class ProductCatalogHttpClient extends ProductCatalogPort {
     }
 
     const raw = (await res.json()) as unknown;
-
-    const parsed = SProductCatalogResponse.safeParse(raw);
+    const parsed = SProductCatalogPayload.safeParse(payloadFromProductServiceJson(raw));
     if (!parsed.success) {
       throw new Error(
         `Product service contract mismatch: ${parsed.error.message}. ` +

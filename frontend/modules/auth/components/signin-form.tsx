@@ -78,8 +78,12 @@ export function SigninForm({
 
     async function onSubmit(values: SigninFormValues) {
         try {
-            await signIn({ email: values.email, password: values.password });
+            const { email, password } = values;
+
+            await signIn({ email, password });
+            
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
+
             toast({ message: 'Login realizado.', variant: 'success' });
             router.push(returnUrl.startsWith('/') ? returnUrl : '/products');
         } catch (e) {
@@ -89,10 +93,12 @@ export function SigninForm({
                 if (e.statusCode === 403) {
                     msg = 'Conta bloqueada temporariamente. Tente mais tarde.';
                 }
+
                 if (e.statusCode === 429) {
                     msg = 'Muitas tentativas. Aguarde e tente novamente.';
                 }
             }
+            
             toast({ message: msg, variant: 'error' });
         }
     }
