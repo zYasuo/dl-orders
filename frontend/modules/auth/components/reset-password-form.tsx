@@ -7,7 +7,7 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { resetPasswordSchema, type ResetPasswordFormValues } from '@/modules/auth/schemas/auth.schemas';
-import { resetPasswordLinkService } from '@/services/auth.service';
+import { requestResetPasswordLink } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 
 export function ResetPasswordForm() {
@@ -19,7 +19,7 @@ export function ResetPasswordForm() {
 
     async function onSubmit(values: ResetPasswordFormValues) {
         try {
-            const res = await resetPasswordLinkService({ email: values.email });
+            const res = await requestResetPasswordLink({ email: values.email });
             toast({ message: res.message, variant: 'success' });
         } catch (e) {
             const msg = e instanceof ApiError ? e.message : 'Não foi possível enviar o link.';

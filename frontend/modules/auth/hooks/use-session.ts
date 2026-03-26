@@ -2,12 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
-import { getMeService } from '@/services/users.service';
+import { getMe } from '@/modules/users/api';
 
 export function useSession() {
     return useQuery({
         queryKey: queryKeys.users.me,
-        queryFn: getMeService,
+        queryFn: getMe,
         retry: false,
         staleTime: 5 * 60 * 1000,
     });

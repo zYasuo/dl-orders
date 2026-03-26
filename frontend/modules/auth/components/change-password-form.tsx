@@ -8,7 +8,7 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { changePasswordSchema, type ChangePasswordFormValues } from '@/modules/auth/schemas/auth.schemas';
-import { changePasswordService } from '@/services/auth.service';
+import { changePassword } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 
 export function ChangePasswordForm() {
@@ -25,7 +25,7 @@ export function ChangePasswordForm() {
 
     async function onSubmit(values: ChangePasswordFormValues) {
         try {
-            await changePasswordService({
+            await changePassword({
                 email: values.email,
                 token: values.token,
                 newPassword: values.newPassword,

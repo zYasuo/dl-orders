@@ -2,12 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
-import { getMeService, patchMeService } from '@/services/users.service';
+import { getMe, updateMe } from '@/modules/users/api';
 
 export function useProfile() {
     return useQuery({
         queryKey: queryKeys.users.me,
-        queryFn: getMeService,
+        queryFn: getMe,
         retry: false,
     });
 }
@@ -15,7 +15,7 @@ export function useProfile() {
 export function useUpdateProfile() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (body: { name?: string | null }) => patchMeService(body),
+        mutationFn: (body: { name?: string | null }) => updateMe(body),
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
         },

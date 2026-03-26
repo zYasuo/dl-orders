@@ -9,7 +9,7 @@ export type CreateOrderInput = {
     idempotencyKey: string;
 };
 
-export async function createOrderService(input: CreateOrderInput) {
+export async function createOrder(input: CreateOrderInput) {
     const raw = await bffJson<unknown>('/api/orders', {
         method: 'POST',
         body: JSON.stringify(input),
@@ -18,7 +18,7 @@ export async function createOrderService(input: CreateOrderInput) {
     return normalizeOrder(raw);
 }
 
-export async function getOrderService(id: string) {
+export async function getOrder(id: string) {
     const raw = await bffJson<unknown>(`/api/orders/${id}`);
     return normalizeOrder(raw);
 }

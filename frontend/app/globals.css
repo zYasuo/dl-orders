@@ -1,33 +1,36 @@
 @import 'tailwindcss';
 
+/* Paleta (dl-tickets / Redis): fundo #0C1A22, texto claro, acento #FF4438.
+   Vermelhos (primary, ring): #ff4438 — destructive / danger: #e63e32 */
 :root {
     --radius: 0.625rem;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.21 0.006 285.885);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.967 0.001 286.375);
-    --accent-foreground: oklch(0.21 0.006 285.885);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
-    --success: oklch(0.527 0.154 150.069);
-    --success-foreground: oklch(0.985 0 0);
-    --danger: oklch(0.577 0.245 27.325);
-    --danger-foreground: oklch(0.985 0 0);
-    --warning: oklch(0.769 0.188 70.08);
-    --warning-foreground: oklch(0.21 0.006 285.885);
+    --background: #0c1a22;
+    --foreground: #ffffff;
+    --card: #111f28;
+    --card-foreground: #ffffff;
+    --popover: #111f28;
+    --popover-foreground: #ffffff;
+    --primary: #ff4438;
+    --primary-foreground: #ffffff;
+    --secondary: #182a36;
+    --secondary-foreground: #ffffff;
+    --muted: #182a36;
+    --muted-foreground: #a8b4bc;
+    --accent: #1e3544;
+    --accent-foreground: #ffffff;
+    --border: rgb(255 255 255 / 12%);
+    --input: rgb(255 255 255 / 14%);
+    --ring: #ff4438;
+    /* Estados da app: tons compatíveis com a mesma paleta (chart-2–4) */
+    --success: #5c7a8f;
+    --success-foreground: #ffffff;
+    --danger: #e63e32;
+    --danger-foreground: #ffffff;
+    --warning: #ff8a80;
+    --warning-foreground: #0c1a22;
 }
 
 @theme inline {
@@ -57,41 +60,21 @@
     --radius-sm: var(--radius-sm);
     --radius-md: var(--radius-md);
     --radius-lg: var(--radius-lg);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+    --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    --font-mono: var(--font-geist-mono), ui-monospace, monospace;
     --spacing-unit: 4px;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: oklch(0.141 0.005 285.823);
-        --foreground: oklch(0.985 0 0);
-        --card: oklch(0.21 0.006 285.885);
-        --card-foreground: oklch(0.985 0 0);
-        --popover: oklch(0.21 0.006 285.885);
-        --popover-foreground: oklch(0.985 0 0);
-        --primary: oklch(0.92 0.004 286.32);
-        --primary-foreground: oklch(0.21 0.006 285.885);
-        --secondary: oklch(0.274 0.006 286.033);
-        --secondary-foreground: oklch(0.985 0 0);
-        --muted: oklch(0.274 0.006 286.033);
-        --muted-foreground: oklch(0.705 0.015 286.067);
-        --accent: oklch(0.274 0.006 286.033);
-        --accent-foreground: oklch(0.985 0 0);
-        --border: oklch(1 0 0 / 10%);
-        --input: oklch(1 0 0 / 15%);
-        --ring: oklch(0.552 0.016 285.938);
-        --success: oklch(0.627 0.194 150.069);
-        --success-foreground: oklch(0.145 0.005 285.823);
-        --danger: oklch(0.637 0.237 25.331);
-        --danger-foreground: oklch(0.985 0 0);
-        --warning: oklch(0.769 0.188 70.08);
-        --warning-foreground: oklch(0.21 0.006 285.885);
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
     }
-}
-
-body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-geist-sans), system-ui, sans-serif;
+    }
+    html {
+        @apply font-sans;
+        color-scheme: dark;
+    }
 }

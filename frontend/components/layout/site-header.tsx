@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/modules/auth/hooks/use-session';
-import { signoutService } from '@/services/auth.service';
+import { signOut } from '@/modules/auth/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 
@@ -15,7 +15,7 @@ export function SiteHeader() {
 
     async function handleSignout() {
         try {
-            await signoutService();
+            await signOut();
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
             router.push('/products');
             router.refresh();

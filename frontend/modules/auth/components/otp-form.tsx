@@ -8,7 +8,7 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { otpSchema, type OtpFormValues } from '@/modules/auth/schemas/auth.schemas';
-import { verifyOtpService } from '@/services/auth.service';
+import { verifyOtp } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
@@ -27,7 +27,7 @@ export function OtpForm() {
 
     async function onSubmit(values: OtpFormValues) {
         try {
-            await verifyOtpService({ email: values.email, code: values.code });
+            await verifyOtp({ email: values.email, code: values.code });
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
             toast({ message: 'E-mail verificado. Você já pode usar a loja.', variant: 'success' });
             router.push('/products');
