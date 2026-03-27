@@ -74,3 +74,7 @@ npm run seed:product -- "C:\path\to\your.json"
 Or set `SEED_JSON_PATH` (PowerShell: `$env:SEED_JSON_PATH="C:\path\to\your.json"; npm run seed:product`).
 
 The script maps: `title` → `name`, `description` → `description`, `final_price` (or `initial_price`) → `price`. Optional: `SEED_BATCH_SIZE` (default 500), `SEED_LIMIT` (e.g. 1000 to import only the first 1000 items).
+
+After each inserted batch, if **`INVENTORY_SERVICE_URL`** and **`SERVICE_AUTH_SECRET`** are set, the script calls the Inventory service (`POST /api/v1/inventories` with `x-service-auth`) for each product using the same `_id` as `productId`. Re-running skips rows that already exist (idempotent). Inventory line names are unique per product (`name` + short id suffix).
+
+**Seed inventory env (optional):** `INVENTORY_SERVICE_URL`, `SERVICE_AUTH_SECRET`, `SEED_INVENTORY_*`, etc. — must satisfy Inventory create validation (`minQuantity < maxQuantity`, `lowStockThreshold <= minQuantity`, `quantity <= maxQuantity`). Prefer **`backend/.env`** (loaded after `apps/product/.env`) for URLs/secrets partilhados pelo workspace; ver `backend/.env.example`.

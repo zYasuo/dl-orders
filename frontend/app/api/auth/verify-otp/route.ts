@@ -4,7 +4,7 @@ import { setSessionCookie } from '@/lib/auth-cookie';
 export async function POST(request: Request) {
     const base = process.env.AUTH_SERVICE_URL;
     if (!base) {
-        return NextResponse.json({ statusCode: 500, error: 'Config', message: 'AUTH_SERVICE_URL não configurada.' }, { status: 500 });
+        return NextResponse.json({ statusCode: 500, error: 'Config', message: 'AUTH_SERVICE_URL is not configured.' }, { status: 500 });
     }
     const body = await request.json();
     const res = await fetch(`${base.replace(/\/$/, '')}/api/v1/auth/verify-otp`, {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const accessToken = parsed.data?.accessToken ?? parsed.accessToken;
     if (!accessToken) {
         return NextResponse.json(
-            { statusCode: 502, error: 'BadGateway', message: 'Resposta de autenticação inválida.' },
+            { statusCode: 502, error: 'BadGateway', message: 'Invalid authentication response.' },
             { status: 502 },
         );
     }

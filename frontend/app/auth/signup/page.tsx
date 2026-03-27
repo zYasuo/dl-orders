@@ -6,15 +6,15 @@ export default function SignupPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Criar conta</CardTitle>
-                <CardDescription>Informe seus dados. Enviaremos um código por e-mail.</CardDescription>
+                <CardTitle>Create account</CardTitle>
+                <CardDescription>Enter your details. We will email you a verification code.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                 <SignupForm />
                 <p className="text-center text-sm text-muted-foreground">
-                    Já tem conta?{' '}
+                    Already have an account?{' '}
                     <Link href="/auth/signin" className="text-primary underline-offset-4 hover:underline">
-                        Entrar
+                        Sign in
                     </Link>
                 </p>
             </CardContent>

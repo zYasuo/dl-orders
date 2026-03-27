@@ -11,7 +11,7 @@ export async function throwIfNotOk(response: Response): Promise<void> {
         throw new ApiError({
             statusCode: response.status,
             error: response.statusText || 'Error',
-            message: response.statusText || 'Não foi possível processar a resposta.',
+            message: response.statusText || 'Could not process the response.',
         });
     }
     const isFailure = body.success === false || body.success === undefined;
@@ -19,13 +19,13 @@ export async function throwIfNotOk(response: Response): Promise<void> {
         throw new ApiError({
             statusCode: response.status,
             error: response.statusText || 'Error',
-            message: response.statusText || 'Não foi possível processar a resposta.',
+            message: response.statusText || 'Could not process the response.',
         });
     }
     throw new ApiError({
         statusCode: body.statusCode ?? response.status,
         error: body.error ?? 'Error',
-        message: body.message ?? 'Algo deu errado.',
+        message: body.message ?? 'Something went wrong.',
         details: body.details,
         timestamp: body.timestamp,
     });

@@ -19,11 +19,11 @@ function loadEnvFile(envPath: string): void {
         }
       }
     }
-  } catch {
-    // .env optional
-  }
+  } catch {}
 }
+
 loadEnvFile(path.resolve(__dirname, '../.env'));
+loadEnvFile(path.resolve(__dirname, '../../../.env'));
 
 const COLLECTION = 'products';
 
@@ -80,6 +80,66 @@ function toProductDoc(item: JsonProduct, index: number): ProductDoc {
   };
 }
 
+function inventoryLineName(productName: string, productId: string): string {
+  const compact = productId.replace(/-/g, '').slice(0, 8);
+  const suffix = ` [${compact}]`;
+  const maxBase = 200 - suffix.length;
+  return `${productName.slice(0, Math.max(1, maxBase))}${suffix}`;
+}
+
+interface SeedInventoryParams {
+  baseUrl: string;
+  serviceSecret: string;
+  quantity: number;
+  maxQuantity: number;
+  minQuantity: number;
+  lowStockThreshold: number;
+  createdBy: string;
+}
+
+async function postInventory(doc: ProductDoc, params: SeedInventoryParams): Promise<void> {
+  const url = `${params.baseUrl.replace(/\/$/, '')}/api/v1/inventories`;
+  const body = {
+    productId: doc._id,
+    name: inventoryLineName(doc.name, doc._id),
+    quantity: params.quantity,
+    maxQuantity: params.maxQuantity,
+    minQuantity: params.minQuantity,
+    lowStockThreshold: params.lowStockThreshold,
+    createdBy: params.createdBy,
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-service-auth': params.serviceSecret,
+    },
+    body: JSON.stringify(body),
+  });
+  if (res.ok) return;
+  const text = await res.text();
+  let msg = text;
+  try {
+    const j = JSON.parse(text) as { message?: string };
+    if (typeof j.message === 'string') {
+      msg = j.message;
+    }
+  } catch {}
+  if (
+    res.status === 400 &&
+    (msg.includes('already exists') || msg.includes('Inventory already exists'))
+  ) {
+    return;
+  }
+  throw new Error(`Inventory seed failed for ${doc._id}: ${res.status} ${msg}`);
+}
+
+async function seedInventoryBatch(docs: ProductDoc[], params: SeedInventoryParams): Promise<void> {
+  for (const doc of docs) {
+    await postInventory(doc, params);
+  }
+}
+
 async function main() {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dl_product_svc';
   const defaultPath = path.resolve(__dirname, 'seed-data/csvjson.json');
@@ -89,6 +149,13 @@ async function main() {
     (fs.existsSync(defaultPath) ? defaultPath : undefined);
   const batchSize = parseInt(process.env.SEED_BATCH_SIZE || '500', 10);
   const limit = process.env.SEED_LIMIT ? parseInt(process.env.SEED_LIMIT, 10) : undefined;
+  const inventoryUrl = process.env.INVENTORY_SERVICE_URL?.trim();
+  const serviceSecret = process.env.SERVICE_AUTH_SECRET?.trim();
+  const seedInvQty = parseInt(process.env.SEED_INVENTORY_QUANTITY || '50', 10);
+  const seedInvMax = parseInt(process.env.SEED_INVENTORY_MAX || '100', 10);
+  const seedInvMin = parseInt(process.env.SEED_INVENTORY_MIN || '10', 10);
+  const seedInvLow = parseInt(process.env.SEED_INVENTORY_LOW_STOCK_THRESHOLD || '5', 10);
+  const seedInvBy = (process.env.SEED_INVENTORY_CREATED_BY || 'seed@dl-orders.local').trim();
 
   if (!jsonPath || !fs.existsSync(jsonPath)) {
     console.error('Pass the JSON file path as argument or set SEED_JSON_PATH.');
@@ -118,6 +185,24 @@ async function main() {
   console.log(`Items in JSON: ${data.length}. To import: ${toImport.length}`);
 
   const client = new MongoClient(uri);
+  let inventoryParams: SeedInventoryParams | null = null;
+  if (inventoryUrl && serviceSecret) {
+    inventoryParams = {
+      baseUrl: inventoryUrl,
+      serviceSecret,
+      quantity: seedInvQty,
+      maxQuantity: seedInvMax,
+      minQuantity: seedInvMin,
+      lowStockThreshold: seedInvLow,
+      createdBy: seedInvBy,
+    };
+    console.log('Inventory seed: enabled →', inventoryUrl);
+  } else {
+    console.log(
+      'Inventory seed: skipped (set INVENTORY_SERVICE_URL and SERVICE_AUTH_SECRET to create stock rows).',
+    );
+  }
+
   try {
     await client.connect();
     const db = client.db();
@@ -130,6 +215,10 @@ async function main() {
       await collection.insertMany(docs);
       inserted += docs.length;
       console.log(`Inserted ${inserted}/${toImport.length}`);
+      if (inventoryParams) {
+        await seedInventoryBatch(docs, inventoryParams);
+        console.log(`Inventory synced for batch ending ${inserted}/${toImport.length}`);
+      }
     }
 
     console.log('Done. Total inserted:', inserted);

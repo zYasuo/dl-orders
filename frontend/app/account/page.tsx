@@ -6,8 +6,8 @@ export default function AccountPage() {
         <div className="mx-auto w-full max-w-lg">
             <Card>
                 <CardHeader>
-                    <CardTitle>Minha conta</CardTitle>
-                    <CardDescription>Dados sincronizados com o serviço Users.</CardDescription>
+                    <CardTitle>My account</CardTitle>
+                    <CardDescription>Data synced with the Users service.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ProfileForm />

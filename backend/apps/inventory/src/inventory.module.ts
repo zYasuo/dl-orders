@@ -19,6 +19,7 @@ import { InventoryRepository } from './infrastructure/outbound/persistence/sql/i
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { RabbitMQModule } from './infrastructure/outbound/rabbitmq/rabbitmq.module';
 import { CheckQuantityInInventoryUseCase } from './application/use-cases/check-quantity-in-inventory';
+import { LookupInventoryByProductIdsUseCase } from './application/use-cases/lookup-inventory-by-product-ids.use-case';
 import { InventoryLowStockPublisherPort } from './domain/ports/inventory-low-stock-publisher.port';
 import { LowStockCronService } from './infrastructure/cron/low-stock-cron.service';
 import { LowStockNotificationDeduperPort } from './domain/ports/inventory-low-stock-notification-deduper.port';
@@ -44,6 +45,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CreateInventoryUseCase,
     HandleOrderCreationRequestedUseCase,
     FindAllInventoryUseCase,
+    LookupInventoryByProductIdsUseCase,
     CheckQuantityInInventoryUseCase,
     LowStockCronService,
     InventoryCacheKeyBuilder,

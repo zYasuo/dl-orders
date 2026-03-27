@@ -37,3 +37,17 @@ enum NotificationStatus {
   SENT
   FAILED
 }
+
+model CartAbandonmentSchedule {
+  sessionKey     String   @id @map("session_key") @db.VarChar(64)
+  email          String   @db.VarChar(254)
+  resumeUrl      String   @map("resume_url") @db.VarChar(2000)
+  pendingUntil   DateTime @map("pending_until")
+  summaryLines   String   @map("summary_lines") @db.VarChar(2000)
+  sent           Boolean  @default(false)
+  failCount      Int      @default(0) @map("fail_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("cart_abandonment_schedules")
+}

@@ -16,10 +16,10 @@ export default function ErrorPage({
 
     return (
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 py-12 text-center sm:px-6 lg:px-8">
-            <h1 className="text-xl font-semibold">Algo deu errado</h1>
+            <h1 className="text-xl font-semibold">Something went wrong</h1>
             <p className="text-sm text-muted-foreground">{error.message}</p>
             <Button type="button" onClick={() => reset()}>
-                Tentar de novo
+                Try again
             </Button>
         </div>
     );

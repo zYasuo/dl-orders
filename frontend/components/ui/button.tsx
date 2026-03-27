@@ -4,14 +4,14 @@ import { cn } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
 
 export const buttonVariants = cva(
-    'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
+    'inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
     {
         variants: {
             variant: {
                 primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
                 secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
                 outline:
-                    'border border-input bg-transparent text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground',
+                    'border border-black/10 bg-transparent text-foreground shadow-none hover:bg-black/[0.03] hover:text-foreground',
                 ghost: 'bg-transparent hover:bg-muted text-foreground',
                 danger: 'bg-danger text-danger-foreground hover:bg-danger/90',
             },

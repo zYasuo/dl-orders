@@ -29,24 +29,24 @@ export function OtpForm() {
         try {
             await verifyOtp({ email: values.email, code: values.code });
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
-            toast({ message: 'E-mail verificado. Você já pode usar a loja.', variant: 'success' });
+            toast({ message: 'Email verified. You can use the store.', variant: 'success' });
             router.push('/products');
         } catch (e) {
-            const msg = e instanceof ApiError ? e.message : 'Código inválido ou expirado.';
+            const msg = e instanceof ApiError ? e.message : 'Invalid or expired code.';
             toast({ message: msg, variant: 'error' });
         }
     }
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <Field label="E-mail" htmlFor="email" error={form.formState.errors.email?.message}>
+            <Field label="Email" htmlFor="email" error={form.formState.errors.email?.message}>
                 <Input id="email" type="email" autoComplete="email" {...form.register('email')} />
             </Field>
-            <Field label="Código OTP (6 dígitos)" htmlFor="code" error={form.formState.errors.code?.message}>
+            <Field label="OTP code (6 digits)" htmlFor="code" error={form.formState.errors.code?.message}>
                 <Input id="code" inputMode="numeric" maxLength={6} autoComplete="one-time-code" {...form.register('code')} />
             </Field>
             <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
-                Confirmar
+                Confirm
             </Button>
         </form>
     );

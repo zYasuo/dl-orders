@@ -7,8 +7,8 @@ export default function ChangePasswordPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Nova senha</CardTitle>
-                <CardDescription>Use o token recebido por e-mail.</CardDescription>
+                <CardTitle>New password</CardTitle>
+                <CardDescription>Use the token you received by email.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Suspense fallback={<Skeleton className="h-56" />}>

@@ -54,11 +54,11 @@ flowchart LR
 
 ## Practices used
 
-- **Hexagonal (ports & adapters)**  
-  - **Domain:** entities and ports (repository, event publisher, audit log, etc.).  
-  - **Application:** use cases and DTOs; no infra here.  
-  - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (persistence, messaging, email). Persistence adapters live under `infrastructure/outbound/persistence/`, split into **sql/** (Prisma/Postgres), **mongodb/** (MongoDB audit logs and Product catalog) so it’s clear which store each repo uses.  
-  Wiring happens in the app module: ports bound to concrete implementations.
+- **Hexagonal (ports & adapters)**
+    - **Domain:** entities and ports (repository, event publisher, audit log, etc.).
+    - **Application:** use cases and DTOs; no infra here.
+    - **Infrastructure:** inbound (HTTP controllers, RabbitMQ consumers) and outbound (persistence, messaging, email). Persistence adapters live under `infrastructure/outbound/persistence/`, split into **sql/** (Prisma/Postgres), **mongodb/** (MongoDB audit logs and Product catalog) so it’s clear which store each repo uses.  
+      Wiring happens in the app module: ports bound to concrete implementations.
 
 - **Event-driven**  
   RabbitMQ with shared pattern names and event payloads in `backend/libs/shared` (`patterns.ts`, `queues.ts`, and event types under `orders/events`, `inventory/events`). Each app that needs messaging connects as a microservice and subscribes to the right patterns.
@@ -75,10 +75,10 @@ flowchart LR
 ## Repo structure
 
 - **Root** — npm workspace with `backend` and `frontend`. Scripts: Docker, dev/build/test/lint for backend and frontend.
-- **frontend/** — Next.js (App Router): public catalog, auth (BFF + httpOnly cookie), checkout, orders, and payment (Mercado Pago). Copy [`frontend/.env.local.example`](frontend/.env.local.example) to `frontend/.env.local` and set the service base URLs (`PRODUCT_SERVICE_URL`, `AUTH_SERVICE_URL`, etc.). Dev: `npm run dev:frontend` from the repo root.
+- **frontend/** — Next.js (App Router): public catalog, auth (BFF + httpOnly cookie), checkout, orders, and payment (Mercado Pago). Copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` or `frontend/.env.local` and set the service base URLs (`PRODUCT_SERVICE_URL`, `AUTH_SERVICE_URL`, `NEXT_PUBLIC_APP_URL` in production). Dev: `npm run dev:frontend` from the repo root.
 - **backend/** — NestJS monorepo:
-  - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`; most have Prisma schema for Postgres; Product uses MongoDB only; optional Dockerfile).
-  - **libs/shared** — constants, event types, validation, MongoDB module.
+    - **apps/** — `orders`, `inventory`, `product`, `notification`, `auth`, `users`, `payment` (each with its own `main.ts`; most have Prisma schema for Postgres; Product uses MongoDB only; optional Dockerfile).
+    - **libs/shared** — constants, event types, validation, MongoDB module.
 
 ## Prerequisites
 
@@ -89,22 +89,22 @@ flowchart LR
 
 1. **Install and start infra**
 
-   ```bash
-   npm install
-   npm run docker:up
-   ```
+    ```bash
+    npm install
+    npm run docker:up
+    ```
 
-   This brings up RabbitMQ (5672, 15672), Redis (6379), five MongoDB instances (27017–27021), and one Postgres per app (except Product, which uses MongoDB only).
+    This brings up RabbitMQ (5672, 15672), Redis (6379), five MongoDB instances (27017–27021), and one Postgres per app (except Product, which uses MongoDB only).
 
 2. **Prisma**  
    Generate clients and push (or migrate) per app (orders, inventory, notification, auth, users, payment). Product does not use Prisma. Example:
 
-   ```bash
-   npm run prisma:orders:generate -w backend
-   npm run prisma:orders:push -w backend
-   ```
+    ```bash
+    npm run prisma:orders:generate -w backend
+    npm run prisma:orders:push -w backend
+    ```
 
-   Repeat for `inventory`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts). Product uses MongoDB only; set `MONGODB_URI` in its `.env`.
+    Repeat for `inventory`, `notification`, `auth`, `users`, `payment` (see `backend/package.json` scripts). Product uses MongoDB only; set `MONGODB_URI` in its `.env`.
 
 3. **Env**  
    Each app can use an `.env` in `backend/apps/<app>/` (e.g. `DATABASE_URL`, `MONGODB_URI` where applicable, `RABBITMQ_URL`, `QUEUE_NAME`, `PORT`, `JWT_SECRET` on services that enforce HTTP auth). Copy from each app’s `.env.example` if present.  
@@ -113,30 +113,32 @@ flowchart LR
 4. **Run the apps**  
    From repo root, run one or all:
 
-   ```bash
-   npm run dev:backend
-   ```
+    ```bash
+    npm run dev:backend
+    ```
 
-   Or from `backend/` run a single app:
+    Or from `backend/` run a single app:
 
-   ```bash
-   npm run start:dev:orders
-   npm run start:dev:inventory
-   npm run start:dev:product
-   npm run start:dev:notification
-   npm run start:dev:auth
-   npm run start:dev:users
-   npm run start:dev:payment
-   ```
+    ```bash
+    npm run start:dev:orders
+    npm run start:dev:inventory
+    npm run start:dev:product
+    npm run start:dev:notification
+    npm run start:dev:auth
+    npm run start:dev:users
+    npm run start:dev:payment
+    ```
 
-   Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006), payment (3007).
+    Orders (3001), inventory (3002), product (3003), notification (3004), auth (3005), users (3006), payment (3007).
+
+    **Catalog empty in the UI?** The Product HTTP API can return `total: 0` when MongoDB has no products. From `backend/`, with Product’s `.env` and Docker Mongo up, run `npm run seed:product` to load sample catalog (and align inventory seed if you need “in stock” — see `backend/apps/product/README.md`).
 
 ## API documentation
 
 When Swagger is enabled (see [backend/SECURITY.md](backend/SECURITY.md)), each service serves interactive API docs (Scalar) at **`/docs`**:
 
 | Service      | Port | Docs URL                   |
-|--------------|------|----------------------------|
+| ------------ | ---- | -------------------------- |
 | Orders       | 3001 | http://localhost:3001/docs |
 | Inventory    | 3002 | http://localhost:3002/docs |
 | Product      | 3003 | http://localhost:3003/docs |
@@ -151,15 +153,15 @@ Start the app you need, then open the URL above in a browser to explore routes, 
 
 **From repo root**
 
-| Script           | Description                |
-|------------------|----------------------------|
-| `docker:up`      | Start Docker stack         |
-| `docker:down`    | Stop Docker stack          |
-| `docker:logs`    | Follow Docker logs         |
-| `dev:backend`    | Run backend in dev mode    |
-| `build:backend`  | Build backend              |
-| `test:backend`   | Run tests                  |
-| `lint:backend`   | Lint and fix               |
+| Script          | Description             |
+| --------------- | ----------------------- |
+| `docker:up`     | Start Docker stack      |
+| `docker:down`   | Stop Docker stack       |
+| `docker:logs`   | Follow Docker logs      |
+| `dev:backend`   | Run backend in dev mode |
+| `build:backend` | Build backend           |
+| `test:backend`  | Run tests               |
+| `lint:backend`  | Lint and fix            |
 
 **From `backend/`** — See `package.json` for the full list: per-app `build:<app>`, `start:dev:<app>`, Prisma generate/push/migrate per app (except Product).
 

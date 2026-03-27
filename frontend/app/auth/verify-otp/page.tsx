@@ -8,8 +8,8 @@ export default function VerifyOtpPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Verificar e-mail</CardTitle>
-                <CardDescription>Digite o código de 6 dígitos enviado ao seu e-mail.</CardDescription>
+                <CardTitle>Verify email</CardTitle>
+                <CardDescription>Enter the 6-digit code sent to your email.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Suspense fallback={<Skeleton className="h-40" />}>
@@ -17,7 +17,7 @@ export default function VerifyOtpPage() {
                 </Suspense>
                 <p className="mt-4 text-center text-sm text-muted-foreground">
                     <Link href="/auth/signup" className="text-primary underline-offset-4 hover:underline">
-                        Voltar ao cadastro
+                        Back to sign up
                     </Link>
                 </p>
             </CardContent>

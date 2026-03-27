@@ -6,6 +6,7 @@ import {
 export abstract class InventoryRepositoryPort {
   abstract create(entity: InventoryEntity): Promise<InventoryEntity | null>;
   abstract findByProductId(productId: string): Promise<InventoryEntity | null>;
+  abstract findByProductIds(productIds: string[]): Promise<InventoryEntity[]>;
   abstract findByName(name: string): Promise<InventoryEntity | null>;
   abstract findAll(): Promise<InventoryEntity[]>;
   abstract findPage(page: number, limit: number): Promise<InventoryEntity[]>;

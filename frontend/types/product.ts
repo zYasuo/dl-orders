@@ -6,4 +6,7 @@ export type Product = {
     imageUrl: string | null;
     createdAt: string;
     updatedAt: string;
+    stockQuantity?: number;
+    inStock?: boolean;
+    lastUnits?: boolean;
 };

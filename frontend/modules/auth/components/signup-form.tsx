@@ -21,20 +21,17 @@ export function SignupForm() {
 
     async function onSubmit(values: SignupFormValues) {
         try {
-
             await signUp({
                 email: values.email,
                 password: values.password,
                 name: values.name?.trim() ? values.name.trim() : undefined,
             });
-            toast({ message: 'Conta criada. Verifique o e-mail com o código OTP.', variant: 'success' });
+            toast({ message: 'Account created. Check your email for the OTP code.', variant: 'success' });
             router.push(`/auth/verify-otp?email=${encodeURIComponent(values.email)}`);
-
         } catch (e) {
-            let msg = 'Não foi possível cadastrar.';
+            let msg = 'Could not sign up.';
             if (e instanceof ApiError) {
-                msg =
-                    e.statusCode === 409 ? 'Não foi possível concluir o cadastro.' : e.message;
+                msg = e.statusCode === 409 ? 'Could not complete sign-up.' : e.message;
             }
             toast({ message: msg, variant: 'error' });
         }
@@ -42,17 +39,17 @@ export function SignupForm() {
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <Field label="Nome" htmlFor="name" error={form.formState.errors.name?.message}>
+            <Field label="Name" htmlFor="name" error={form.formState.errors.name?.message}>
                 <Input id="name" autoComplete="name" {...form.register('name')} />
             </Field>
-            <Field label="E-mail" htmlFor="email" error={form.formState.errors.email?.message}>
+            <Field label="Email" htmlFor="email" error={form.formState.errors.email?.message}>
                 <Input id="email" type="email" autoComplete="email" {...form.register('email')} />
             </Field>
-            <Field label="Senha" htmlFor="password" hint="Mínimo 12 caracteres." error={form.formState.errors.password?.message}>
+            <Field label="Password" htmlFor="password" hint="At least 12 characters." error={form.formState.errors.password?.message}>
                 <Input id="password" type="password" autoComplete="new-password" {...form.register('password')} />
             </Field>
             <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
-                Criar conta
+                Create account
             </Button>
         </form>
     );

@@ -22,18 +22,18 @@ export function ResetPasswordForm() {
             const res = await requestResetPasswordLink({ email: values.email });
             toast({ message: res.message, variant: 'success' });
         } catch (e) {
-            const msg = e instanceof ApiError ? e.message : 'Não foi possível enviar o link.';
+            const msg = e instanceof ApiError ? e.message : 'Could not send the link.';
             toast({ message: msg, variant: 'error' });
         }
     }
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <Field label="E-mail" htmlFor="email" error={form.formState.errors.email?.message}>
+            <Field label="Email" htmlFor="email" error={form.formState.errors.email?.message}>
                 <Input id="email" type="email" autoComplete="email" {...form.register('email')} />
             </Field>
             <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
-                Enviar link
+                Send link
             </Button>
         </form>
     );

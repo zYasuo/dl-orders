@@ -33,9 +33,9 @@ export function ProfileForm() {
         try {
             const trimmed = values.name.trim();
             await updateProfile.mutateAsync({ name: trimmed === '' ? null : trimmed });
-            toast({ message: 'Perfil atualizado.', variant: 'success' });
+            toast({ message: 'Profile updated.', variant: 'success' });
         } catch (e) {
-            const msg = e instanceof ApiError ? e.message : 'Não foi possível salvar.';
+            const msg = e instanceof ApiError ? e.message : 'Could not save.';
             toast({ message: msg, variant: 'error' });
         }
     }
@@ -45,20 +45,20 @@ export function ProfileForm() {
     }
 
     if (isError || !user) {
-        const msg = error instanceof ApiError ? error.message : 'Não foi possível carregar o perfil.';
+        const msg = error instanceof ApiError ? error.message : 'Could not load profile.';
         return <Alert variant="error">{msg}</Alert>;
     }
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex max-w-md flex-col gap-4">
-            <Field label="E-mail" htmlFor="profile-email">
+            <Field label="Email" htmlFor="profile-email">
                 <Input id="profile-email" value={user.email} disabled readOnly className="bg-muted" />
             </Field>
-            <Field label="Nome" htmlFor="name" error={form.formState.errors.name?.message as string | undefined}>
+            <Field label="Name" htmlFor="name" error={form.formState.errors.name?.message as string | undefined}>
                 <Input id="name" autoComplete="name" {...form.register('name')} />
             </Field>
             <Button type="submit" loading={form.formState.isSubmitting || updateProfile.isPending}>
-                Salvar
+                Save
             </Button>
         </form>
     );

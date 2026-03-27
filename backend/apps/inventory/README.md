@@ -9,7 +9,7 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Ports
 
-- **InventoryRepositoryPort** - Persist and load inventory/reservations (Postgres/Prisma), incluindo `findPage` e `count`.
+- **InventoryRepositoryPort** - Persist and load inventory/reservations (Postgres/Prisma), incluindo `findPage`, `count`, `findByProductIds`.
 - **InventoryListCachePort** - Cache legado da lista de inventário.
 - **CachePort** - Cache genérico para listagem paginada com versionamento (`inventories:all:version`).
 - **InventoryEventsPublisherPort** - Publish inventory events to RabbitMQ (`inventory.reserved`, `inventory.reservation_failed`).
@@ -18,7 +18,7 @@ Reserves stock when an order is created and tells the orders service whether the
 
 ## Inbound
 
-- **HTTP:** REST (create, list paginada, reservation audit log) — JWT or `x-service-auth`.
+- **HTTP:** REST (create, list paginada, **`POST /api/v1/inventories/lookup`** body `{ productIds }` — resposta mínima `productId`, `quantity`, `inStock`, `lastUnits` para vitrine; JWT ou `x-service-auth`), reservation audit log — JWT or `x-service-auth`.
 - **Messaging:** `order.creation_requested` (from orders service).
 
 ## Outbound
@@ -57,4 +57,4 @@ Or from `backend/`:
 npm run start:dev:inventory
 ```
 
-Ensure RabbitMQ, Redis, Postgres, and MongoDB are up, and that `apps/inventory/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`, `JWT_SECRET`. Copy from `apps/inventory/.env.example`. Port 3002 if exposing HTTP.
+Ensure RabbitMQ, Redis, Postgres, and MongoDB are up, and that `apps/inventory/.env` has `DATABASE_URL`, `MONGODB_URI`, `RABBITMQ_URL`, `QUEUE_NAME`, `REDIS_URL`, `JWT_SECRET`, and **`SERVICE_AUTH_SECRET`** (same value used by the Next.js BFF and product seed for `x-service-auth`). Copy from `apps/inventory/.env.example`. Port 3002 if exposing HTTP.

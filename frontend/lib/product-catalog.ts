@@ -1,4 +1,6 @@
 import { throwIfNotOk } from '@/lib/errors';
+import { mergeStockIntoProduct } from '@/lib/stock-map';
+import type { StockRow } from '@/lib/stock-map';
 import { ApiError } from '@/types/api';
 import type { ApiPaginatedSuccessResponse, ApiSuccessResponse } from '@/types/api';
 import type { PaginatedResponse } from '@/types/pagination';
@@ -29,6 +31,45 @@ function buildListUrl(origin: string, page: number, limit: number): string {
     params.set('page', String(page));
     params.set('limit', String(limit));
     return `${origin}/api/products?${params.toString()}`;
+}
+
+async function fetchStockMap(productIds: string[]): Promise<Record<string, StockRow> | null> {
+    if (productIds.length === 0) {
+        return {};
+    }
+    const origin = serverBffOrigin();
+    if (!origin) {
+        return null;
+    }
+    try {
+        const res = await fetch(`${origin}/api/inventory/stock`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
+            body: JSON.stringify({ productIds }),
+        });
+        await throwIfNotOk(res);
+        const payload = (await res.json()) as unknown;
+        if (
+            payload !== null &&
+            typeof payload === 'object' &&
+            'success' in payload &&
+            (payload as Record<string, unknown>).success === true &&
+            'data' in payload &&
+            (payload as Record<string, unknown>).data !== null &&
+            typeof (payload as Record<string, unknown>).data === 'object'
+        ) {
+            return (payload as ApiSuccessResponse<Record<string, StockRow>>).data;
+        }
+        return null;
+    } catch (e) {
+        const msg = e instanceof ApiError ? e.message : String(e);
+        console.warn(
+            'Stock map unavailable (catalog will not assume out of stock). Check INVENTORY_SERVICE_URL, SERVICE_AUTH_SECRET and the Inventory service.',
+            msg,
+        );
+        return null;
+    }
 }
 
 function isPaginatedProductPayload(body: unknown): body is PaginatedResponse<Product> {
@@ -87,7 +128,12 @@ export async function fetchProductList(page = 1, limit = DEFAULT_PRODUCTS_PAGE_S
         const data = (await res.json()) as unknown;
         const unwrapped = unwrapProductListPayload(data);
         if (unwrapped) {
-            return unwrapped;
+            const ids = unwrapped.data.map((p) => p.id);
+            const stockMap = await fetchStockMap(ids);
+            return {
+                ...unwrapped,
+                data: unwrapped.data.map((p) => mergeStockIntoProduct(p, stockMap)),
+            };
         }
         return emptyPaginated(page, limit);
     } catch (e) {
@@ -113,7 +159,12 @@ export async function fetchProductById(id: string): Promise<Product | null> {
         }
         await throwIfNotOk(res);
         const data = (await res.json()) as unknown;
-        return unwrapProductPayload(data);
+        const product = unwrapProductPayload(data);
+        if (!product) {
+            return null;
+        }
+        const stockMap = await fetchStockMap([product.id]);
+        return mergeStockIntoProduct(product, stockMap);
     } catch (e) {
         if (e instanceof ApiError) {
             throw e;

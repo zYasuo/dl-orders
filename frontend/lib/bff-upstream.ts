@@ -10,7 +10,7 @@ export async function upstreamJson<T>(options: {
 }): Promise<T> {
     const { baseUrl, path, method = 'GET', body, accessToken, idempotencyKey } = options;
     if (!baseUrl) {
-        throw new Error('URL do serviço não configurada.');
+        throw new Error('Service URL is not configured.');
     }
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');

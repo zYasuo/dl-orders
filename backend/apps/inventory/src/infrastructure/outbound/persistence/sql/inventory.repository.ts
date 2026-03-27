@@ -59,6 +59,28 @@ export class InventoryRepository extends InventoryRepositoryPort {
     );
   }
 
+  async findByProductIds(productIds: string[]): Promise<InventoryEntity[]> {
+    if (productIds.length === 0) return [];
+    const rows = await this.db.inventory.findMany({
+      where: { productId: { in: productIds } },
+    });
+    return rows.map(
+      (row) =>
+        new InventoryEntity(
+          row.id,
+          row.name,
+          row.quantity,
+          row.maxQuantity,
+          row.minQuantity,
+          row.lowStockThreshold,
+          row.productId,
+          row.createdBy,
+          row.createdAt,
+          row.updatedAt,
+        ),
+    );
+  }
+
   async findByName(name: string): Promise<InventoryEntity | null> {
     const row = await this.db.inventory.findFirst({ where: { name } });
     if (!row) return null;

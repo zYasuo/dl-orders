@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
                 href="/products"
                 className="text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-                Voltar ao catálogo
+                Back to catalog
             </Link>
         </div>
     );

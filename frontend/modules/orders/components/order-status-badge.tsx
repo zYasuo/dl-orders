@@ -2,9 +2,9 @@ import { Badge } from '@/components/ui/badge';
 import type { OrderStatus } from '@/types/order';
 
 const labels: Record<OrderStatus, string> = {
-    PENDING: 'Pendente',
-    CONFIRMED: 'Confirmado',
-    CANCELLED: 'Cancelado',
+    PENDING: 'Pending',
+    CONFIRMED: 'Confirmed',
+    CANCELLED: 'Cancelled',
 };
 
 const variants: Record<OrderStatus, 'pending' | 'confirmed' | 'cancelled' | 'default'> = {

@@ -30,27 +30,27 @@ export function ChangePasswordForm() {
                 token: values.token,
                 newPassword: values.newPassword,
             });
-            toast({ message: 'Senha alterada. Faça login.', variant: 'success' });
+            toast({ message: 'Password updated. Sign in.', variant: 'success' });
             router.push('/auth/signin');
         } catch (e) {
-            const msg = e instanceof ApiError ? e.message : 'Não foi possível alterar a senha.';
+            const msg = e instanceof ApiError ? e.message : 'Could not change password.';
             toast({ message: msg, variant: 'error' });
         }
     }
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <Field label="E-mail" htmlFor="email" error={form.formState.errors.email?.message}>
+            <Field label="Email" htmlFor="email" error={form.formState.errors.email?.message}>
                 <Input id="email" type="email" autoComplete="email" {...form.register('email')} />
             </Field>
             <Field label="Token" htmlFor="token" error={form.formState.errors.token?.message}>
                 <Input id="token" autoComplete="off" {...form.register('token')} />
             </Field>
-            <Field label="Nova senha" htmlFor="newPassword" error={form.formState.errors.newPassword?.message}>
+            <Field label="New password" htmlFor="newPassword" error={form.formState.errors.newPassword?.message}>
                 <Input id="newPassword" type="password" autoComplete="new-password" {...form.register('newPassword')} />
             </Field>
             <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
-                Salvar senha
+                Save password
             </Button>
         </form>
     );

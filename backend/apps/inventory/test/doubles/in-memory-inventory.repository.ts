@@ -20,6 +20,11 @@ export class InMemoryInventoryRepository extends InventoryRepositoryPort {
     return Array.from(this.inventories.values()).find((inv) => inv.productId === productId) ?? null;
   }
 
+  async findByProductIds(productIds: string[]): Promise<InventoryEntity[]> {
+    const set = new Set(productIds);
+    return Array.from(this.inventories.values()).filter((inv) => set.has(inv.productId));
+  }
+
   async findByName(name: string): Promise<InventoryEntity | null> {
     return Array.from(this.inventories.values()).find((inv) => inv.name === name) ?? null;
   }
@@ -48,6 +53,18 @@ export class InMemoryInventoryRepository extends InventoryRepositoryPort {
   }
   async findAll(): Promise<InventoryEntity[]> {
     return Array.from(this.inventories.values());
+  }
+
+  async findPage(page: number, limit: number): Promise<InventoryEntity[]> {
+    const sorted = Array.from(this.inventories.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+    const skip = (page - 1) * limit;
+    return sorted.slice(skip, skip + limit);
+  }
+
+  async count(): Promise<number> {
+    return this.inventories.size;
   }
 
   async findLowStock(): Promise<InventoryEntity[]> {

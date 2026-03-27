@@ -1,4 +1,4 @@
-import { applyDecorators, Get, Post, UseGuards } from '@nestjs/common';
+import { applyDecorators, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -9,6 +9,8 @@ import {
 } from '@nestjs/swagger';
 import { ServiceOrJwtAuthGuard, StandardErrorResponseDto } from '@app/shared';
 import { CreateInventoryDto } from '../../../../application/dto/create-inventory.schema';
+import { LookupInventoryByProductIdsDto } from '../../../../application/dto/lookup-inventory-by-product-ids.schema';
+import { InventoryStockLookupItemSwagger } from './inventory-stock-lookup.swagger';
 
 export const ApiInventories = () =>
   applyDecorators(ApiTags('Inventories'), ApiBearerAuth(), UseGuards(ServiceOrJwtAuthGuard));
@@ -41,6 +43,17 @@ export const InventoryDoc = {
       Get(),
       ApiOperation({ summary: 'Get all inventory items' }),
       ApiResponse({ status: 200, description: 'List of inventory items' }),
+      ApiResponse({ status: 401, description: 'Unauthorized' }),
+    ),
+
+  Lookup: () =>
+    applyDecorators(
+      Post('lookup'),
+      HttpCode(HttpStatus.OK),
+      ApiOperation({ summary: 'Stock snapshot for product ids (storefront)' }),
+      ApiBody({ type: LookupInventoryByProductIdsDto }),
+      ApiResponse({ status: 200, description: 'Stock rows', type: [InventoryStockLookupItemSwagger] }),
+      standardError(400, 'Invalid input'),
       ApiResponse({ status: 401, description: 'Unauthorized' }),
     ),
 };

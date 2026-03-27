@@ -81,40 +81,38 @@ export function SigninForm({
             const { email, password } = values;
 
             await signIn({ email, password });
-            
+
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
 
-            toast({ message: 'Login realizado.', variant: 'success' });
+            toast({ message: 'Signed in successfully.', variant: 'success' });
             router.push(returnUrl.startsWith('/') ? returnUrl : '/products');
         } catch (e) {
-            let msg = 'Não foi possível entrar.';
+            let msg = 'Could not sign in.';
             if (e instanceof ApiError) {
                 msg = e.message;
                 if (e.statusCode === 403) {
-                    msg = 'Conta bloqueada temporariamente. Tente mais tarde.';
+                    msg = 'Account temporarily locked. Try again later.';
                 }
 
                 if (e.statusCode === 429) {
-                    msg = 'Muitas tentativas. Aguarde e tente novamente.';
+                    msg = 'Too many attempts. Wait and try again.';
                 }
             }
-            
+
             toast({ message: msg, variant: 'error' });
         }
     }
 
     function onSocialComingSoon(provider: string) {
-        toast({ message: `Entrada com ${provider} ainda não está disponível.`, variant: 'warning' });
+        toast({ message: `Sign-in with ${provider} is not available yet.`, variant: 'warning' });
     }
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
                 <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Bem-vindo de volta</CardTitle>
-                    <CardDescription>
-                        Entre com Apple ou Google, ou use e-mail e senha.
-                    </CardDescription>
+                    <CardTitle className="text-xl">Welcome back</CardTitle>
+                    <CardDescription>Sign in with Apple or Google, or use email and password.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -127,7 +125,7 @@ export function SigninForm({
                                     onClick={() => onSocialComingSoon('Apple')}
                                 >
                                     <AppleIcon />
-                                    Entrar com Apple
+                                    Continue with Apple
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -136,17 +134,17 @@ export function SigninForm({
                                     onClick={() => onSocialComingSoon('Google')}
                                 >
                                     <GoogleIcon />
-                                    Entrar com Google
+                                    Continue with Google
                                 </Button>
                             </FieldStack>
-                            <FieldSeparator>Ou continue com</FieldSeparator>
+                            <FieldSeparator>Or continue with</FieldSeparator>
                             <FieldStack>
-                                <FieldLabel htmlFor="email">E-mail</FieldLabel>
+                                <FieldLabel htmlFor="email">Email</FieldLabel>
                                 <Input
                                     id="email"
                                     type="email"
                                     autoComplete="email"
-                                    placeholder="voce@exemplo.com"
+                                    placeholder="you@example.com"
                                     aria-invalid={!!form.formState.errors.email}
                                     {...form.register('email')}
                                 />
@@ -158,12 +156,12 @@ export function SigninForm({
                             </FieldStack>
                             <FieldStack>
                                 <div className="flex items-center gap-2">
-                                    <FieldLabel htmlFor="password">Senha</FieldLabel>
+                                    <FieldLabel htmlFor="password">Password</FieldLabel>
                                     <Link
                                         href="/auth/reset-password"
                                         className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
                                     >
-                                        Esqueceu a senha?
+                                        Forgot password?
                                     </Link>
                                 </div>
                                 <Input
@@ -181,12 +179,12 @@ export function SigninForm({
                             </FieldStack>
                             <FieldStack>
                                 <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
-                                    Entrar
+                                    Sign in
                                 </Button>
                                 <FieldDescription className="text-center">
-                                    Não tem conta?{' '}
+                                    No account?{' '}
                                     <Link href="/auth/signup" className="text-primary underline-offset-4 hover:underline">
-                                        Criar conta
+                                        Create account
                                     </Link>
                                 </FieldDescription>
                             </FieldStack>
@@ -195,9 +193,9 @@ export function SigninForm({
                 </CardContent>
             </Card>
             <FieldDescription className="px-2 text-center text-xs sm:px-6">
-                Ao continuar, você concorda com os{' '}
-                <span className="text-muted-foreground">Termos</span> e a{' '}
-                <span className="text-muted-foreground">Política de Privacidade</span> (em breve).
+                By continuing, you agree to the{' '}
+                <span className="text-muted-foreground">Terms</span> and{' '}
+                <span className="text-muted-foreground">Privacy Policy</span> (coming soon).
             </FieldDescription>
         </div>
     );
