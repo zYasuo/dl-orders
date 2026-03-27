@@ -1,6 +1,10 @@
 'use server';
 
+import { cookies } from 'next/headers';
+import { authServiceSessionPaths, postAuthServiceForSession, throwIfAuthSessionFailed } from '@/lib/auth/auth-service-session';
 import { bffJson } from '@/lib/http/bff-client';
+import { SESSION_COOKIE_NAME } from '@/lib/session/constants';
+import { setSessionCookieOnStore } from '@/lib/session/auth-cookie';
 import type { MessageResponse, SignupResponse } from '@/types/auth';
 
 export async function signUp(body: { email: string; password: string; name?: string }) {
@@ -8,15 +12,30 @@ export async function signUp(body: { email: string; password: string; name?: str
 }
 
 export async function verifyOtp(body: { email: string; code: string }) {
-    return bffJson<{ success: boolean }>('/api/auth/verify-otp', { method: 'POST', body: JSON.stringify(body) });
+    const result = await postAuthServiceForSession(authServiceSessionPaths.verifyOtp, body);
+    throwIfAuthSessionFailed(result);
+    const store = await cookies();
+    setSessionCookieOnStore(store, result.accessToken);
+    return { success: true as const };
 }
 
 export async function signIn(body: { email: string; password: string }) {
-    return bffJson<{ success: boolean }>('/api/auth/signin', { method: 'POST', body: JSON.stringify(body) });
+    const result = await postAuthServiceForSession(authServiceSessionPaths.signin, body);
+    throwIfAuthSessionFailed(result);
+    const store = await cookies();
+    setSessionCookieOnStore(store, result.accessToken);
+    return { success: true as const };
 }
 
 export async function signOut() {
-    await bffJson<unknown>('/api/auth/signout', { method: 'POST' });
+    const store = await cookies();
+    store.set(SESSION_COOKIE_NAME, '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0,
+    });
 }
 
 export async function requestResetPasswordLink(body: { email: string }) {

@@ -1,0 +1,4 @@
+[
+    { "email": "usuario1-verificado@example.com", "password": "senha-com-12-chars" },
+    { "email": "usuario2-verificado@example.com", "password": "outra-senha-12" }
+]

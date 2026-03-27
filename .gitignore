@@ -44,6 +44,12 @@ lerna-debug.log*
 .cursor/rules/
 .cursor/skills/
 
+loadtest/k6/tokens.json
+loadtest/k6/test-users.json
+loadtest/k6/env.local
+loadtest/k6/.env
+loadtest/k6/secrets.env
+
 # dotenv environment variable files
 .env
 .env.development.local

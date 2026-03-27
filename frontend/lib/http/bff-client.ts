@@ -1,6 +1,48 @@
 import { throwIfNotOk } from '@/lib/http/errors';
 import type { ApiSuccessResponse } from '@/types/api';
 
+function normalizedAppOrigin(value: string | undefined): string | undefined {
+    if (value === undefined) {
+        return undefined;
+    }
+    const trimmed = value.trim();
+    if (trimmed === '') {
+        return undefined;
+    }
+    return trimmed.replace(/\/$/, '');
+}
+
+function resolveServerBffOrigin(): string {
+    const internal = normalizedAppOrigin(process.env.INTERNAL_APP_ORIGIN);
+    if (internal) {
+        return internal;
+    }
+    const publicUrl = normalizedAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
+    if (publicUrl) {
+        return publicUrl;
+    }
+    const vercel = process.env.VERCEL_URL?.trim();
+    if (vercel) {
+        const host = vercel.replace(/^https?:\/\//, '');
+        return `https://${host}`;
+    }
+    if (process.env.NODE_ENV !== 'production') {
+        const port = process.env.PORT ?? '3000';
+        return `http://127.0.0.1:${port}`;
+    }
+    throw new Error(
+        'Server-side BFF requests need a known app origin. Set INTERNAL_APP_ORIGIN or NEXT_PUBLIC_APP_URL, or run on Vercel (VERCEL_URL).',
+    );
+}
+
+function toBffAbsoluteUrl(path: string): string {
+    if (!path.startsWith('/') || typeof window !== 'undefined') {
+        return path;
+    }
+    const base = resolveServerBffOrigin();
+    return `${base}${path}`;
+}
+
 export type BffPaginatedMeta = {
     page: number;
     limit: number;
@@ -24,7 +66,8 @@ export async function bffFetch(path: string, init?: BffFetchOptions): Promise<Re
     if (idempotencyKey) {
         headers.set('Idempotency-Key', idempotencyKey);
     }
-    const res = await fetch(path, {
+    const url = toBffAbsoluteUrl(path);
+    const res = await fetch(url, {
         ...rest,
         headers,
         credentials: 'include',

@@ -245,7 +245,8 @@ services:
       - MONGODB_URI=mongodb://mongo-orders:27017/dl_orders_audit
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - PRODUCT_SERVICE_URL=${PRODUCT_SERVICE_URL:-http://product-service:3003}
-      - SERVICE_AUTH_SECRET=${SERVICE_AUTH_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-local}
+      - SERVICE_AUTH_SECRET=${SERVICE_AUTH_SECRET:-dev-service-auth-local}
     depends_on:
       postgres-orders:
         condition: service_healthy
@@ -346,7 +347,7 @@ services:
     environment:
       - PORT=3005
       - DATABASE_URL=postgresql://postgres:postgres@postgres-auth:5432/dl_auth_svc
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-local}
       - JWT_EXPIRES_IN=1d
       - OTP_EXPIRES_IN_MINUTES=10
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
@@ -378,7 +379,7 @@ services:
     environment:
       - PORT=3006
       - DATABASE_URL=postgresql://postgres:postgres@postgres-users:5432/dl_users_svc
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-local}
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=users_queue
       - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-dev-internal-api-dl-orders}
@@ -405,7 +406,7 @@ services:
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - QUEUE_NAME=payment_queue
       - ORDERS_SERVICE_URL=http://orders-service:3001
-      - SERVICE_AUTH_SECRET=${SERVICE_AUTH_SECRET}
+      - SERVICE_AUTH_SECRET=${SERVICE_AUTH_SECRET:-dev-service-auth-local}
       - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-}
       - MERCADOPAGO_WEBHOOK_SECRET=${MERCADOPAGO_WEBHOOK_SECRET:-}
       - MONGODB_URI=mongodb://mongo-payment:27017/dl_payment_audit
