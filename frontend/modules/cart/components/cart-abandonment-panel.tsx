@@ -10,7 +10,6 @@ import { scheduleCartAbandonmentDebounced, cancelCartAbandonment } from '@/lib/c
 export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
     const { data: user } = useSession();
     const [consent, setConsent] = useState(false);
-    const [email, setEmail] = useState('');
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
@@ -30,7 +29,11 @@ export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
                 void cancelCartAbandonment();
                 return;
             }
-            const resolvedEmail = email.trim() || user?.email?.trim() || '';
+            if (!user?.email?.trim()) {
+                void cancelCartAbandonment();
+                return;
+            }
+            const resolvedEmail = user.email.trim();
             if (!consent || !resolvedEmail) {
                 void cancelCartAbandonment();
                 return;
@@ -41,11 +44,11 @@ export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
                 consent,
             });
         }, 500);
-    }, [consent, email, user?.email, items]);
+    }, [consent, user?.email, items]);
 
     useEffect(() => {
         syncSchedule();
-    }, [items, consent, email, user?.email, syncSchedule]);
+    }, [items, consent, user?.email, syncSchedule]);
 
     if (items.length === 0) {
         return null;
@@ -59,18 +62,22 @@ export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
                         Email reminder
                     </h2>
                     <p className="text-[15px] leading-relaxed text-muted-foreground">
-                        Optional — one gentle reminder if you leave without checking out (about fifteen minutes).
+                        Optional — one gentle reminder if you leave without checking out (about fifteen minutes). Sign in so we can use your account email; reminders are sent server-side only when you opt in below.
                     </p>
                 </div>
-                <Field label="Email" htmlFor="cart-reminder-email" hint="Only used for the reminder if you opt in below.">
+                <Field
+                    label="Account email"
+                    htmlFor="cart-reminder-email"
+                    hint={user?.email ? 'Reminders use your signed-in email.' : 'Sign in to enable reminders.'}
+                >
                     <Input
                         id="cart-reminder-email"
                         type="email"
                         autoComplete="email"
                         className="rounded-xl border-black/8"
-                        value={email}
-                        placeholder={user?.email ?? undefined}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={user?.email ?? ''}
+                        readOnly
+                        disabled={!user?.email}
                     />
                 </Field>
                 <label className="flex cursor-pointer items-start gap-3 text-[14px] leading-snug text-foreground/85">

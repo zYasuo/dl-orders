@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CachePort } from '@app/shared';
 import { OrderEntity } from '../../domain/entities/order.entity';
 import { OrderAuditLogPort } from '../../domain/ports/order-audit-log.port';
@@ -8,6 +8,7 @@ import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port'
 import { ProductCatalogPort } from '../../domain/ports/product-catalog.port';
 import { orderCacheKey } from '../cache/order-cache-key';
 import { TCreateOrder } from '../dto/create-order.dto';
+import { normalizeOrderRecipientEmail, type TOrderAccessContext } from '../types/order-access.context';
 
 @Injectable()
 export class CreateOrderUseCase {
@@ -24,8 +25,12 @@ export class CreateOrderUseCase {
     private readonly cache: CachePort,
   ) {}
 
-  async execute(input: TCreateOrder) {
-    const { productId, quantity, description, recipient, idempotencyKey } = input;
+  async execute(input: TCreateOrder, access: TOrderAccessContext) {
+    const { productId, quantity, description, idempotencyKey } = input;
+    const recipient =
+      access.mode === 'internal-service'
+        ? normalizeOrderRecipientEmail(input.recipient)
+        : normalizeOrderRecipientEmail(access.email);
 
     this.logger.log(`Creating order for product ${productId}`);
 
@@ -38,6 +43,11 @@ export class CreateOrderUseCase {
     const existingOrder = await this.ordersRepositoryPort.findByIdempotencyKey(idempotencyKey);
 
     if (existingOrder) {
+      if (access.mode === 'user') {
+        if (normalizeOrderRecipientEmail(existingOrder.recipient) !== access.email) {
+          throw new ForbiddenException('Forbidden');
+        }
+      }
       return existingOrder;
     }
 

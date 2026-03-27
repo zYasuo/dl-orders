@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CachePort } from '@app/shared';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
@@ -9,6 +9,7 @@ import { OrderEventsPublisherPort } from '../../../src/domain/ports/order-events
 import { ProductCatalogPort } from '../../../src/domain/ports/product-catalog.port';
 import { OrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import type { TOrderAccessContext } from '../../../src/application/types/order-access.context';
 
 describe('CreateOrderUseCase', () => {
   let sut: CreateOrderUseCase;
@@ -21,6 +22,8 @@ describe('CreateOrderUseCase', () => {
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
+  const userAccess: TOrderAccessContext = { mode: 'user', email: 'test@test.com' };
+  const internalAccess: TOrderAccessContext = { mode: 'internal-service' };
   const fakeProduct = { name: 'Product A', description: 'Description A', price: 99.9 };
   const fakeOrder = new OrderEntity({
     id: 'id-123',
@@ -107,7 +110,7 @@ describe('CreateOrderUseCase', () => {
         idempotencyKey,
       };
 
-      const result = await sut.execute(input);
+      const result = await sut.execute(input, userAccess);
 
       expect(productCatalogPort.findById).toHaveBeenCalledWith('product-123');
       expect(ordersRepository.create).toHaveBeenCalledTimes(1);
@@ -181,7 +184,7 @@ describe('CreateOrderUseCase', () => {
       };
       productCatalogPort.findById.mockResolvedValueOnce(null);
 
-      await expect(sut.execute(input)).rejects.toThrow(new NotFoundException('Product not found'));
+      await expect(sut.execute(input, userAccess)).rejects.toThrow(new NotFoundException('Product not found'));
 
       expect(ordersRepository.create).not.toHaveBeenCalled();
       expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
@@ -198,7 +201,7 @@ describe('CreateOrderUseCase', () => {
       };
       ordersRepository.create.mockRejectedValueOnce(new Error('DB failed'));
 
-      await expect(sut.execute(input)).rejects.toThrow('DB failed');
+      await expect(sut.execute(input, userAccess)).rejects.toThrow('DB failed');
 
       expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
       expect(cache.incr).not.toHaveBeenCalled();
@@ -218,7 +221,7 @@ describe('CreateOrderUseCase', () => {
         price: 99.9,
       });
 
-      await sut.execute(input);
+      await sut.execute(input, userAccess);
 
       expect(ordersRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -253,7 +256,7 @@ describe('CreateOrderUseCase', () => {
       });
       ordersRepository.create.mockResolvedValueOnce(orderWithTotal);
 
-      const result = await sut.execute(input);
+      const result = await sut.execute(input, userAccess);
 
       expect(ordersRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -285,11 +288,77 @@ describe('CreateOrderUseCase', () => {
       };
       orderSummary.put.mockRejectedValueOnce(new Error('Summary write failed'));
 
-      const result = await sut.execute(input);
+      const result = await sut.execute(input, userAccess);
 
       expect(result).toEqual(fakeOrder);
       expect(orderEventsPublisher.publishOrderCreationRequested).toHaveBeenCalledTimes(1);
       expect(orderAuditLog.log).toHaveBeenCalledTimes(1);
+    });
+
+    it('for end-user JWT, overwrites recipient with authenticated email (ignores body recipient)', async () => {
+      const input = {
+        productId: 'product-123',
+        quantity: 1,
+        description: 'test order',
+        recipient: 'attacker@evil.com',
+        idempotencyKey,
+      };
+
+      await sut.execute(input, userAccess);
+
+      expect(ordersRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipient: 'test@test.com',
+        }),
+      );
+    });
+
+    it('for internal service auth, uses normalized recipient from body', async () => {
+      const input = {
+        productId: 'product-123',
+        quantity: 1,
+        description: 'test order',
+        recipient: 'Buyer@Shop.COM',
+        idempotencyKey,
+      };
+
+      await sut.execute(input, internalAccess);
+
+      expect(ordersRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipient: 'buyer@shop.com',
+        }),
+      );
+    });
+
+    it('rejects idempotent replay when idempotency key belongs to another user', async () => {
+      const otherOrder = new OrderEntity({
+        id: 'order-other',
+        description: 'other',
+        status: OrderStatus.PENDING,
+        productId: 'product-123',
+        quantity: 1,
+        createdAt,
+        updatedAt: createdAt,
+        recipient: 'other@user.com',
+        productName: 'Product A',
+        productDescription: 'Description A',
+        idempotencyKey,
+        unitPrice: 99.9,
+        totalPrice: 99.9,
+      });
+      ordersRepository.findByIdempotencyKey.mockResolvedValueOnce(otherOrder);
+
+      const input = {
+        productId: 'product-123',
+        quantity: 1,
+        description: 'order',
+        recipient: 'test@test.com',
+        idempotencyKey,
+      };
+
+      await expect(sut.execute(input, userAccess)).rejects.toThrow(ForbiddenException);
+      expect(ordersRepository.create).not.toHaveBeenCalled();
     });
   });
 });

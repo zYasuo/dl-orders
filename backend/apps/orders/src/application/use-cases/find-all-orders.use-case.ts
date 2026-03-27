@@ -4,6 +4,7 @@ import { OrderEntity } from '../../domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../domain/ports/orders-repository.port';
 import { OrdersCacheKeyBuilder } from '../cache/orders-cache-key-builder';
 import { TFindAllOrdersQuery } from '../dto/find-all-orders-query.schema';
+import type { TOrderAccessContext } from '../types/order-access.context';
 
 @Injectable()
 export class FindAllOrdersUseCase {
@@ -15,10 +16,17 @@ export class FindAllOrdersUseCase {
     private readonly cacheKeyBuilder: OrdersCacheKeyBuilder,
   ) {}
 
-  async execute(input: TFindAllOrdersQuery): Promise<Paginated<OrderEntity>> {
+  async execute(
+    input: TFindAllOrdersQuery,
+    access: TOrderAccessContext,
+  ): Promise<Paginated<OrderEntity>> {
     const { page, limit } = input;
 
-    const cacheKey = await this.cacheKeyBuilder.buildListKey(page, limit);
+    const listScope =
+      access.mode === 'internal-service'
+        ? 'all'
+        : { recipientEmail: access.email };
+    const cacheKey = await this.cacheKeyBuilder.buildListKey(page, limit, listScope);
     const cached = await this.cache.getJson<Paginated<OrderEntity>>(cacheKey);
 
     if (cached) {
@@ -28,7 +36,7 @@ export class FindAllOrdersUseCase {
     return runWithCacheReadLock<Paginated<OrderEntity>>(
       this.cache,
       cacheKey,
-      () => this.readFromSourceAndCache(cacheKey, page, limit),
+      () => this.readFromSourceAndCache(cacheKey, page, limit, access),
     );
   }
 
@@ -36,11 +44,18 @@ export class FindAllOrdersUseCase {
     cacheKey: string,
     page: number,
     limit: number,
+    access: TOrderAccessContext,
   ): Promise<Paginated<OrderEntity>> {
-    const [data, total] = await Promise.all([
-      this.ordersRepositoryPort.findPage(page, limit),
-      this.ordersRepositoryPort.count(),
-    ]);
+    const [data, total] =
+      access.mode === 'internal-service'
+        ? await Promise.all([
+            this.ordersRepositoryPort.findPage(page, limit),
+            this.ordersRepositoryPort.count(),
+          ])
+        : await Promise.all([
+            this.ordersRepositoryPort.findPageByRecipient(access.email, page, limit),
+            this.ordersRepositoryPort.countByRecipient(access.email),
+          ]);
     const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
     const result = {
       data,

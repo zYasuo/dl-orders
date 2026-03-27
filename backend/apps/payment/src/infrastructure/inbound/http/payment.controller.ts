@@ -52,7 +52,14 @@ export class PaymentController {
   }
 
   @PaymentDoc.GetByOrderId()
-  getByOrderId(@Param('orderId') orderId: string) {
-    return this.findPaymentByOrderIdUseCase.execute(orderId);
+  getByOrderId(
+    @Param('orderId') orderId: string,
+    @Headers('authorization') authorization: string | undefined,
+  ) {
+    const raw = authorization?.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+    if (!raw) {
+      throw new UnauthorizedException('Missing or invalid Authorization header');
+    }
+    return this.findPaymentByOrderIdUseCase.execute(orderId, raw);
   }
 }

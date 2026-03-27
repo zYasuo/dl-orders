@@ -4,6 +4,13 @@ export interface IOrderDetails {
   idempotencyKey?: string | null;
 }
 
+export type TGetOrderDetailsOptions = {
+  bearerToken: string;
+};
+
 export abstract class OrderDetailsPort {
-  abstract getByOrderId(orderId: string): Promise<IOrderDetails | null>;
+  abstract getByOrderId(
+    orderId: string,
+    options?: TGetOrderDetailsOptions,
+  ): Promise<IOrderDetails | null>;
 }

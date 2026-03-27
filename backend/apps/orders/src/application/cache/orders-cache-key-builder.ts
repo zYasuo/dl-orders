@@ -7,9 +7,15 @@ export class OrdersCacheKeyBuilder {
 
   constructor(private readonly cache: CachePort) {}
 
-  async buildListKey(page: number, limit: number): Promise<string> {
+  async buildListKey(
+    page: number,
+    limit: number,
+    scope: 'all' | { recipientEmail: string } = 'all',
+  ): Promise<string> {
     const version = (await this.cache.get(this.versionKey)) ?? '1';
-    return `orders:all:v${version}:page:${page}:limit:${limit}`;
+    const scopeKey =
+      scope === 'all' ? 'all' : `u:${scope.recipientEmail}`;
+    return `orders:${scopeKey}:v${version}:page:${page}:limit:${limit}`;
   }
 
   async bumpVersion(): Promise<void> {

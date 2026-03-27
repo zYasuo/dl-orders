@@ -74,6 +74,46 @@ export class OrdersRepository extends OrdersRepositoryPort {
       : null;
   }
 
+  async findPageByRecipient(
+    recipientEmail: string,
+    page: number,
+    limit: number,
+  ): Promise<OrderEntity[]> {
+    const skip = (page - 1) * limit;
+    const rows = await this.db.order.findMany({
+      where: { recipient: { equals: recipientEmail, mode: 'insensitive' } },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return rows.map(
+      (item) =>
+        new OrderEntity({
+          id: item.id,
+          sequenceId: item.sequenceId,
+          productId: item.productId,
+          quantity: item.quantity,
+          description: item.description,
+          recipient: item.recipient,
+          productName: item.productName,
+          productDescription: item.productDescription,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          status: item.status as OrderStatus,
+          idempotencyKey: item.idempotencyKey,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        }),
+    );
+  }
+
+  async countByRecipient(recipientEmail: string): Promise<number> {
+    return this.db.order.count({
+      where: { recipient: { equals: recipientEmail, mode: 'insensitive' } },
+    });
+  }
+
   async findPage(page: number, limit: number): Promise<OrderEntity[]> {
     const skip = (page - 1) * limit;
     const rows = await this.db.order.findMany({

@@ -1,5 +1,6 @@
 import { OrderEntity, OrderStatus } from '../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../src/domain/ports/orders-repository.port';
+import { normalizeOrderRecipientEmail } from '../../src/application/types/order-access.context';
 
 export class InMemoryOrdersRepository extends OrdersRepositoryPort {
   private readonly orders = new Map<string, OrderEntity>();
@@ -21,6 +22,27 @@ export class InMemoryOrdersRepository extends OrdersRepositoryPort {
     );
     const skip = (page - 1) * limit;
     return sorted.slice(skip, skip + limit);
+  }
+
+  async findPageByRecipient(
+    recipientEmail: string,
+    page: number,
+    limit: number,
+  ): Promise<OrderEntity[]> {
+    const needle = normalizeOrderRecipientEmail(recipientEmail);
+    const filtered = [...this.orders.values()].filter(
+      (o) => normalizeOrderRecipientEmail(o.recipient) === needle,
+    );
+    const sorted = filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const skip = (page - 1) * limit;
+    return sorted.slice(skip, skip + limit);
+  }
+
+  async countByRecipient(recipientEmail: string): Promise<number> {
+    const needle = normalizeOrderRecipientEmail(recipientEmail);
+    return [...this.orders.values()].filter(
+      (o) => normalizeOrderRecipientEmail(o.recipient) === needle,
+    ).length;
   }
 
   async count(): Promise<number> {

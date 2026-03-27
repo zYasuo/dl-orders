@@ -9,7 +9,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 ## Role
 
 - **Events in:** Listens for `inventory.reserved` (forwarded by the orders service after inventory reserves stock). Fetches order details from the orders service (including the order's `idempotencyKey`), creates a Payment record (PENDING) or returns the existing one when the same idempotency key or orderId is used, then creates a Mercado Pago Preference (or skips if one already exists) and stores the checkout URL (`initPoint`).
-- **HTTP:** Mercado Pago webhook (`POST /payments/webhook`, signature verification required and `MERCADOPAGO_WEBHOOK_SECRET` set); GET payment by order ID (`GET /payments/order/:orderId`, JWT) for the checkout link. HTTP calls to the orders service use `SERVICE_AUTH_SECRET` in the `x-service-auth` header.
+- **HTTP:** Mercado Pago webhook (`POST /payments/webhook`, signature verification required and `MERCADOPAGO_WEBHOOK_SECRET` set); GET payment by order ID (`GET /payments/order/:orderId`, JWT) — before returning payment data, the service calls **`GET /orders/:id`** on the orders API with the **same Bearer JWT**, so only the order owner receives the checkout link. Internal inventory flows use `x-service-auth` on `OrderDetailsPort` (no JWT).
 - **Events out:** On webhook `approved` -> `payment.approved` (orders confirms); on `rejected`/cancelled -> `payment.failed` (orders cancels and returns stock).
 
 ## Ports
@@ -18,7 +18,7 @@ After **Inventory** reserves stock, **Orders** forwards the `inventory.reserved`
 - **PaymentGatewayPort** - Mercado Pago SDK: create preference, get payment details.
 - **PaymentEventsPublisherPort** - Publish payment events to RabbitMQ (`payment.approved`, `payment.failed`).
 - **PaymentAuditLogPort** - Append payment audit entries (MongoDB).
-- **OrderDetailsPort** - Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id`).
+- **OrderDetailsPort** - Fetch order details (e.g. total price) from the orders service (HTTP `GET /orders/:id` with either `x-service-auth` or end-user `Authorization: Bearer`).
 
 ## Inbound
 

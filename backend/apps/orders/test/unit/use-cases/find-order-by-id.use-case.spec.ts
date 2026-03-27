@@ -1,10 +1,11 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CachePort } from '@app/shared';
 import { orderCacheKey } from '../../../src/application/cache/order-cache-key';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
+import type { TOrderAccessContext } from '../../../src/application/types/order-access.context';
 
 describe('FindOrderByIdUseCase', () => {
   let sut: FindOrderByIdUseCase;
@@ -13,6 +14,9 @@ describe('FindOrderByIdUseCase', () => {
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
+  const internalAccess: TOrderAccessContext = { mode: 'internal-service' };
+  const userAccess: TOrderAccessContext = { mode: 'user', email: 'test@test.com' };
+
   const fakeOrder = new OrderEntity({
     id: 'id-123',
     description: 'test order',
@@ -65,7 +69,7 @@ describe('FindOrderByIdUseCase', () => {
 
   describe('execute', () => {
     it('returns order when found', async () => {
-      const result = await sut.execute('id-123');
+      const result = await sut.execute('id-123', internalAccess);
 
       expect(cache.getJson).toHaveBeenCalledWith(orderCacheKey('id-123'));
       expect(ordersRepository.findById).toHaveBeenCalledTimes(1);
@@ -77,7 +81,7 @@ describe('FindOrderByIdUseCase', () => {
     it('returns cached order without hitting repository', async () => {
       cache.getJson.mockResolvedValueOnce(fakeOrder);
 
-      const result = await sut.execute('id-123');
+      const result = await sut.execute('id-123', internalAccess);
 
       expect(result).toEqual(fakeOrder);
       expect(ordersRepository.findById).not.toHaveBeenCalled();
@@ -87,14 +91,33 @@ describe('FindOrderByIdUseCase', () => {
     it('throws NotFoundException when order does not exist', async () => {
       ordersRepository.findById.mockResolvedValueOnce(null);
 
-      await expect(sut.execute('non-existent')).rejects.toThrow(NotFoundException);
+      await expect(sut.execute('non-existent', internalAccess)).rejects.toThrow(NotFoundException);
       expect(cache.setJson).not.toHaveBeenCalled();
     });
 
     it('propagates error when repository throws', async () => {
       ordersRepository.findById.mockRejectedValueOnce(new Error('DB failed'));
 
-      await expect(sut.execute('id-123')).rejects.toThrow('DB failed');
+      await expect(sut.execute('id-123', internalAccess)).rejects.toThrow('DB failed');
+    });
+
+    it('allows owner JWT to read order', async () => {
+      const result = await sut.execute('id-123', userAccess);
+      expect(result).toEqual(fakeOrder);
+    });
+
+    it('rejects JWT for another recipient (cached)', async () => {
+      cache.getJson.mockResolvedValueOnce(fakeOrder);
+
+      await expect(sut.execute('id-123', { mode: 'user', email: 'other@test.com' })).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('rejects JWT for another recipient (repository)', async () => {
+      await expect(sut.execute('id-123', { mode: 'user', email: 'other@test.com' })).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SERVICE_AUTH_HEADER } from '@app/shared';
-import { IOrderDetails, OrderDetailsPort } from '../../../domain/ports/order-details.port';
+import {
+  IOrderDetails,
+  OrderDetailsPort,
+  type TGetOrderDetailsOptions,
+} from '../../../domain/ports/order-details.port';
 
 @Injectable()
 export class OrdersHttpClient extends OrderDetailsPort {
@@ -12,11 +16,16 @@ export class OrdersHttpClient extends OrderDetailsPort {
     this.baseUrl = this.configService.getOrThrow<string>('ORDERS_SERVICE_URL').replace(/\/$/, '');
   }
 
-  async getByOrderId(orderId: string): Promise<IOrderDetails | null> {
+  async getByOrderId(
+    orderId: string,
+    options?: TGetOrderDetailsOptions,
+  ): Promise<IOrderDetails | null> {
     const url = `${this.baseUrl}/api/v1/orders/${encodeURIComponent(orderId)}`;
     const serviceSecret = this.configService.get<string>('SERVICE_AUTH_SECRET')?.trim();
     const headers: Record<string, string> = {};
-    if (serviceSecret) {
+    if (options?.bearerToken) {
+      headers['Authorization'] = `Bearer ${options.bearerToken}`;
+    } else if (serviceSecret) {
       headers[SERVICE_AUTH_HEADER] = serviceSecret;
     }
 
@@ -25,6 +34,10 @@ export class OrdersHttpClient extends OrderDetailsPort {
     const { status, ok } = response;
 
     if (status === 404) return null;
+
+    if (status === 403) {
+      throw new ForbiddenException('Forbidden');
+    }
 
     if (!ok) {
       throw new Error(`Orders service returned ${status}: ${await response.text()}`);

@@ -35,7 +35,7 @@ Use **`.env`** (do not commit — it is in the monorepo `.gitignore`). **`.env.e
 cp .env.example .env
 ```
 
-Restart `npm run dev` after changing variables. Without `INVENTORY_SERVICE_URL` and `SERVICE_AUTH_SECRET`, the BFF `POST /api/inventory/stock` returns 500. For abandoned-cart reminders (optional), also set `NOTIFICATION_SERVICE_URL` and the same `SERVICE_AUTH_SECRET` as on the Notification service.
+Restart `npm run dev` after changing variables. Without `INVENTORY_SERVICE_URL`, `SERVICE_AUTH_SECRET`, and a signed-in session, the BFF `POST /api/inventory/stock` returns **500** (config) or **401** (no session). For abandoned-cart reminders (optional), set `NOTIFICATION_SERVICE_URL`, the same `SERVICE_AUTH_SECRET` as on Notification, and **`USERS_SERVICE_URL`** (BFF checks the session and matches `email` in the body to the logged-in user).
 
 Typical values (local ports):
 
@@ -53,12 +53,12 @@ Typical values (local ports):
 
 ### BFF stock (catalog)
 
-- **`POST /api/inventory/stock`** — body `{ "productIds": string[] }` (max 50). Response `{ success, timestamp, data }` where `data` is a map `productId → { quantity, inStock, lastUnits }`. The handler calls **`POST /api/v1/inventories/lookup`** on Inventory with `x-service-auth`. Upstream errors return the same status and error JSON as the backend.
+- **`POST /api/inventory/stock`** — requires **session cookie**; body `{ "productIds": string[] }` (max 50). Response `{ success, timestamp, data }` where `data` is a map `productId → { quantity, inStock, lastUnits }`. The handler calls **`POST /api/v1/inventories/lookup`** on Inventory with `x-service-auth`. Upstream errors return the same status and error JSON as the backend.
 
 ### BFF abandoned cart
 
-- **`PUT /api/cart/abandonment`** — JSON body `{ sessionKey, email, resumeUrl, pendingUntil` (ISO datetime), `summaryLines }`. Forwards to **`PUT /api/v1/internal/cart-abandonment`** on Notification with `x-service-auth`. The client should only call this after explicit user consent.
-- **`DELETE /api/cart/abandonment?sessionKey=`** — cancels scheduling on Notification (e.g. empty cart, checkout completed, or expiry).
+- **`PUT /api/cart/abandonment`** — requires **session cookie**; `email` in the body must match **`GET /api/v1/users/me`** for that session. JSON body `{ sessionKey, email, resumeUrl, pendingUntil` (ISO datetime), `summaryLines }`. Forwards to **`PUT /api/v1/internal/cart-abandonment`** on Notification with `x-service-auth`. Call only after explicit user consent.
+- **`DELETE /api/cart/abandonment?sessionKey=`** — requires **session cookie**; cancels scheduling on Notification (e.g. empty cart, checkout completed, or expiry).
 
 ## Cart (MVP)
 

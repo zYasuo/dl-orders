@@ -5,6 +5,7 @@ import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-or
 import { OrderEntity } from '../../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
+import type { TOrderAccessContext } from '../../../src/application/types/order-access.context';
 
 describe('FindOrderByIdUseCase (integration)', () => {
   let sut: FindOrderByIdUseCase;
@@ -38,6 +39,7 @@ describe('FindOrderByIdUseCase (integration)', () => {
 
   describe('execute', () => {
     it('returns order when found', async () => {
+      const ownerAccess: TOrderAccessContext = { mode: 'user', email: 'test@test.com' };
       const created = await ordersRepository.create(
         OrderEntity.create({
           productId: '123',
@@ -51,13 +53,14 @@ describe('FindOrderByIdUseCase (integration)', () => {
         }),
       );
 
-      const result = await sut.execute(created.id);
+      const result = await sut.execute(created.id, ownerAccess);
       expect(result.id).toBe(created.id);
       expect(result.productId).toBe(created.productId);
     });
 
     it('throws NotFoundException when order does not exist', async () => {
-      await expect(sut.execute('non-existent-id')).rejects.toThrow(NotFoundException);
+      const internalAccess: TOrderAccessContext = { mode: 'internal-service' };
+      await expect(sut.execute('non-existent-id', internalAccess)).rejects.toThrow(NotFoundException);
     });
   });
 });

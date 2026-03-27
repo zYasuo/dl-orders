@@ -4,14 +4,16 @@ import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import type { TJwtPayload } from './jwt-auth.guard';
 
-/** Header sent by internal services (e.g. payment → orders) when SERVICE_AUTH_SECRET is set. */
 export const SERVICE_AUTH_HEADER = 'x-service-auth';
 
-/**
- * Allows either:
- * - `x-service-auth` matching `SERVICE_AUTH_SECRET` (service-to-service), or
- * - `Authorization: Bearer` JWT verified with `JWT_SECRET` (end users).
- */
+export const INTERNAL_SERVICE_AUTH_REQUEST_KEY = 'internalServiceAuth' as const;
+
+export type TServiceOrJwtRequest = Request & {
+  user?: TJwtPayload;
+  [INTERNAL_SERVICE_AUTH_REQUEST_KEY]?: true;
+};
+
+
 @Injectable()
 export class ServiceOrJwtAuthGuard implements CanActivate {
   constructor(private readonly configService: ConfigService) {}
@@ -23,6 +25,7 @@ export class ServiceOrJwtAuthGuard implements CanActivate {
     const headerValue = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
 
     if (serviceSecret && headerValue === serviceSecret) {
+      (request as TServiceOrJwtRequest)[INTERNAL_SERVICE_AUTH_REQUEST_KEY] = true;
       return Promise.resolve(true);
     }
 
@@ -41,7 +44,7 @@ export class ServiceOrJwtAuthGuard implements CanActivate {
 
     try {
       const decoded = jwt.verify(token, secret) as TJwtPayload;
-      (request as Request & { user: TJwtPayload }).user = decoded;
+      (request as TServiceOrJwtRequest).user = decoded;
 
       return Promise.resolve(true);
     } catch {

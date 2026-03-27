@@ -9,6 +9,7 @@ import { OrderSummaryPort } from '../../../src/domain/ports/order-summary.port';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
 import { FakeOrderEventsPublisher } from '../../doubles/fake-order-events.publisher';
 import { InMemoryOrdersRepository } from '../../doubles/in-memory-orders.repository';
+import type { TOrderAccessContext } from '../../../src/application/types/order-access.context';
 
 describe('CreateOrderUseCase (integration)', () => {
   let sut: CreateOrderUseCase;
@@ -61,6 +62,7 @@ describe('CreateOrderUseCase (integration)', () => {
 
   describe('execute', () => {
     it('persists order as PENDING and publishes OrderCreationRequested', async () => {
+      const userAccess: TOrderAccessContext = { mode: 'user', email: 'test@test.com' };
       const input = {
         productId: 'product-123',
         quantity: 1,
@@ -69,7 +71,7 @@ describe('CreateOrderUseCase (integration)', () => {
         idempotencyKey: crypto.randomUUID(),
       };
 
-      const result = await sut.execute(input);
+      const result = await sut.execute(input, userAccess);
 
       expect(result.status).toBe(OrderStatus.PENDING);
 

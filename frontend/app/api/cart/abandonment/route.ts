@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { normalizeEmailForBff, requireSessionToken, requireSessionUserEmail } from '@/lib/bff-session';
 
 const putBodySchema = z.object({
     sessionKey: z.string().min(8).max(64),
@@ -14,6 +15,11 @@ const deleteQuerySchema = z.object({
 });
 
 export async function PUT(request: Request) {
+    const profile = await requireSessionUserEmail();
+    if (profile instanceof NextResponse) {
+        return profile;
+    }
+
     const base = process.env.NOTIFICATION_SERVICE_URL?.replace(/\/$/, '');
     const secret = process.env.SERVICE_AUTH_SECRET;
     if (!base || !secret) {
@@ -35,6 +41,14 @@ export async function PUT(request: Request) {
             { status: 400 },
         );
     }
+
+    if (normalizeEmailForBff(parsed.data.email) !== profile.email) {
+        return NextResponse.json(
+            { statusCode: 403, error: 'Forbidden', message: 'Email must match the signed-in user.' },
+            { status: 403 },
+        );
+    }
+
     const res = await fetch(`${base}/api/v1/internal/cart-abandonment`, {
         method: 'PUT',
         headers: {
@@ -48,6 +62,11 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+    const session = await requireSessionToken();
+    if (session instanceof NextResponse) {
+        return session;
+    }
+
     const base = process.env.NOTIFICATION_SERVICE_URL?.replace(/\/$/, '');
     const secret = process.env.SERVICE_AUTH_SECRET;
     if (!base || !secret) {

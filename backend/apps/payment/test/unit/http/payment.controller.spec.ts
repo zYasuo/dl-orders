@@ -18,12 +18,15 @@ import { WebhookSignatureService } from '../../../src/infrastructure/inbound/htt
 describe('PaymentController', () => {
   let controller: PaymentController;
   let webhookSignatureService: jest.Mocked<WebhookSignatureService>;
+  let findPaymentByOrderId: jest.Mocked<Pick<FindPaymentByOrderIdUseCase, 'execute'>>;
 
   beforeEach(async () => {
     webhookSignatureService = {
       isSecretConfigured: jest.fn().mockReturnValue(true),
       validate: jest.fn().mockReturnValue(true),
     } as unknown as jest.Mocked<WebhookSignatureService>;
+
+    findPaymentByOrderId = { execute: jest.fn().mockResolvedValue({}) };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PaymentController],
@@ -34,7 +37,7 @@ describe('PaymentController', () => {
         },
         {
           provide: FindPaymentByOrderIdUseCase,
-          useValue: { execute: jest.fn().mockResolvedValue({}) },
+          useValue: findPaymentByOrderId,
         },
         {
           provide: WebhookSignatureService,
@@ -98,6 +101,33 @@ describe('PaymentController', () => {
       );
       expect(result).toEqual({ received: true });
       expect(webhookSignatureService.validate).toHaveBeenCalledWith('mo-456', 'ts=1,v1=abc', 'req-2');
+    });
+  });
+
+  describe('getByOrderId', () => {
+    it('passes bearer token to use case', async () => {
+      findPaymentByOrderId.execute.mockResolvedValueOnce({
+        paymentId: 'p1',
+        orderId: 'o1',
+        status: 'PENDING',
+        amount: 10,
+        initPoint: null,
+      });
+
+      const result = await controller.getByOrderId('o1', 'Bearer abc.def.ghi');
+
+      expect(findPaymentByOrderId.execute).toHaveBeenCalledWith('o1', 'abc.def.ghi');
+      expect(result).toEqual(
+        expect.objectContaining({
+          paymentId: 'p1',
+          orderId: 'o1',
+        }),
+      );
+    });
+
+    it('throws UnauthorizedException when Authorization header is missing', () => {
+      expect(() => controller.getByOrderId('o1', undefined)).toThrow(UnauthorizedException);
+      expect(findPaymentByOrderId.execute).not.toHaveBeenCalled();
     });
   });
 });

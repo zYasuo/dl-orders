@@ -4,12 +4,12 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 ## Role
 
-- **HTTP:** Create order, list paginada, find by ID, audit log, summary — all require **Bearer JWT** (same `JWT_SECRET` as auth) **or** header **`x-service-auth`** matching **`SERVICE_AUTH_SECRET`** (used by the payment service to fetch order details). Create order accepts an `idempotencyKey` (UUID); if the same key is sent again, the service returns the existing order (no duplicate). On create, the service fetches the product from the product service (`GET /api/v1/products/:id`, public) for name, description, and price; then publishes `order.creation_requested`.
+- **HTTP:** Create order, list paginada, find by ID, audit log, summary — all require **Bearer JWT** (same `JWT_SECRET` as auth) **or** header **`x-service-auth`** matching **`SERVICE_AUTH_SECRET`** (used by the payment service to fetch any order). **End-user JWT:** list/find/audit/summary are scoped to orders whose `recipient` email matches the token (case-insensitive); create order sets `recipient` from the JWT email (body `recipient` is ignored for JWT clients). Reusing another user’s `idempotencyKey` returns **403**. **Service auth:** full access for integration (e.g. payment). On create, the service fetches the product from the product service (`GET /api/v1/products/:id`, public) for name, description, and price; then publishes `order.creation_requested`.
 - **Events in:** Listens for `inventory.reserved` (confirm order) and `inventory.reservation_failed` (cancel order). On confirm, publishes `order.confirmed` (including real `totalPrice` and product data) for the notification service.
 
 ## Ports
 
-- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma). Includes `findPage`, `count`, `confirmIfPending` e `cancelIfPending` for atomic status transitions.
+- **OrdersRepositoryPort** - Persist and load orders (Postgres/Prisma). Includes `findPage`, `count`, `findPageByRecipient`, `countByRecipient`, `confirmIfPending` e `cancelIfPending` for atomic status transitions.
 - **ProductCatalogPort** - Fetch product by id from the product service (HTTP `GET /api/v1/products/:id`); response is validated against the v1 contract so the orders service does not break when the product service evolves.
 - **OrderEventsPublisherPort** - Publish order events to RabbitMQ (`order.creation_requested`, `order.confirmed`).
 - **OrderAuditLogPort** - Append audit entries (MongoDB).
@@ -30,7 +30,7 @@ Orchestrates the order lifecycle: create, confirm, or cancel orders and coordina
 
 - **Postgres** - Orders and related data; connection via `DATABASE_URL` in `apps/orders/.env`.
 - **MongoDB** - Audit log and order summaries; connection via `MONGODB_URI` in `apps/orders/.env`.
-- **Redis** - Shared cache instance; connection via `REDIS_URL` in `apps/orders/.env`. Chaves: item por id (`orders:{id}`), listas paginadas versionadas (`orders:all:v{version}:page:{page}:limit:{limit}`) e versão (`orders:all:version`).
+- **Redis** - Shared cache instance; connection via `REDIS_URL` in `apps/orders/.env`. Chaves: item por id (`orders:{id}`), listas paginadas versionadas por âmbito (`orders:all:...` para serviço interno; `orders:u:{email}:...` para JWT de utilizador) e versão (`orders:all:version`).
 
 ## HTTP response contract
 
