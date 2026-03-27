@@ -1,6 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
+import { orderCacheKey } from '../../../src/application/cache/order-cache-key';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
 import { OrderEventsPublisherPort } from '../../../src/domain/ports/order-events-publisher.port';
@@ -15,6 +17,7 @@ describe('CreateOrderUseCase', () => {
   let orderEventsPublisher: jest.Mocked<OrderEventsPublisherPort>;
   let orderAuditLog: jest.Mocked<OrderAuditLogPort>;
   let orderSummary: jest.Mocked<OrderSummaryPort>;
+  let cache: jest.Mocked<CachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
@@ -67,6 +70,18 @@ describe('CreateOrderUseCase', () => {
       getByOrderId: jest.fn().mockResolvedValue(null),
     } as unknown as jest.Mocked<OrderSummaryPort>;
 
+    cache = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn().mockResolvedValue(undefined),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as jest.Mocked<CachePort>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
@@ -75,6 +90,7 @@ describe('CreateOrderUseCase', () => {
         { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
         { provide: OrderAuditLogPort, useValue: orderAuditLog },
         { provide: OrderSummaryPort, useValue: orderSummary },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 
@@ -149,6 +165,9 @@ describe('CreateOrderUseCase', () => {
         idempotencyKey,
       });
 
+      expect(cache.incr).toHaveBeenCalledWith('orders:all:version');
+      expect(cache.setJson).toHaveBeenCalledWith(orderCacheKey(fakeOrder.id), fakeOrder, 60 * 5);
+
       expect(result).toEqual(fakeOrder);
     });
 
@@ -166,6 +185,7 @@ describe('CreateOrderUseCase', () => {
 
       expect(ordersRepository.create).not.toHaveBeenCalled();
       expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
+      expect(cache.incr).not.toHaveBeenCalled();
     });
 
     it('does not publish event when repository throws', async () => {
@@ -181,6 +201,7 @@ describe('CreateOrderUseCase', () => {
       await expect(sut.execute(input)).rejects.toThrow('DB failed');
 
       expect(orderEventsPublisher.publishOrderCreationRequested).not.toHaveBeenCalled();
+      expect(cache.incr).not.toHaveBeenCalled();
     });
 
     it('uses empty string for productDescription when product.description is null/undefined', async () => {

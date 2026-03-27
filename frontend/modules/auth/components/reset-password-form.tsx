@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
@@ -11,6 +12,7 @@ import { requestResetPasswordLink } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 
 export function ResetPasswordForm() {
+    const router = useRouter();
     const { toast } = useToast();
     const form = useForm<ResetPasswordFormValues>({
         resolver: zodResolver(resetPasswordSchema),
@@ -20,7 +22,11 @@ export function ResetPasswordForm() {
     async function onSubmit(values: ResetPasswordFormValues) {
         try {
             const res = await requestResetPasswordLink({ email: values.email });
-            toast({ message: res.message, variant: 'success' });
+            toast({
+                message: res.message,
+                variant: 'success',
+                action: { label: 'Back to sign in', onClick: () => router.push('/auth/signin') },
+            });
         } catch (e) {
             const msg = e instanceof ApiError ? e.message : 'Could not send the link.';
             toast({ message: msg, variant: 'error' });

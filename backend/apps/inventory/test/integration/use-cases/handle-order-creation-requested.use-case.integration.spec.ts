@@ -1,19 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { HandleOrderCreationRequestedUseCase } from '../../../src/application/use-cases/handle-order-creation-requested.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
 import { InventoryEventsPublisherPort } from '../../../src/domain/ports/inventory-events-publisher.port';
-import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 import { ReservationAuditLogPort } from '../../../src/domain/ports/reservation-audit-log.port';
 import { FakeInventoryEventsPublisher } from '../../doubles/fake-inventory-events.publisher';
-import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
 describe('HandleOrderCreationRequestedUseCase (integration)', () => {
   let sut: HandleOrderCreationRequestedUseCase;
   let repository: InMemoryInventoryRepository;
   let eventsPublisher: FakeInventoryEventsPublisher;
-  let listCache: InMemoryInventoryListCache;
 
   const productId = 'product-1';
   const inventoryId = 'inventory-1';
@@ -37,11 +35,22 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
       ),
     );
     eventsPublisher = new FakeInventoryEventsPublisher();
-    listCache = new InMemoryInventoryListCache();
     const reservationAuditLog: ReservationAuditLogPort = {
       log: jest.fn().mockResolvedValue(undefined),
       getByOrderId: jest.fn().mockResolvedValue([]),
     };
+
+    const cache: CachePort = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn(),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as CachePort;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,7 +58,7 @@ describe('HandleOrderCreationRequestedUseCase (integration)', () => {
         { provide: InventoryRepositoryPort, useValue: repository },
         { provide: InventoryEventsPublisherPort, useValue: eventsPublisher },
         { provide: ReservationAuditLogPort, useValue: reservationAuditLog },
-        { provide: InventoryListCachePort, useValue: listCache },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 

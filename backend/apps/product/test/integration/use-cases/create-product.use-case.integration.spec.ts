@@ -1,5 +1,6 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { CreateProductUseCase } from '../../../src/application/use-cases/create-product.use-case';
 import { ProductCachePort } from '../../../src/domain/ports/product-cache.port';
 import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
@@ -11,6 +12,19 @@ describe('CreateProductUseCase (integration)', () => {
   let productRepository: InMemoryProductRepository;
   let productCache: InMemoryProductCache;
 
+  const buildCachePort = (): CachePort =>
+    ({
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn(),
+      incr: jest.fn().mockResolvedValue(1),
+    }) as unknown as CachePort;
+
   beforeEach(async () => {
     productRepository = new InMemoryProductRepository();
     productCache = new InMemoryProductCache();
@@ -20,6 +34,7 @@ describe('CreateProductUseCase (integration)', () => {
         CreateProductUseCase,
         { provide: ProductRepositoryPort, useValue: productRepository },
         { provide: ProductCachePort, useValue: productCache },
+        { provide: CachePort, useValue: buildCachePort() },
       ],
     }).compile();
 
@@ -65,6 +80,7 @@ describe('CreateProductUseCase (integration)', () => {
           CreateProductUseCase,
           { provide: ProductRepositoryPort, useValue: failingRepo },
           { provide: ProductCachePort, useValue: cache },
+          { provide: CachePort, useValue: buildCachePort() },
         ],
       }).compile();
       const useCase = module.get(CreateProductUseCase);

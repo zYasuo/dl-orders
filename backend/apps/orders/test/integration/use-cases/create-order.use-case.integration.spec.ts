@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { CreateOrderUseCase } from '../../../src/application/use-cases/create-order.use-case';
 import { OrderStatus } from '../../../src/domain/entities/order.entity';
 import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
@@ -31,6 +32,18 @@ describe('CreateOrderUseCase (integration)', () => {
       getByOrderId: jest.fn().mockResolvedValue(null),
     };
 
+    const cache: CachePort = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn().mockResolvedValue(undefined),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as CachePort;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderUseCase,
@@ -39,6 +52,7 @@ describe('CreateOrderUseCase (integration)', () => {
         { provide: OrderEventsPublisherPort, useValue: orderEventsPublisher },
         { provide: OrderAuditLogPort, useValue: orderAuditLog },
         { provide: OrderSummaryPort, useValue: orderSummary },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 

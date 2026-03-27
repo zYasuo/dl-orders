@@ -1,15 +1,15 @@
-import Link from 'next/link';
-
 export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <div className="flex min-h-[calc(100svh-3.5rem)] w-full flex-col items-center justify-center gap-8 bg-muted p-6 md:p-10">
-            <div className="flex w-full max-w-sm flex-col gap-6">{children}</div>
-            <Link
-                href="/products"
-                className="text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-                Back to catalog
-            </Link>
+        <div className="relative flex min-h-svh w-full flex-1 flex-col items-center justify-center overflow-hidden bg-background p-6 md:p-10">
+            <div
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-25%,color-mix(in_oklch,var(--primary)_20%,transparent),transparent_72%)]"
+                aria-hidden
+            />
+            <div
+                className="pointer-events-none absolute bottom-0 left-1/2 h-[min(420px,55vh)] w-[min(680px,120%)] -translate-x-1/2 translate-y-1/2 rounded-[50%] bg-[radial-gradient(circle,color-mix(in_oklch,var(--primary)_8%,transparent)_0%,transparent_68%)] blur-2xl"
+                aria-hidden
+            />
+            <div className="relative z-10 w-full max-w-[440px]">{children}</div>
         </div>
     );
 }

@@ -1,14 +1,14 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { CreateInventoryUseCase } from '../../../src/application/use-cases/create-inventory.use-case';
 import { InventoryEntity } from '../../../src/domain/entities/inventory.entity';
-import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
 
 describe('CreateInventoryUseCase', () => {
   let sut: CreateInventoryUseCase;
   let inventoryRepository: jest.Mocked<InventoryRepositoryPort>;
-  let listCache: jest.Mocked<InventoryListCachePort>;
+  let cache: jest.Mocked<CachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const createdBy = 'user@test.com';
@@ -36,17 +36,23 @@ describe('CreateInventoryUseCase', () => {
       delete: jest.fn(),
     } as unknown as jest.Mocked<InventoryRepositoryPort>;
 
-    listCache = {
+    cache = {
       get: jest.fn(),
       set: jest.fn(),
-      invalidate: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<InventoryListCachePort>;
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn(),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as jest.Mocked<CachePort>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateInventoryUseCase,
         { provide: InventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: InventoryListCachePort, useValue: listCache },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 
@@ -81,7 +87,7 @@ describe('CreateInventoryUseCase', () => {
         }),
       );
       expect(result).toEqual(fakeInventory);
-      expect(listCache.invalidate).toHaveBeenCalledTimes(1);
+      expect(cache.incr).toHaveBeenCalledWith('inventories:all:version');
     });
 
     it('throws BadRequestException when inventory already exists for product', async () => {

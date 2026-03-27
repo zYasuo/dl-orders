@@ -1,1 +1,7 @@
-export { ToastProvider, useToast, type ToastVariant, type ToastInput } from '@/hooks/use-toast';
+export {
+    ToastProvider,
+    useToast,
+    type ToastAction,
+    type ToastInput,
+    type ToastVariant,
+} from '@/hooks/use-toast';

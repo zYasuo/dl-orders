@@ -23,11 +23,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { queryKeys } from '@/lib/query-keys';
+import { cn } from '@/lib/utils';
 import { signinSchema, type SigninFormValues } from '@/modules/auth/schemas/auth.schemas';
 import { signIn } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { cn } from '@/lib/utils';
 
 function AppleIcon({ className }: { className?: string }) {
     return (
@@ -61,10 +61,10 @@ function GoogleIcon({ className }: { className?: string }) {
     );
 }
 
-export function SigninForm({
-    className,
-    ...props
-}: ComponentProps<'div'>) {
+const socialBtnClass =
+    'h-11 w-full rounded-xl border border-white/10 bg-background/50 text-sm font-medium shadow-sm transition-colors hover:border-white/15 hover:bg-muted/60';
+
+export function SigninForm({ className, ...props }: ComponentProps<'div'>) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl') || '/products';
@@ -84,8 +84,12 @@ export function SigninForm({
 
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
 
-            toast({ message: 'Signed in successfully.', variant: 'success' });
-            router.push(returnUrl.startsWith('/') ? returnUrl : '/products');
+            const nextPath = returnUrl.startsWith('/') ? returnUrl : '/products';
+            toast({
+                message: 'Signed in successfully.',
+                variant: 'success',
+                action: { label: 'Continue', onClick: () => router.push(nextPath) },
+            });
         } catch (e) {
             let msg = 'Could not sign in.';
             if (e instanceof ApiError) {
@@ -104,24 +108,45 @@ export function SigninForm({
     }
 
     function onSocialComingSoon(provider: string) {
-        toast({ message: `Sign-in with ${provider} is not available yet.`, variant: 'warning' });
+        toast({
+            message: `Sign-in with ${provider} is not available yet.`,
+            variant: 'warning',
+            action: { label: 'Got it', onClick: () => {} },
+        });
     }
 
+    const inputClass =
+        'h-11 rounded-xl border-white/10 bg-background/60 text-[15px] shadow-inner shadow-black/20 placeholder:text-muted-foreground/80';
+
     return (
-        <div className={cn('flex flex-col gap-6', className)} {...props}>
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Welcome back</CardTitle>
-                    <CardDescription>Sign in with Apple or Google, or use email and password.</CardDescription>
+        <div className={cn('flex flex-col gap-8', className)} {...props}>
+            <Card
+                className={cn(
+                    'overflow-hidden rounded-2xl border-white/9 bg-card/80 text-card-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_32px_64px_-28px_rgba(0,0,0,0.75)] backdrop-blur-xl',
+                )}
+            >
+                <CardHeader className="space-y-4 px-8 pb-0 pt-9 text-center">
+                    <div
+                        className="mx-auto h-1 w-16 rounded-full bg-primary shadow-[0_0_24px_-4px_var(--primary)]"
+                        aria-hidden
+                    />
+                    <div className="space-y-2">
+                        <CardTitle className="text-balance text-2xl font-semibold tracking-tight md:text-[1.65rem] md:leading-tight">
+                            Welcome back
+                        </CardTitle>
+                        <CardDescription className="mx-auto max-w-xs text-balance text-[15px] leading-relaxed text-muted-foreground">
+                            Sign in to keep shopping. Email and password below — Apple and Google coming soon.
+                        </CardDescription>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-8 pb-9 pt-7">
                     <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <FieldGroup>
-                            <FieldStack>
+                        <FieldGroup className="gap-7">
+                            <FieldStack className="gap-3">
                                 <Button
                                     variant="outline"
                                     type="button"
-                                    className="w-full"
+                                    className={socialBtnClass}
                                     onClick={() => onSocialComingSoon('Apple')}
                                 >
                                     <AppleIcon />
@@ -130,22 +155,25 @@ export function SigninForm({
                                 <Button
                                     variant="outline"
                                     type="button"
-                                    className="w-full"
+                                    className={socialBtnClass}
                                     onClick={() => onSocialComingSoon('Google')}
                                 >
                                     <GoogleIcon />
                                     Continue with Google
                                 </Button>
                             </FieldStack>
-                            <FieldSeparator>Or continue with</FieldSeparator>
-                            <FieldStack>
-                                <FieldLabel htmlFor="email">Email</FieldLabel>
+                            <FieldSeparator className="py-0.5">Or continue with</FieldSeparator>
+                            <FieldStack className="gap-2.5">
+                                <FieldLabel className="text-[13px] font-medium uppercase tracking-[0.06em] text-muted-foreground" htmlFor="email">
+                                    Email
+                                </FieldLabel>
                                 <Input
                                     id="email"
                                     type="email"
                                     autoComplete="email"
                                     placeholder="you@example.com"
                                     aria-invalid={!!form.formState.errors.email}
+                                    className={inputClass}
                                     {...form.register('email')}
                                 />
                                 {form.formState.errors.email ? (
@@ -154,12 +182,17 @@ export function SigninForm({
                                     </p>
                                 ) : null}
                             </FieldStack>
-                            <FieldStack>
-                                <div className="flex items-center gap-2">
-                                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                            <FieldStack className="gap-2.5">
+                                <div className="flex items-baseline justify-between gap-3">
+                                    <FieldLabel
+                                        className="text-[13px] font-medium uppercase tracking-[0.06em] text-muted-foreground"
+                                        htmlFor="password"
+                                    >
+                                        Password
+                                    </FieldLabel>
                                     <Link
                                         href="/auth/reset-password"
-                                        className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
+                                        className="text-xs font-medium text-primary underline-offset-4 outline-none ring-offset-background hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     >
                                         Forgot password?
                                     </Link>
@@ -169,6 +202,7 @@ export function SigninForm({
                                     type="password"
                                     autoComplete="current-password"
                                     aria-invalid={!!form.formState.errors.password}
+                                    className={inputClass}
                                     {...form.register('password')}
                                 />
                                 {form.formState.errors.password ? (
@@ -177,14 +211,22 @@ export function SigninForm({
                                     </p>
                                 ) : null}
                             </FieldStack>
-                            <FieldStack>
-                                <Button type="submit" loading={form.formState.isSubmitting} className="w-full">
+                            <FieldStack className="gap-4 pt-1">
+                                <Button
+                                    type="submit"
+                                    loading={form.formState.isSubmitting}
+                                    size="lg"
+                                    className="h-12 w-full rounded-xl text-base font-semibold shadow-lg shadow-primary/25"
+                                >
                                     Sign in
                                 </Button>
-                                <FieldDescription className="text-center">
-                                    No account?{' '}
-                                    <Link href="/auth/signup" className="text-primary underline-offset-4 hover:underline">
-                                        Create account
+                                <FieldDescription className="text-center text-[15px] text-muted-foreground">
+                                    New here?{' '}
+                                    <Link
+                                        href="/auth/signup"
+                                        className="font-semibold text-primary underline-offset-4 outline-none ring-offset-background hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    >
+                                        Create an account
                                     </Link>
                                 </FieldDescription>
                             </FieldStack>
@@ -192,10 +234,10 @@ export function SigninForm({
                     </form>
                 </CardContent>
             </Card>
-            <FieldDescription className="px-2 text-center text-xs sm:px-6">
-                By continuing, you agree to the{' '}
+            <FieldDescription className="px-1 text-center text-xs leading-relaxed text-muted-foreground/90 sm:px-4">
+                By continuing, you agree to our{' '}
                 <span className="text-muted-foreground">Terms</span> and{' '}
-                <span className="text-muted-foreground">Privacy Policy</span> (coming soon).
+                <span className="text-muted-foreground">Privacy Policy</span> — coming soon.
             </FieldDescription>
         </div>
     );

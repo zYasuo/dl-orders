@@ -1,25 +1,34 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { CreateInventoryUseCase } from '../../../src/application/use-cases/create-inventory.use-case';
-import { InventoryListCachePort } from '../../../src/domain/ports/inventory-list-cache.port';
 import { InventoryRepositoryPort } from '../../../src/domain/ports/inventory-repository.port';
-import { InMemoryInventoryListCache } from '../../doubles/in-memory-inventory-list-cache';
 import { InMemoryInventoryRepository } from '../../doubles/in-memory-inventory.repository';
 
 describe('CreateInventoryUseCase (integration)', () => {
   let sut: CreateInventoryUseCase;
   let inventoryRepository: InMemoryInventoryRepository;
-  let listCache: InMemoryInventoryListCache;
 
   beforeEach(async () => {
     inventoryRepository = new InMemoryInventoryRepository();
-    listCache = new InMemoryInventoryListCache();
+
+    const cache: CachePort = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn(),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as CachePort;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateInventoryUseCase,
         { provide: InventoryRepositoryPort, useValue: inventoryRepository },
-        { provide: InventoryListCachePort, useValue: listCache },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 
@@ -33,8 +42,8 @@ describe('CreateInventoryUseCase (integration)', () => {
         name: 'Warehouse 1',
         quantity: 10,
         maxQuantity: 100,
-        minQuantity: 1,
-        lowStockThreshold: 5,
+        minQuantity: 5,
+        lowStockThreshold: 3,
         createdBy: 'test@example.com',
       };
 
@@ -55,8 +64,8 @@ describe('CreateInventoryUseCase (integration)', () => {
         name: 'Warehouse 1',
         quantity: 10,
         maxQuantity: 100,
-        minQuantity: 1,
-        lowStockThreshold: 5,
+        minQuantity: 5,
+        lowStockThreshold: 3,
         createdBy: 'test@example.com',
       });
 
@@ -66,8 +75,8 @@ describe('CreateInventoryUseCase (integration)', () => {
           name: 'Warehouse 2',
           quantity: 5,
           maxQuantity: 100,
-          minQuantity: 1,
-          lowStockThreshold: 5,
+          minQuantity: 5,
+          lowStockThreshold: 3,
           createdBy: 'test@example.com',
         }),
       ).rejects.toThrow(BadRequestException);
@@ -79,8 +88,8 @@ describe('CreateInventoryUseCase (integration)', () => {
         name: 'Warehouse 1',
         quantity: 10,
         maxQuantity: 100,
-        minQuantity: 1,
-        lowStockThreshold: 5,
+        minQuantity: 5,
+        lowStockThreshold: 3,
         createdBy: 'test@example.com',
       });
 
@@ -90,8 +99,8 @@ describe('CreateInventoryUseCase (integration)', () => {
           name: 'Warehouse 1',
           quantity: 5,
           maxQuantity: 100,
-          minQuantity: 1,
-          lowStockThreshold: 5,
+          minQuantity: 5,
+          lowStockThreshold: 3,
           createdBy: 'test@example.com',
         }),
       ).rejects.toThrow(BadRequestException);

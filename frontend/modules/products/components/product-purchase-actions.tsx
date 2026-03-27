@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function ProductPurchaseActions({ productId, inStock, stockQuantity }: Props) {
+    const router = useRouter();
     const { toast } = useToast();
     const outOfStock = inStock === false;
 
@@ -58,7 +60,11 @@ export function ProductPurchaseActions({ productId, inStock, stockQuantity }: Pr
             return;
         }
         addToCart(productId, clampedQty);
-        toast({ message: 'Added to cart.', variant: 'success' });
+        toast({
+            message: 'Added to cart.',
+            variant: 'success',
+            action: { label: 'View cart', onClick: () => router.push('/cart') },
+        });
         window.dispatchEvent(new Event('dl-orders-cart'));
     }
 
@@ -103,7 +109,7 @@ export function ProductPurchaseActions({ productId, inStock, stockQuantity }: Pr
                     type="button"
                     size="lg"
                     variant="outline"
-                    className="w-full min-w-40 border-black/12 sm:w-auto"
+                    className="w-full min-w-40 sm:w-auto"
                     onClick={handleAddToCart}
                 >
                     Add to cart

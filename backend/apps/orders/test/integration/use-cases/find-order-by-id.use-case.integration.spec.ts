@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
 import { FindOrderByIdUseCase } from '../../../src/application/use-cases/find-order-by-id.use-case';
 import { OrderEntity } from '../../../src/domain/entities/order.entity';
 import { OrdersRepositoryPort } from '../../../src/domain/ports/orders-repository.port';
@@ -12,10 +13,23 @@ describe('FindOrderByIdUseCase (integration)', () => {
   beforeEach(async () => {
     ordersRepository = new InMemoryOrdersRepository();
 
+    const cache: CachePort = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn().mockResolvedValue(null),
+      setJson: jest.fn().mockResolvedValue(undefined),
+      incr: jest.fn(),
+    } as unknown as CachePort;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindOrderByIdUseCase,
         { provide: OrdersRepositoryPort, useValue: ordersRepository },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 
@@ -34,7 +48,6 @@ describe('FindOrderByIdUseCase (integration)', () => {
           productDescription: 'Desc',
           idempotencyKey: crypto.randomUUID(),
           unitPrice: 10,
-          totalPrice: 10,
         }),
       );
 

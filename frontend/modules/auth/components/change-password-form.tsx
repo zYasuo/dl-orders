@@ -30,8 +30,11 @@ export function ChangePasswordForm() {
                 token: values.token,
                 newPassword: values.newPassword,
             });
-            toast({ message: 'Password updated. Sign in.', variant: 'success' });
-            router.push('/auth/signin');
+            toast({
+                message: 'Password updated. Sign in.',
+                variant: 'success',
+                action: { label: 'Sign in', onClick: () => router.push('/auth/signin') },
+            });
         } catch (e) {
             const msg = e instanceof ApiError ? e.message : 'Could not change password.';
             toast({ message: msg, variant: 'error' });

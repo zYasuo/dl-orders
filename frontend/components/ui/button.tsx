@@ -11,7 +11,7 @@ export const buttonVariants = cva(
                 primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
                 secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
                 outline:
-                    'border border-black/10 bg-transparent text-foreground shadow-none hover:bg-black/[0.03] hover:text-foreground',
+                    'border border-border bg-transparent text-foreground shadow-none hover:bg-muted hover:text-foreground',
                 ghost: 'bg-transparent hover:bg-muted text-foreground',
                 danger: 'bg-danger text-danger-foreground hover:bg-danger/90',
             },

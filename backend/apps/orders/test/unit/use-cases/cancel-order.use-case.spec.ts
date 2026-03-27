@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
+import { orderCacheKey } from '../../../src/application/cache/order-cache-key';
 import { CancelOrderUseCase } from '../../../src/application/use-cases/cancel-order.use-case';
 import { OrderEntity, OrderStatus } from '../../../src/domain/entities/order.entity';
 import { OrderAuditLogPort } from '../../../src/domain/ports/order-audit-log.port';
@@ -10,6 +12,7 @@ describe('CancelOrderUseCase', () => {
   let ordersRepository: jest.Mocked<OrdersRepositoryPort>;
   let orderAuditLog: jest.Mocked<OrderAuditLogPort>;
   let orderSummary: jest.Mocked<OrderSummaryPort>;
+  let cache: jest.Mocked<CachePort>;
 
   const createdAt = new Date('2025-01-01T12:00:00Z');
   const idempotencyKey = crypto.randomUUID();
@@ -65,12 +68,25 @@ describe('CancelOrderUseCase', () => {
       getByOrderId: jest.fn().mockResolvedValue(null),
     } as unknown as jest.Mocked<OrderSummaryPort>;
 
+    cache = {
+      get: jest.fn(),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn().mockResolvedValue(undefined),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn(),
+      setJson: jest.fn(),
+      incr: jest.fn().mockResolvedValue(1),
+    } as unknown as jest.Mocked<CachePort>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CancelOrderUseCase,
         { provide: OrdersRepositoryPort, useValue: ordersRepository },
         { provide: OrderAuditLogPort, useValue: orderAuditLog },
         { provide: OrderSummaryPort, useValue: orderSummary },
+        { provide: CachePort, useValue: cache },
       ],
     }).compile();
 
@@ -103,6 +119,9 @@ describe('CancelOrderUseCase', () => {
         createdAt: cancelledOrder.createdAt.toISOString(),
         updatedAt: expect.any(String),
       });
+
+      expect(cache.incr).toHaveBeenCalledWith('orders:all:version');
+      expect(cache.del).toHaveBeenCalledWith(orderCacheKey('order-1'));
     });
 
     it('returns without side effects when order is not pending or not found', async () => {
@@ -114,6 +133,8 @@ describe('CancelOrderUseCase', () => {
 
       expect(ordersRepository.cancelIfPending).toHaveBeenCalledWith('non-existent');
       expect(orderAuditLog.log).not.toHaveBeenCalled();
+      expect(cache.incr).not.toHaveBeenCalled();
+      expect(cache.del).not.toHaveBeenCalled();
     });
 
     it('completes without throwing when orderSummary.put fails', async () => {

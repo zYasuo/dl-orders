@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AppProviders } from '@/components/providers/app-providers';
-import { SiteHeader } from '@/components/layout/site-header';
+import { ConditionalSiteHeader } from '@/components/layout/conditional-site-header';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -28,7 +28,7 @@ export default function RootLayout({
         <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
             <body className="flex min-h-full flex-col bg-background text-foreground">
                 <AppProviders>
-                    <SiteHeader />
+                    <ConditionalSiteHeader />
                     <main className="flex min-w-0 w-full flex-1 flex-col">{children}</main>
                 </AppProviders>
             </body>

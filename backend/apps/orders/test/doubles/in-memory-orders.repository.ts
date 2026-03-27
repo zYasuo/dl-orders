@@ -15,6 +15,18 @@ export class InMemoryOrdersRepository extends OrdersRepositoryPort {
     return this.orders.get(id) ?? null;
   }
 
+  async findPage(page: number, limit: number): Promise<OrderEntity[]> {
+    const sorted = [...this.orders.values()].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+    const skip = (page - 1) * limit;
+    return sorted.slice(skip, skip + limit);
+  }
+
+  async count(): Promise<number> {
+    return this.orders.size;
+  }
+
   async updateStatus(id: string, status: string): Promise<OrderEntity | null> {
     const order = this.orders.get(id);
     if (!order) return null;

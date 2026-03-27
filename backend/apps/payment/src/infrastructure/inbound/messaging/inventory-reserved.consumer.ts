@@ -9,7 +9,7 @@ export class InventoryReservedConsumer {
 
   constructor(private readonly handleInventoryReservedUseCase: HandleInventoryReservedUseCase) {}
 
-  @EventPattern(PATTERNS.INVENTORY_RESERVED)
+  @EventPattern(PATTERNS.INVENTORY_RESERVED_FOR_PAYMENT)
   async handle(@Payload() payload: InventoryReservedEvent): Promise<void> {
     this.logger.log('Received inventory reserved', { orderId: payload.orderId });
     await this.handleInventoryReservedUseCase.execute(payload);

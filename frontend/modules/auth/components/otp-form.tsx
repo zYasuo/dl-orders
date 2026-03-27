@@ -29,8 +29,11 @@ export function OtpForm() {
         try {
             await verifyOtp({ email: values.email, code: values.code });
             await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
-            toast({ message: 'Email verified. You can use the store.', variant: 'success' });
-            router.push('/products');
+            toast({
+                message: 'Email verified. You can use the store.',
+                variant: 'success',
+                action: { label: 'Browse catalog', onClick: () => router.push('/products') },
+            });
         } catch (e) {
             const msg = e instanceof ApiError ? e.message : 'Invalid or expired code.';
             toast({ message: msg, variant: 'error' });

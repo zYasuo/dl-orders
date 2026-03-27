@@ -29,7 +29,7 @@ export class OrdersRabbitMqPublisher extends OrderEventsPublisherPort {
   }
 
   publishInventoryReservedToPayment(event: InventoryReservedEvent): Promise<void> {
-    this.paymentClient.emit(PATTERNS.INVENTORY_RESERVED, event);
+    this.paymentClient.emit(PATTERNS.INVENTORY_RESERVED_FOR_PAYMENT, event);
     return Promise.resolve();
   }
 }

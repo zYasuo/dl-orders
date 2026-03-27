@@ -1,18 +1,47 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CachePort } from '@app/shared';
+import { ProductCacheKeyBuilder } from '../../../src/application/cache/product-cache-key-builder';
 import { FindAllProductsUseCase } from '../../../src/application/use-cases/find-all-products.use-case';
 import { ProductEntity } from '../../../src/domain/entities/product.entity';
 import { ProductRepositoryPort } from '../../../src/domain/ports/product-repository.port';
 import { InMemoryProductRepository } from '../../doubles/in-memory-product.repository';
 
+jest.mock('@app/shared', () => ({
+  CachePort: class CachePort {},
+  runWithCacheReadLock: async <T>(
+    _cache: unknown,
+    _cacheKey: string,
+    onLockAcquired: () => Promise<T>,
+  ): Promise<T> => onLockAcquired(),
+}));
+
 describe('FindAllProductsUseCase (integration)', () => {
   let sut: FindAllProductsUseCase;
   let productRepository: InMemoryProductRepository;
+  let cache: jest.Mocked<CachePort>;
 
   beforeEach(async () => {
     productRepository = new InMemoryProductRepository();
 
+    cache = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn(),
+      setIfNotExists: jest.fn(),
+      del: jest.fn(),
+      delIfEquals: jest.fn(),
+      exists: jest.fn(),
+      getJson: jest.fn().mockResolvedValue(null),
+      setJson: jest.fn().mockResolvedValue(undefined),
+      incr: jest.fn(),
+    } as unknown as jest.Mocked<CachePort>;
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FindAllProductsUseCase, { provide: ProductRepositoryPort, useValue: productRepository }],
+      providers: [
+        FindAllProductsUseCase,
+        { provide: ProductRepositoryPort, useValue: productRepository },
+        { provide: CachePort, useValue: cache },
+        ProductCacheKeyBuilder,
+      ],
     }).compile();
 
     sut = module.get(FindAllProductsUseCase);
@@ -27,16 +56,10 @@ describe('FindAllProductsUseCase (integration)', () => {
     });
 
     it('returns paginated products sorted by createdAt desc', async () => {
-      const older = ProductEntity.create({
-        name: 'Older',
-        description: 'Desc',
-        price: 10,
-      });
-      const newer = ProductEntity.create({
-        name: 'Newer',
-        description: 'Desc',
-        price: 20,
-      });
+      const olderAt = new Date('2025-01-01T12:00:00Z');
+      const newerAt = new Date('2025-01-02T12:00:00Z');
+      const older = new ProductEntity('id-older', 'Older', 'Desc', 10, null, olderAt, olderAt);
+      const newer = new ProductEntity('id-newer', 'Newer', 'Desc', 20, null, newerAt, newerAt);
       await productRepository.create(older);
       await productRepository.create(newer);
 
