@@ -244,37 +244,39 @@ export function MyOrdersSection() {
                             <ul className="space-y-3 md:hidden" aria-label="Orders list">
                                 {orders.map((order) => (
                                     <li key={order.id}>
-                                        <button
-                                            type="button"
-                                            className="flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                            onClick={() => openDetail(order)}
-                                        >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <p className="font-mono text-sm font-semibold text-foreground">{orderLabel(order)}</p>
-                                                    <p className="mt-1 line-clamp-2 text-sm text-foreground">{order.productName || '—'}</p>
+                                        <div className="overflow-hidden rounded-xl border border-border bg-card">
+                                            <button
+                                                type="button"
+                                                className="flex w-full flex-col gap-3 p-4 pb-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                onClick={() => openDetail(order)}
+                                                aria-label={`Order ${orderLabel(order)}, ${order.productName ?? 'product'}. View details.`}
+                                            >
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p className="font-mono text-sm font-semibold text-foreground">{orderLabel(order)}</p>
+                                                        <p className="mt-1 line-clamp-2 text-sm text-foreground">{order.productName || '—'}</p>
+                                                    </div>
+                                                    <OrderStatusBadge status={order.status} />
                                                 </div>
-                                                <OrderStatusBadge status={order.status} />
-                                            </div>
-                                            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                                                <span className="tabular-nums text-muted-foreground">Qty {order.quantity}</span>
-                                                <span className="font-medium tabular-nums text-foreground">
-                                                    {formatCurrencyBRL(order.totalPrice)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
-                                                <time className="text-xs text-muted-foreground" dateTime={order.createdAt}>
-                                                    {formatRelativeEn(order.createdAt)}
-                                                </time>
-                                                <span
-                                                    className="inline-flex items-center gap-1 text-xs font-medium text-primary"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                                                    <span className="tabular-nums text-muted-foreground">Qty {order.quantity}</span>
+                                                    <span className="font-medium tabular-nums text-foreground">
+                                                        {formatCurrencyBRL(order.totalPrice)}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                            <div className="flex items-center justify-between gap-2 border-t border-border px-4 pb-4 pt-3">
+                                                <button
+                                                    type="button"
+                                                    className="text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
+                                                    onClick={() => openDetail(order)}
+                                                    aria-label={`Order ${orderLabel(order)} date, open details`}
                                                 >
-                                                    <OrderRowActions order={order} onViewDetails={openDetail} />
-                                                </span>
+                                                    <time dateTime={order.createdAt}>{formatRelativeEn(order.createdAt)}</time>
+                                                </button>
+                                                <OrderRowActions order={order} onViewDetails={openDetail} />
                                             </div>
-                                        </button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
