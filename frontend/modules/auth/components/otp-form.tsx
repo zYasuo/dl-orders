@@ -11,7 +11,7 @@ import { otpSchema, type OtpFormValues } from '@/modules/auth/schemas/auth.schem
 import { verifyOtp } from '@/modules/auth/api';
 import { ApiError } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/lib/query-keys';
+import { userKeys } from '@/modules/users/query-keys';
 
 export function OtpForm() {
     const router = useRouter();
@@ -28,7 +28,7 @@ export function OtpForm() {
     async function onSubmit(values: OtpFormValues) {
         try {
             await verifyOtp({ email: values.email, code: values.code });
-            await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
+            await queryClient.invalidateQueries({ queryKey: userKeys.me });
             toast({
                 message: 'Email verified. You can use the store.',
                 variant: 'success',

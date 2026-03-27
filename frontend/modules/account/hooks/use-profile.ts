@@ -1,12 +1,12 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/lib/query-keys';
+import { userKeys } from '@/modules/users/query-keys';
 import { getMe, updateMe } from '@/modules/users/api';
 
 export function useProfile() {
     return useQuery({
-        queryKey: queryKeys.users.me,
+        queryKey: userKeys.me,
         queryFn: getMe,
         retry: false,
     });
@@ -17,7 +17,7 @@ export function useUpdateProfile() {
     return useMutation({
         mutationFn: (body: { name?: string | null }) => updateMe(body),
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
+            void queryClient.invalidateQueries({ queryKey: userKeys.me });
         },
     });
 }

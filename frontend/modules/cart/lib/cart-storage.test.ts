@@ -5,7 +5,7 @@ import {
     clearCartStorage,
     CART_STORAGE_KEY,
     CART_TTL_MS,
-} from '@/lib/cart-storage';
+} from '@/modules/cart/lib/cart-storage';
 
 function installWindowStorage() {
     const store: Record<string, string> = {};

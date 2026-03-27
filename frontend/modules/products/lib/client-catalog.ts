@@ -1,6 +1,6 @@
-import { throwIfNotOk } from '@/lib/errors';
-import { mergeStockIntoProduct } from '@/lib/stock-map';
-import type { StockLookupRow, StockRow } from '@/lib/stock-map';
+import { throwIfNotOk } from '@/lib/http/errors';
+import { mergeStockIntoProduct } from '@/modules/products/lib/stock-map';
+import type { StockLookupRow, StockRow } from '@/modules/products/lib/stock-map';
 import { ApiError } from '@/types/api';
 import type { ApiSuccessResponse } from '@/types/api';
 import type { Product } from '@/types/product';

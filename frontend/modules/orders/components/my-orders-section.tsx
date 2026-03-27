@@ -16,7 +16,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrencyBRL, cn } from '@/lib/utils';
-import { formatRelativeEn } from '@/lib/format-relative-pt';
+import { formatRelativeEn } from '@/lib/format/format-relative-pt';
 import { OrderDetailDialog } from '@/modules/orders/components/order-detail-dialog';
 import { OrderStatusBadge } from '@/modules/orders/components/order-status-badge';
 import { useOrdersList } from '@/modules/orders/hooks/use-orders-list';

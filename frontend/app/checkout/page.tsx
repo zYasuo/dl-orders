@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fetchProductById } from '@/lib/product-catalog';
+import { getStockUiState } from '@/modules/products/lib/stock-status';
+import { fetchProductById } from '@/modules/products/server/catalog';
 import { CheckoutForm, type CheckoutProductPreview } from '@/modules/orders/components/checkout-form';
 
 type SearchParams = Promise<{ productId?: string; quantity?: string }>;
@@ -28,22 +29,31 @@ async function CheckoutFormSlot({ searchParams }: { searchParams: SearchParams }
     const productId = sp.productId?.trim() ?? '';
     let maxStock: number | null = null;
     let product: CheckoutProductPreview | null = null;
+    let stockUnavailable = false;
     if (productId) {
         const p = await fetchProductById(productId);
         if (p) {
             product = toPreview(p);
-        }
-        if (p && typeof p.stockQuantity === 'number' && typeof p.inStock === 'boolean') {
-            maxStock = p.inStock ? p.stockQuantity : 0;
+            const state = getStockUiState(p);
+            if (state === 'out_of_stock') {
+                maxStock = 0;
+            } else if (state === 'unconfirmed') {
+                stockUnavailable = true;
+            } else if (p.inStock === true && typeof p.stockQuantity === 'number') {
+                maxStock = p.stockQuantity;
+            } else {
+                maxStock = null;
+            }
         }
     }
     const initialQuantity = parseInitialQuantity(sp.quantity, maxStock);
     return (
         <CheckoutForm
-            key={`${maxStock}-${initialQuantity}-${product?.id ?? ''}`}
+            key={`${maxStock}-${initialQuantity}-${product?.id ?? ''}-${stockUnavailable}`}
             product={product}
             maxStock={maxStock}
             initialQuantity={initialQuantity}
+            stockUnavailable={stockUnavailable}
         />
     );
 }

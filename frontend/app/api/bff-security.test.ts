@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SESSION_COOKIE_NAME } from '@/lib/session-constants';
+import { SESSION_COOKIE_NAME } from '@/lib/session/constants';
 import { POST as inventoryStockPost } from '@/app/api/inventory/stock/route';
 import { PUT as cartAbandonmentPut, DELETE as cartAbandonmentDelete } from '@/app/api/cart/abandonment/route';
 
@@ -23,14 +23,38 @@ describe('BFF security (session before internal service proxy)', () => {
         process.env.USERS_SERVICE_URL = 'http://users.test';
     });
 
-    it('POST /api/inventory/stock returns 401 without session cookie', async () => {
+    it('POST /api/inventory/stock proxies without session (catalog SSR uses service auth only)', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            text: async () =>
+                JSON.stringify({
+                    success: true,
+                    timestamp: '2025-01-01T00:00:00.000Z',
+                    data: [
+                        {
+                            productId: 'p1',
+                            quantity: 10,
+                            inStock: true,
+                            lastUnits: false,
+                        },
+                    ],
+                }),
+        });
+
         const req = new Request('http://localhost/api/inventory/stock', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productIds: ['p1'] }),
         });
         const res = await inventoryStockPost(req);
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(200);
+        expect(global.fetch).toHaveBeenCalledWith(
+            'http://inventory.test/api/v1/inventories/lookup',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({ 'x-service-auth': 'secret' }),
+            }),
+        );
     });
 
     it('PUT /api/cart/abandonment returns 401 without session cookie', async () => {

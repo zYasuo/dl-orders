@@ -35,7 +35,7 @@ Use **`.env`** (do not commit — it is in the monorepo `.gitignore`). **`.env.e
 cp .env.example .env
 ```
 
-Restart `npm run dev` after changing variables. Without `INVENTORY_SERVICE_URL`, `SERVICE_AUTH_SECRET`, and a signed-in session, the BFF `POST /api/inventory/stock` returns **500** (config) or **401** (no session). For abandoned-cart reminders (optional), set `NOTIFICATION_SERVICE_URL`, the same `SERVICE_AUTH_SECRET` as on Notification, and **`USERS_SERVICE_URL`** (BFF checks the session and matches `email` in the body to the logged-in user).
+Restart `npm run dev` after changing variables. Without `INVENTORY_SERVICE_URL` or `SERVICE_AUTH_SECRET`, the BFF `POST /api/inventory/stock` returns **500** (config). The handler does not require a browser session: it calls Inventory with **`x-service-auth`** only (catalog SSR for anonymous users). For abandoned-cart reminders (optional), set `NOTIFICATION_SERVICE_URL`, the same `SERVICE_AUTH_SECRET` as on Notification, and **`USERS_SERVICE_URL`** (BFF checks the session and matches `email` in the body to the logged-in user).
 
 Typical values (local ports):
 
@@ -53,7 +53,7 @@ Typical values (local ports):
 
 ### BFF stock (catalog)
 
-- **`POST /api/inventory/stock`** — requires **session cookie**; body `{ "productIds": string[] }` (max 50). Response `{ success, timestamp, data }` where `data` is a map `productId → { quantity, inStock, lastUnits }`. The handler calls **`POST /api/v1/inventories/lookup`** on Inventory with `x-service-auth`. Upstream errors return the same status and error JSON as the backend.
+- **`POST /api/inventory/stock`** — no session required; body `{ "productIds": string[] }` (max 50). Response `{ success, timestamp, data }` where `data` is a map `productId → { quantity, inStock, lastUnits }`. The handler calls **`POST /api/v1/inventories/lookup`** on Inventory with `x-service-auth`. Upstream errors return the same status and error JSON as the backend.
 
 ### BFF abandoned cart
 

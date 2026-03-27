@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { SESSION_COOKIE_NAME } from '@/lib/session-constants';
+import { SESSION_COOKIE_NAME } from '@/lib/session/constants';
 
 export async function GET(request: Request) {
     const base = process.env.ORDERS_SERVICE_URL;

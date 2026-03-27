@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatCurrencyBRL } from '@/lib/utils';
-import { formatRelativeEn } from '@/lib/format-relative-pt';
+import { formatRelativeEn } from '@/lib/format/format-relative-pt';
 import { OrderStatusBadge } from '@/modules/orders/components/order-status-badge';
 import { useToast } from '@/hooks/use-toast';
 import type { Order } from '@/types/order';

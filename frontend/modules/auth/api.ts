@@ -1,4 +1,6 @@
-import { bffJson } from '@/lib/api-client';
+'use server';
+
+import { bffJson } from '@/lib/http/bff-client';
 import type { MessageResponse, SignupResponse } from '@/types/auth';
 
 export async function signUp(body: { email: string; password: string; name?: string }) {

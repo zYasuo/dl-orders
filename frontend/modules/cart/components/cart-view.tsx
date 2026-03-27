@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/hooks/use-cart';
-import { fetchProductsWithStockClient } from '@/lib/client-catalog';
-import { cancelCartAbandonment } from '@/lib/cart-abandonment-schedule';
-import { clearCartStorage, removeCartLine, setLineQuantity } from '@/lib/cart-storage';
-import { cn } from '@/lib/utils';
-import { formatCurrencyBRL } from '@/lib/utils';
+import { fetchProductsWithStockClient } from '@/modules/products/lib/client-catalog';
+import { cancelCartAbandonment } from '@/modules/cart/lib/cart-abandonment-schedule';
+import { clearCartStorage, removeCartLine, setLineQuantity } from '@/modules/cart/lib/cart-storage';
+import { getStockUiState, isCartLinePurchasable } from '@/modules/products/lib/stock-status';
+import { cn, formatCurrencyBRL } from '@/lib/utils';
 import { CartAbandonmentPanel } from '@/modules/cart/components/cart-abandonment-panel';
+import { OutOfStockRibbon, StockUnverifiedHint } from '@/modules/products/components/out-of-stock-ribbon';
 import type { Product } from '@/types/product';
 
 export function CartView() {
@@ -74,11 +75,11 @@ export function CartView() {
             return null;
         }
         const row = lines[0];
-        if (!row.product || row.product.inStock === false) {
+        if (!row.product || !isCartLinePurchasable(row.product, stockFailed)) {
             return null;
         }
         return row;
-    }, [lines]);
+    }, [lines, stockFailed]);
 
     async function handleRefreshStock() {
         setRefreshing(true);
@@ -96,7 +97,11 @@ export function CartView() {
             return;
         }
         const line = lines.find((l) => l.item.productId === productId);
-        const max = line?.product?.inStock === true && typeof line.product.stockQuantity === 'number' ? line.product.stockQuantity : null;
+        const product = line?.product ?? null;
+        if (!product || !isCartLinePurchasable(product, stockFailed)) {
+            return;
+        }
+        const max = product.inStock === true && typeof product.stockQuantity === 'number' ? product.stockQuantity : null;
         const q = max !== null && max > 0 ? Math.min(n, max) : n;
         setLineQuantity(productId, q);
         refresh();
@@ -133,7 +138,7 @@ export function CartView() {
         <div className="flex flex-col gap-10">
             {stockFailed ? (
                 <p className="max-w-xl border-l-2 border-amber-500/40 pl-4 text-[14px] leading-relaxed text-muted-foreground">
-                    Stock could not be refreshed in real time. Double-check quantities before checkout.
+                    Stock could not be refreshed in real time. Use &quot;Refresh stock&quot; before you pay.
                 </p>
             ) : null}
 
@@ -168,7 +173,9 @@ export function CartView() {
                         <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Subtotal</p>
                         <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-foreground">{formatCurrencyBRL(subtotal)}</p>
                         {lines.length > 1 ? (
-                            <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">Checkout is per product from your cart lines.</p>
+                            <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
+                                Checkout is per product from your cart lines.
+                            </p>
                         ) : null}
                         {singleCheckoutLine ? (
                             <Link
@@ -189,121 +196,127 @@ export function CartView() {
                         </div>
                     ) : (
                         <ul className="flex flex-col">
-                            {lines.map(({ item, product }) => (
-                                <li
-                                    key={item.productId}
-                                    className="flex flex-col gap-4 border-b border-black/6 py-6 last:border-b-0 sm:flex-row sm:items-center sm:gap-6 sm:py-7"
-                                >
-                                    <Link
-                                        href={product ? `/products/${product.id}` : '/products'}
-                                        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-24 sm:w-24"
+                            {lines.map(({ item, product }) => {
+                                const stockState = product ? getStockUiState(product) : 'unconfirmed';
+                                const lineOk = product ? isCartLinePurchasable(product, stockFailed) : false;
+                                const isOutOfStock = stockState === 'out_of_stock';
+                                return (
+                                    <li
+                                        key={item.productId}
+                                        className="flex flex-col gap-4 border-b border-black/6 py-6 last:border-b-0 sm:flex-row sm:items-center sm:gap-6 sm:py-7"
                                     >
-                                        {product?.imageUrl ? (
-                                            <img
-                                                src={product.imageUrl}
-                                                alt={product.name}
-                                                className={cn('h-full w-full object-cover', product.inStock === false && 'opacity-45 grayscale')}
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center text-[12px] text-muted-foreground/45">
-                                                No photo
-                                            </div>
-                                        )}
-                                    </Link>
-
-                                    <div className="min-w-0 flex-1 space-y-1.5">
-                                        {product ? (
-                                            <Link
-                                                href={`/products/${product.id}`}
-                                                className="block text-sm font-medium leading-snug text-foreground transition-colors duration-200 hover:text-muted-foreground"
-                                            >
-                                                {product.name}
-                                            </Link>
-                                        ) : (
-                                            <span className="text-[15px] text-muted-foreground">Product removed from catalog</span>
-                                        )}
-                                        {product ? (
-                                            <p className="text-sm font-medium tabular-nums text-foreground/90">
-                                                {formatCurrencyBRL(product.price)}
-                                                {item.quantity > 1 ? (
-                                                    <span className="font-normal text-muted-foreground">
-                                                        {' '}
-                                                        × {item.quantity}
-                                                        {product.inStock !== false ? (
-                                                            <span className="tabular-nums">
-                                                                {' '}
-                                                                · {formatCurrencyBRL(product.price * item.quantity)}
-                                                            </span>
-                                                        ) : null}
-                                                    </span>
-                                                ) : null}
-                                            </p>
-                                        ) : null}
-                                        {product ? (
-                                            product.inStock === true ? (
-                                                <p className={cn('text-[13px] text-muted-foreground', product.lastUnits && 'text-foreground/70')}>
-                                                    {typeof product.stockQuantity === 'number' ? `${product.stockQuantity} in stock` : null}
-                                                    {product.lastUnits ? ' · Limited quantity' : null}
-                                                </p>
-                                            ) : product.inStock === false ? (
-                                                <span className="inline-flex w-fit rounded-md bg-muted px-2 py-0.5 text-[12px] font-medium text-muted-foreground">
-                                                    Out of stock
-                                                </span>
-                                            ) : (
-                                                <p className="text-[13px] text-muted-foreground">
-                                                    Stock not verified — you can still try to check out.
-                                                </p>
-                                            )
-                                        ) : null}
-                                    </div>
-
-                                    <div className="flex flex-col gap-3 sm:shrink-0 sm:flex-row sm:items-center sm:gap-4 sm:pl-2">
-                                        <Field
-                                            label="Qty"
-                                            htmlFor={`qty-${item.productId}`}
-                                            className="w-full min-w-26 sm:w-24 [&_label]:text-[11px] [&_label]:font-medium [&_label]:uppercase [&_label]:tracking-[0.06em] [&_label]:text-muted-foreground"
+                                        <Link
+                                            href={product ? `/products/${product.id}` : '/products'}
+                                            className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-24 sm:w-24"
                                         >
-                                            <Input
-                                                id={`qty-${item.productId}`}
-                                                type="number"
-                                                min={1}
-                                                max={
-                                                    product?.inStock === true && typeof product.stockQuantity === 'number'
-                                                        ? product.stockQuantity
-                                                        : undefined
-                                                }
-                                                className="rounded-xl border-black/8"
-                                                disabled={!product || product.inStock === false}
-                                                defaultValue={item.quantity}
-                                                key={`${item.productId}-${item.quantity}`}
-                                                onBlur={(e) => clampQty(item.productId, e.target.value)}
-                                            />
-                                        </Field>
-                                        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-                                            {product && product.inStock !== false ? (
-                                                <Link
-                                                    href={`/checkout?productId=${encodeURIComponent(item.productId)}&quantity=${encodeURIComponent(String(item.quantity))}`}
-                                                    className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'rounded-full')}
-                                                >
-                                                    Checkout
-                                                </Link>
+                                            {product?.imageUrl ? (
+                                                <img
+                                                    src={product.imageUrl}
+                                                    alt={product.name}
+                                                    className={cn('h-full w-full object-cover', isOutOfStock && 'opacity-45 grayscale')}
+                                                />
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center text-[12px] text-muted-foreground/45">
+                                                    No photo
+                                                </div>
+                                            )}
+                                            {isOutOfStock ? (
+                                                <span className="pointer-events-none absolute inset-x-1 top-1 flex justify-center">
+                                                    <OutOfStockRibbon variant="inline" className="scale-90 px-2 py-0.5 text-[9px]" />
+                                                </span>
                                             ) : null}
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-auto px-2 text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                onClick={() => {
-                                                    removeCartLine(item.productId);
-                                                    refresh();
-                                                }}
-                                            >
-                                                Remove
-                                            </Button>
+                                        </Link>
+
+                                        <div className="min-w-0 flex-1 space-y-1.5">
+                                            {product ? (
+                                                <Link
+                                                    href={`/products/${product.id}`}
+                                                    className="block text-sm font-medium leading-snug text-foreground transition-colors duration-200 hover:text-muted-foreground"
+                                                >
+                                                    {product.name}
+                                                </Link>
+                                            ) : (
+                                                <span className="text-[15px] text-muted-foreground">Product removed from catalog</span>
+                                            )}
+                                            {product ? (
+                                                <p className="text-sm font-medium tabular-nums text-foreground/90">
+                                                    {formatCurrencyBRL(product.price)}
+                                                    {item.quantity > 1 ? (
+                                                        <span className="font-normal text-muted-foreground">
+                                                            {' '}
+                                                            × {item.quantity}
+                                                            {lineOk ? (
+                                                                <span className="tabular-nums">
+                                                                    {' '}
+                                                                    · {formatCurrencyBRL(product.price * item.quantity)}
+                                                                </span>
+                                                            ) : null}
+                                                        </span>
+                                                    ) : null}
+                                                </p>
+                                            ) : null}
+                                            {product ? (
+                                                stockState === 'purchasable' ? (
+                                                    <p className={cn('text-[13px] text-muted-foreground', product.lastUnits && 'text-foreground/70')}>
+                                                        {typeof product.stockQuantity === 'number' ? `${product.stockQuantity} in stock` : null}
+                                                        {product.lastUnits ? ' · Limited quantity' : null}
+                                                    </p>
+                                                ) : stockState === 'out_of_stock' ? (
+                                                    <p className="text-[13px] text-muted-foreground">Unavailable for purchase.</p>
+                                                ) : (
+                                                    <StockUnverifiedHint className="text-[13px]" />
+                                                )
+                                            ) : null}
                                         </div>
-                                    </div>
-                                </li>
-                            ))}
+
+                                        <div className="flex flex-col gap-3 sm:shrink-0 sm:flex-row sm:items-center sm:gap-4 sm:pl-2">
+                                            <Field
+                                                label="Qty"
+                                                htmlFor={`qty-${item.productId}`}
+                                                className="w-full min-w-26 sm:w-24 [&_label]:text-[11px] [&_label]:font-medium [&_label]:uppercase [&_label]:tracking-[0.06em] [&_label]:text-muted-foreground"
+                                            >
+                                                <Input
+                                                    id={`qty-${item.productId}`}
+                                                    type="number"
+                                                    min={1}
+                                                    max={
+                                                        product?.inStock === true && typeof product.stockQuantity === 'number'
+                                                            ? product.stockQuantity
+                                                            : undefined
+                                                    }
+                                                    className="rounded-xl border-black/8"
+                                                    disabled={!product || !lineOk}
+                                                    defaultValue={item.quantity}
+                                                    key={`${item.productId}-${item.quantity}`}
+                                                    onBlur={(e) => clampQty(item.productId, e.target.value)}
+                                                />
+                                            </Field>
+                                            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+                                                {product && lineOk ? (
+                                                    <Link
+                                                        href={`/checkout?productId=${encodeURIComponent(item.productId)}&quantity=${encodeURIComponent(String(item.quantity))}`}
+                                                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'rounded-full')}
+                                                    >
+                                                        Checkout
+                                                    </Link>
+                                                ) : null}
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-auto px-2 text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                                    onClick={() => {
+                                                        removeCartLine(item.productId);
+                                                        refresh();
+                                                    }}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { normalizeEmailForBff, requireSessionToken, requireSessionUserEmail } from '@/lib/bff-session';
+import { normalizeEmailForBff, requireSessionToken, requireSessionUserEmail } from '@/lib/session/bff-session';
 
 const putBodySchema = z.object({
     sessionKey: z.string().min(8).max(64),

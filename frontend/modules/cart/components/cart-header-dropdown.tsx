@@ -13,13 +13,17 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCart } from '@/hooks/use-cart';
-import { fetchProductByIdClient } from '@/lib/client-catalog';
+import { fetchProductsWithStockClient } from '@/modules/products/lib/client-catalog';
+import { getStockUiState } from '@/modules/products/lib/stock-status';
 import { cn } from '@/lib/utils';
+
+type LineMeta = { name: string; note: string | null };
 
 export function CartHeaderDropdown() {
     const { snapshot, count } = useCart();
     const [open, setOpen] = useState(false);
-    const [titles, setTitles] = useState<Record<string, string>>({});
+    const [lineMeta, setLineMeta] = useState<Record<string, LineMeta>>({});
+    const [miniLoading, setMiniLoading] = useState(false);
 
     const items = useMemo(() => (snapshot.kind === 'ok' ? snapshot.items : []), [snapshot]);
 
@@ -28,22 +32,39 @@ export function CartHeaderDropdown() {
             return;
         }
         let cancelled = false;
+        setMiniLoading(true);
         void (async () => {
             const ids = [...new Set(items.map((i) => i.productId))];
-            const entries = await Promise.all(
-                ids.map(async (id) => {
-                    const p = await fetchProductByIdClient(id);
-                    return [id, p?.name ?? id.slice(0, 8)] as const;
-                }),
-            );
-            if (!cancelled) {
-                setTitles((prev) => {
-                    const next = { ...prev };
-                    for (const [id, name] of entries) {
-                        next[id] = name;
+            try {
+                const { products, stockFailed } = await fetchProductsWithStockClient(ids);
+                if (cancelled) {
+                    return;
+                }
+                const byId = new Map(products.map((p) => [p.id, p]));
+                const next: Record<string, LineMeta> = {};
+                for (const id of ids) {
+                    const p = byId.get(id) ?? null;
+                    const name = p?.name ?? id.slice(0, 8);
+                    let note: string | null = null;
+                    if (!p) {
+                        note = 'Product not found';
+                    } else if (stockFailed) {
+                        note = 'Stock not verified';
+                    } else {
+                        const s = getStockUiState(p);
+                        if (s === 'out_of_stock') {
+                            note = 'Out of stock';
+                        } else if (s === 'unconfirmed') {
+                            note = 'Stock not verified';
+                        }
                     }
-                    return next;
-                });
+                    next[id] = { name, note };
+                }
+                setLineMeta((prev) => ({ ...prev, ...next }));
+            } finally {
+                if (!cancelled) {
+                    setMiniLoading(false);
+                }
             }
         })();
         return () => {
@@ -80,17 +101,26 @@ export function CartHeaderDropdown() {
                     <>
                         <div className="max-h-56 overflow-y-auto">
                             {items.map((line) => {
-                                const label = titles[line.productId] ?? '…';
+                                const meta = lineMeta[line.productId];
+                                const label = miniLoading && !meta ? 'Loading…' : (meta?.name ?? '…');
+                                const note = meta?.note ?? null;
                                 return (
                                     <DropdownMenuItem key={line.productId} asChild className="cursor-pointer">
                                         <Link
                                             href={`/products/${line.productId}`}
-                                            className="flex w-full min-w-0 items-start gap-2"
+                                            className="flex w-full min-w-0 flex-col items-stretch gap-0.5"
                                         >
-                                            <span className="tabular-nums text-muted-foreground">{line.quantity}×</span>
-                                            <span className="min-w-0 flex-1 wrap-break-word text-[13px] font-normal leading-snug text-foreground">
-                                                {label}
-                                            </span>
+                                            <div className="flex w-full min-w-0 items-start gap-2">
+                                                <span className="tabular-nums text-muted-foreground">{line.quantity}×</span>
+                                                <span className="min-w-0 flex-1 wrap-break-word text-[13px] font-normal leading-snug text-foreground">
+                                                    {label}
+                                                </span>
+                                            </div>
+                                            {note ? (
+                                                <span className="pl-7 text-[12px] text-muted-foreground" role="status">
+                                                    {note}
+                                                </span>
+                                            ) : null}
                                         </Link>
                                     </DropdownMenuItem>
                                 );

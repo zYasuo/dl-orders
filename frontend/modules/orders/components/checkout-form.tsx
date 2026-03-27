@@ -12,8 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/modules/auth/hooks/use-session';
 import { buildCheckoutSchema, composeOrderDescription, type CheckoutFormValues } from '@/modules/orders/schemas/checkout.schema';
 import { useCreateOrder } from '@/modules/orders/hooks/use-create-order';
-import { cancelCartAbandonment } from '@/lib/cart-abandonment-schedule';
-import { removeCartLine } from '@/lib/cart-storage';
+import { cancelCartAbandonment } from '@/modules/cart/lib/cart-abandonment-schedule';
+import { removeCartLine } from '@/modules/cart/lib/cart-storage';
+import { parseSafeReturnUrl, SIGNIN_REASON_CHECKOUT } from '@/lib/routing/return-url';
 import { cn, formatCurrencyBRL } from '@/lib/utils';
 import { ApiError } from '@/types/api';
 
@@ -54,10 +55,12 @@ export function CheckoutForm({
     product,
     maxStock,
     initialQuantity,
+    stockUnavailable = false,
 }: {
     product: CheckoutProductPreview | null;
     maxStock: number | null;
     initialQuantity?: number;
+    stockUnavailable?: boolean;
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -91,7 +94,8 @@ export function CheckoutForm({
     );
     const needsSignIn = isFetched && !user;
     const signInReturn = `/checkout?${searchParams.toString()}`;
-    const signInHref = `/auth/signin?returnUrl=${encodeURIComponent(signInReturn.startsWith('/') ? signInReturn : '/checkout')}`;
+    const safeReturn = parseSafeReturnUrl(signInReturn);
+    const signInHref = `/auth/signin?returnUrl=${encodeURIComponent(safeReturn)}&reason=${SIGNIN_REASON_CHECKOUT}`;
 
     useEffect(() => {
         if (user?.email) {
@@ -168,6 +172,39 @@ export function CheckoutForm({
         );
     }
 
+    if (productId && !product) {
+        return (
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+                This product could not be loaded.{' '}
+                <Link href="/products" className="text-foreground underline-offset-4 transition-colors duration-200 hover:underline">
+                    Back to catalog
+                </Link>
+                .
+            </p>
+        );
+    }
+
+    if (stockUnavailable && product) {
+        return (
+            <div className="max-w-xl space-y-4">
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                    Stock for this product could not be verified. Refresh the page or try again later.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button type="button" variant="secondary" size="md" onClick={() => router.refresh()}>
+                        Refresh page
+                    </Button>
+                    <Link
+                        href="/products"
+                        className="text-[15px] text-foreground underline-offset-4 transition-colors duration-200 hover:underline"
+                    >
+                        Back to catalog
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     if (maxStock !== null && maxStock === 0) {
         return (
             <p className="text-[15px] leading-relaxed text-muted-foreground">
@@ -182,7 +219,7 @@ export function CheckoutForm({
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
-            <aside className="order-1 mb-10 lg:sticky lg:top-24 lg:order-2 lg:mb-0">
+            <aside className="order-1 mb-10 lg:sticky lg:top-32 lg:order-2 lg:mb-0">
                 <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                     <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Order summary</h2>
                     {product ? (
@@ -400,7 +437,12 @@ export function CheckoutForm({
                         />
                     </Field>
                     <Field label="Order notes" htmlFor="notes" className={fieldLabelShell} error={form.formState.errors.notes?.message}>
-                        <textarea id="notes" className={textareaClass} placeholder="Gift message, instructions, or other details" {...form.register('notes')} />
+                        <textarea
+                            id="notes"
+                            className={textareaClass}
+                            placeholder="Gift message, instructions, or other details"
+                            {...form.register('notes')}
+                        />
                     </Field>
                 </section>
 

@@ -1,4 +1,4 @@
-import { bffJson } from '@/lib/api-client';
+import { bffJson } from '@/lib/http/bff-client';
 import type { Product } from '@/types/product';
 
 export async function getProducts() {

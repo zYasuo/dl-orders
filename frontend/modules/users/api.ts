@@ -1,4 +1,4 @@
-import { bffJson } from '@/lib/api-client';
+import { bffJson } from '@/lib/http/bff-client';
 import type { UserProfile } from '@/types/user';
 
 export async function getMe() {

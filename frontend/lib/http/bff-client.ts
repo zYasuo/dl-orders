@@ -1,4 +1,4 @@
-import { throwIfNotOk } from '@/lib/errors';
+import { throwIfNotOk } from '@/lib/http/errors';
 import type { ApiSuccessResponse } from '@/types/api';
 
 export type BffPaginatedMeta = {

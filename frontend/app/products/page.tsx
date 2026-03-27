@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { CatalogPagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/empty-state';
-import { buildProductsCatalogHref, parseCatalogInStockOnlyFilter } from '@/lib/catalog-href';
-import { DEFAULT_PRODUCTS_PAGE_SIZE, fetchProductList } from '@/lib/product-catalog';
+import { DEFAULT_PRODUCTS_PAGE_SIZE, fetchProductList } from '@/modules/products/server/catalog';
+import { buildProductsCatalogHref, parseCatalogInStockOnlyFilter } from '@/modules/products/lib/catalog-href';
 import { ProductGrid } from '@/modules/products/components/product-grid';
 import { cn } from '@/lib/utils';
 

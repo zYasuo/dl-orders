@@ -1,4 +1,4 @@
-import { bffJson } from '@/lib/api-client';
+import { bffJson } from '@/lib/http/bff-client';
 import type { PaymentByOrder } from '@/types/payment';
 
 export async function getPaymentByOrder(orderId: string) {

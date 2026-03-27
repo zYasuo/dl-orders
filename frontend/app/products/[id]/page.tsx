@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ProductDescription } from '@/modules/products/components/product-description';
 import { ProductPurchaseActions } from '@/modules/products/components/product-purchase-actions';
-import { fetchProductById } from '@/lib/product-catalog';
+import { OutOfStockRibbon, StockUnverifiedHint } from '@/modules/products/components/out-of-stock-ribbon';
+import { getStockUiState } from '@/modules/products/lib/stock-status';
+import { fetchProductById } from '@/modules/products/server/catalog';
 import { cn } from '@/lib/utils';
 import { formatCurrencyBRL } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -29,6 +31,9 @@ export default async function ProductDetailPage({ params }: Props) {
         notFound();
     }
 
+    const stockState = getStockUiState(product);
+    const isOutOfStock = stockState === 'out_of_stock';
+
     return (
         <div className="flex flex-col gap-10 lg:gap-14">
             <nav aria-label="Breadcrumb" className="text-[13px] text-muted-foreground">
@@ -53,7 +58,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 <figure
                     className={cn(
                         'mx-auto w-full max-w-lg lg:mx-0',
-                        product.inStock === false && 'opacity-[0.92]',
+                        isOutOfStock && 'opacity-[0.92]',
                     )}
                 >
                     <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted">
@@ -63,27 +68,20 @@ export default async function ProductDetailPage({ params }: Props) {
                                 alt={product.name}
                                 className={cn(
                                     'h-full w-full object-cover',
-                                    product.inStock === false && 'opacity-50 grayscale',
+                                    isOutOfStock && 'opacity-50 grayscale',
                                 )}
                             />
                         ) : (
                             <div
                                 className={cn(
                                     'flex h-full items-center justify-center px-8 text-center text-[13px] text-muted-foreground/55',
-                                    product.inStock === false && 'opacity-60',
+                                    isOutOfStock && 'opacity-60',
                                 )}
                             >
                                 No photo
                             </div>
                         )}
-                        {product.inStock === false ? (
-                            <span
-                                role="status"
-                                className="pointer-events-none absolute bottom-4 left-1/2 z-10 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-background/85 px-3.5 py-1.5 text-center text-[12px] font-medium text-muted-foreground shadow-sm ring-1 ring-black/6 backdrop-blur-sm"
-                            >
-                                Out of stock
-                            </span>
-                        ) : null}
+                        {isOutOfStock ? <OutOfStockRibbon variant="overlay" /> : null}
                     </div>
                 </figure>
                 <div className="flex min-w-0 flex-col gap-8 lg:max-w-xl lg:pt-2">
@@ -92,7 +90,7 @@ export default async function ProductDetailPage({ params }: Props) {
                             {product.name}
                         </h1>
                         <p className="text-lg font-medium tabular-nums tracking-tight text-foreground sm:text-xl">{formatCurrencyBRL(product.price)}</p>
-                        {product.inStock === true ? (
+                        {stockState === 'purchasable' ? (
                             <p
                                 className={cn(
                                     'max-w-prose text-[15px] leading-relaxed text-muted-foreground',
@@ -102,14 +100,12 @@ export default async function ProductDetailPage({ params }: Props) {
                                 {product.lastUnits ? 'Limited quantity.' : 'Ships when available.'}
                                 {typeof product.stockQuantity === 'number' ? ` ${product.stockQuantity} in stock.` : null}
                             </p>
-                        ) : product.inStock === false ? (
+                        ) : stockState === 'out_of_stock' ? (
                             <p className="max-w-prose text-[15px] leading-relaxed text-muted-foreground">
-                                This product is currently unavailable.
+                                This product is out of stock and cannot be purchased right now.
                             </p>
                         ) : (
-                            <p className="max-w-prose text-[15px] leading-relaxed text-muted-foreground">
-                                Live stock could not be loaded. You can still try to order — availability is confirmed when the order is placed.
-                            </p>
+                            <StockUnverifiedHint className="max-w-prose text-[15px]" />
                         )}
                     </div>
                     <ProductPurchaseActions productId={product.id} inStock={product.inStock} stockQuantity={product.stockQuantity} />

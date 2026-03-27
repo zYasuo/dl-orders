@@ -1,4 +1,4 @@
-import { getOrCreateCartSessionId, type CartItem } from '@/lib/cart-storage';
+import { getOrCreateCartSessionId, type CartItem } from '@/modules/cart/lib/cart-storage';
 
 export type ScheduleCartAbandonmentInput = {
     email: string;

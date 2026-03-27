@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/modules/auth/api';
-import { queryKeys } from '@/lib/query-keys';
+import { userKeys } from '@/modules/users/query-keys';
 import type { UserProfile } from '@/types/user';
 
 function initialsFromUser(user: UserProfile): string {
@@ -35,7 +35,7 @@ export function SiteHeaderUserMenu({ user }: { user: UserProfile }) {
     async function handleSignout() {
         try {
             await signOut();
-            await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
+            await queryClient.invalidateQueries({ queryKey: userKeys.me });
             router.push('/products');
             router.refresh();
         } catch {}

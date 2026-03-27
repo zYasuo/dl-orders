@@ -1,4 +1,4 @@
-import { DEFAULT_PRODUCTS_PAGE_SIZE } from '@/lib/product-catalog';
+import { DEFAULT_PRODUCTS_PAGE_SIZE } from '@/modules/products/constants';
 
 export type CatalogHrefOptions = {
     page?: number;

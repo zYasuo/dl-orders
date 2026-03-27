@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { SESSION_COOKIE_NAME } from '@/lib/session-constants';
+import { SESSION_COOKIE_NAME } from '@/lib/session/constants';
 
 export async function GET() {
     const base = process.env.USERS_SERVICE_URL;

@@ -22,7 +22,13 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { queryKeys } from '@/lib/query-keys';
+import { userKeys } from '@/modules/users/query-keys';
+import {
+    parseSafeReturnUrl,
+    SIGNIN_REASON_ACCOUNT,
+    SIGNIN_REASON_CHECKOUT,
+    SIGNIN_REASON_ORDERS,
+} from '@/lib/routing/return-url';
 import { cn } from '@/lib/utils';
 import { signinSchema, type SigninFormValues } from '@/modules/auth/schemas/auth.schemas';
 import { signIn } from '@/modules/auth/api';
@@ -64,10 +70,22 @@ function GoogleIcon({ className }: { className?: string }) {
 const socialBtnClass =
     'h-11 w-full rounded-xl border border-white/10 bg-background/50 text-sm font-medium shadow-sm transition-colors hover:border-white/15 hover:bg-muted/60';
 
+function normalizeSigninReason(raw: string | null): string | null {
+    if (
+        raw === SIGNIN_REASON_CHECKOUT ||
+        raw === SIGNIN_REASON_ORDERS ||
+        raw === SIGNIN_REASON_ACCOUNT
+    ) {
+        return raw;
+    }
+    return null;
+}
+
 export function SigninForm({ className, ...props }: ComponentProps<'div'>) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const returnUrl = searchParams.get('returnUrl') || '/products';
+    const returnUrl = parseSafeReturnUrl(searchParams.get('returnUrl'));
+    const signinReason = normalizeSigninReason(searchParams.get('reason'));
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
@@ -82,14 +100,10 @@ export function SigninForm({ className, ...props }: ComponentProps<'div'>) {
 
             await signIn({ email, password });
 
-            await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
+            await queryClient.invalidateQueries({ queryKey: userKeys.me });
 
-            const nextPath = returnUrl.startsWith('/') ? returnUrl : '/products';
-            toast({
-                message: 'Signed in successfully.',
-                variant: 'success',
-                action: { label: 'Continue', onClick: () => router.push(nextPath) },
-            });
+            toast({ message: 'Signed in successfully.', variant: 'success' });
+            router.replace(returnUrl);
         } catch (e) {
             let msg = 'Could not sign in.';
             if (e instanceof ApiError) {
@@ -118,6 +132,15 @@ export function SigninForm({ className, ...props }: ComponentProps<'div'>) {
     const inputClass =
         'h-11 rounded-xl border-white/10 bg-background/60 text-[15px] shadow-inner shadow-black/20 placeholder:text-muted-foreground/80';
 
+    const reasonMessage =
+        signinReason === SIGNIN_REASON_CHECKOUT
+            ? 'Inicie sessão para continuar a compra.'
+            : signinReason === SIGNIN_REASON_ORDERS
+              ? 'Inicie sessão para ver os seus pedidos.'
+              : signinReason === SIGNIN_REASON_ACCOUNT
+                ? 'Inicie sessão para aceder à sua conta.'
+                : null;
+
     return (
         <div className={cn('flex flex-col gap-8', className)} {...props}>
             <Card
@@ -134,6 +157,14 @@ export function SigninForm({ className, ...props }: ComponentProps<'div'>) {
                         <CardTitle className="text-balance text-2xl font-semibold tracking-tight md:text-[1.65rem] md:leading-tight">
                             Welcome back
                         </CardTitle>
+                        {reasonMessage ? (
+                            <p
+                                className="mx-auto max-w-sm text-balance text-[15px] font-medium leading-relaxed text-primary"
+                                role="status"
+                            >
+                                {reasonMessage}
+                            </p>
+                        ) : null}
                         <CardDescription className="mx-auto max-w-xs text-balance text-[15px] leading-relaxed text-muted-foreground">
                             Sign in to keep shopping. Email and password below — Apple and Google coming soon.
                         </CardDescription>

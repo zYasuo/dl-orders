@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buildProductsCatalogHref } from '@/lib/catalog-href';
+import { buildProductsCatalogHref } from '@/modules/products/lib/catalog-href';
 import { cn } from '@/lib/utils';
 
 const linkBase =

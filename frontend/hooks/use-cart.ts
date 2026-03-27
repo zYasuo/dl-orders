@@ -6,7 +6,7 @@ import {
     type CartReadResult,
     getCartItemCount,
     readCart,
-} from '@/lib/cart-storage';
+} from '@/modules/cart/lib/cart-storage';
 
 export function useCart() {
     const [snapshot, setSnapshot] = useState<CartReadResult>(() => ({

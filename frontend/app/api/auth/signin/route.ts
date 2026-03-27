@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { setSessionCookie } from '@/lib/auth-cookie';
+import { setSessionCookie } from '@/lib/session/auth-cookie';
 
 export async function POST(request: Request) {
     const base = process.env.AUTH_SERVICE_URL;

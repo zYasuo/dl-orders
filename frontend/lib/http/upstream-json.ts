@@ -1,4 +1,4 @@
-import { throwIfNotOk } from '@/lib/errors';
+import { throwIfNotOk } from '@/lib/http/errors';
 
 export async function upstreamJson<T>(options: {
     baseUrl: string | undefined;

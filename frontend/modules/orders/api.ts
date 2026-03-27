@@ -1,4 +1,4 @@
-import { bffJson, bffPaginatedJson } from '@/lib/api-client';
+import { bffJson, bffPaginatedJson } from '@/lib/http/bff-client';
 import { normalizeOrder } from '@/types/order';
 import type { Order } from '@/types/order';
 

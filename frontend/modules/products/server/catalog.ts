@@ -1,12 +1,14 @@
-import { throwIfNotOk } from '@/lib/errors';
-import { mergeStockIntoProduct } from '@/lib/stock-map';
-import type { StockRow } from '@/lib/stock-map';
+import { headers } from 'next/headers';
+import { throwIfNotOk } from '@/lib/http/errors';
+import { DEFAULT_PRODUCTS_PAGE_SIZE } from '@/modules/products/constants';
+import { mergeStockIntoProduct } from '@/modules/products/lib/stock-map';
+import type { StockRow } from '@/modules/products/lib/stock-map';
 import { ApiError } from '@/types/api';
 import type { ApiPaginatedSuccessResponse, ApiSuccessResponse } from '@/types/api';
 import type { PaginatedResponse } from '@/types/pagination';
 import type { Product } from '@/types/product';
 
-export const DEFAULT_PRODUCTS_PAGE_SIZE = 12;
+export { DEFAULT_PRODUCTS_PAGE_SIZE } from '@/modules/products/constants';
 
 function emptyPaginated(page: number, limit: number): PaginatedResponse<Product> {
     return {
@@ -42,9 +44,13 @@ async function fetchStockMap(productIds: string[]): Promise<Record<string, Stock
         return null;
     }
     try {
+        const cookie = (await headers()).get('cookie');
         const res = await fetch(`${origin}/api/inventory/stock`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(cookie ? { Cookie: cookie } : {}),
+            },
             cache: 'no-store',
             body: JSON.stringify({ productIds }),
         });

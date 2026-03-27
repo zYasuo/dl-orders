@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useSession } from '@/modules/auth/hooks/use-session';
-import type { CartItem } from '@/lib/cart-storage';
-import { scheduleCartAbandonmentDebounced, cancelCartAbandonment } from '@/lib/cart-abandonment-schedule';
+import type { CartItem } from '@/modules/cart/lib/cart-storage';
+import { scheduleCartAbandonmentDebounced, cancelCartAbandonment } from '@/modules/cart/lib/cart-abandonment-schedule';
 
 export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
     const { data: user } = useSession();
@@ -44,11 +44,11 @@ export function CartAbandonmentPanel({ items }: { items: CartItem[] }) {
                 consent,
             });
         }, 500);
-    }, [consent, user?.email, items]);
+    }, [consent, user, items]);
 
     useEffect(() => {
         syncSchedule();
-    }, [items, consent, user?.email, syncSchedule]);
+    }, [items, consent, user, syncSchedule]);
 
     if (items.length === 0) {
         return null;

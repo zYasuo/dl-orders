@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { requireSessionToken } from '@/lib/bff-session';
-import { stockRowsToMap } from '@/lib/stock-map';
+import { stockRowsToMap } from '@/modules/products/lib/stock-map';
 
 const bodySchema = z.object({
     productIds: z.array(z.string().min(1).max(36)).min(1).max(50),
 });
 
 export async function POST(request: Request) {
-    const session = await requireSessionToken();
-    if (session instanceof NextResponse) {
-        return session;
-    }
-
     const base = process.env.INVENTORY_SERVICE_URL;
     const secret = process.env.SERVICE_AUTH_SECRET;
     if (!base || !secret) {

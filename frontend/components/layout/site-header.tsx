@@ -21,14 +21,15 @@ export function SiteHeader() {
                     href="/products"
                     className="justify-self-start flex h-16 min-w-0 max-w-full items-center overflow-hidden transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm sm:h-24"
                 >
-                    <span className="relative block h-9 max-w-[min(9.5rem,34vw)] sm:h-24 sm:max-w-[min(92vw,28rem)]">
+                    <span className="relative flex h-7 max-w-[min(9rem,64vw)] items-center sm:h-10 sm:max-w-[min(92vw,13rem)]">
                         <Image
                             src="/logo/dl-logo.png"
                             alt="dl-orders"
-                            width={280}
-                            height={120}
-                            className="h-9 w-auto max-w-full object-contain object-left sm:h-24"
+                            width={561}
+                            height={309}
+                            className="h-full w-auto max-w-full object-contain object-left"
                             priority
+                            sizes="(min-width: 640px) 13rem, 9rem"
                         />
                     </span>
                 </Link>
