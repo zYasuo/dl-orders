@@ -16,21 +16,29 @@ export function SiteHeader() {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/80">
-            <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:h-24 sm:gap-4 sm:px-6 lg:px-8">
+            <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-3 sm:h-24 sm:grid-cols-[1fr_auto_1fr] sm:gap-4 sm:px-6 lg:px-8">
                 <Link
                     href="/products"
-                    className="justify-self-start flex h-16 items-center transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm sm:h-24"
+                    className="justify-self-start flex h-16 min-w-0 max-w-full items-center overflow-hidden transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm sm:h-24"
                 >
-                    <span className="relative block h-20 w-64 shrink-0 overflow-hidden sm:h-24 sm:w-[min(92vw,28rem)]">
-                        <Image src="/logo/dl-logo.png" alt="dl-orders" width={280} height={120} className="h-20 w-auto sm:h-24" priority />
+                    <span className="relative block h-9 max-w-[min(9.5rem,34vw)] sm:h-24 sm:max-w-[min(92vw,28rem)]">
+                        <Image
+                            src="/logo/dl-logo.png"
+                            alt="dl-orders"
+                            width={280}
+                            height={120}
+                            className="h-9 w-auto max-w-full object-contain object-left sm:h-24"
+                            priority
+                        />
                     </span>
                 </Link>
 
-                <nav className="flex justify-center" aria-label="Main">
+                <nav className="flex shrink-0 justify-center px-1" aria-label="Main">
                     <Link
                         href="/products"
                         className={cn(
                             navText,
+                            'whitespace-nowrap',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                         )}
                     >
@@ -38,7 +46,7 @@ export function SiteHeader() {
                     </Link>
                 </nav>
 
-                <div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
+                <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-3">
                     <CartHeaderDropdown />
                     {loggedIn ? (
                         <SiteHeaderUserMenu user={user} />

@@ -1,5 +1,6 @@
-import { bffJson } from '@/lib/api-client';
+import { bffJson, bffPaginatedJson } from '@/lib/api-client';
 import { normalizeOrder } from '@/types/order';
+import type { Order } from '@/types/order';
 
 export type CreateOrderInput = {
     productId: string;
@@ -21,4 +22,10 @@ export async function createOrder(input: CreateOrderInput) {
 export async function getOrder(id: string) {
     const raw = await bffJson<unknown>(`/api/orders/${id}`);
     return normalizeOrder(raw);
+}
+
+export async function listOrders(page = 1, limit = 12) {
+    const { data, meta } = await bffPaginatedJson<unknown>(`/api/orders?page=${page}&limit=${limit}`);
+    const orders: Order[] = data.map((raw) => normalizeOrder(raw));
+    return { orders, meta };
 }

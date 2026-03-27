@@ -7,6 +7,8 @@ export const queryKeys = {
     },
     orders: {
         all: ['orders'] as const,
+        list: (page?: number, limit?: number) =>
+            [...queryKeys.orders.all, 'list', { page: page ?? 1, limit: limit ?? 12 }] as const,
         detail: (id: string) => [...queryKeys.orders.all, 'detail', id] as const,
     },
     payments: {

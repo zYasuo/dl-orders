@@ -2,6 +2,7 @@ export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
 export type Order = {
     id: string;
+    sequenceId?: number;
     productId: string;
     quantity: number;
     description: string;

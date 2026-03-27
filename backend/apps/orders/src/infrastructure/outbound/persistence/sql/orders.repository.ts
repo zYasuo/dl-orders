@@ -29,6 +29,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
 
       return new OrderEntity({
         id: order.id,
+        sequenceId: order.sequenceId,
         productId: order.productId,
         quantity: order.quantity,
         description: order.description,
@@ -56,6 +57,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
     return item
       ? new OrderEntity({
           id: item.id,
+          sequenceId: item.sequenceId,
           productId: item.productId,
           quantity: item.quantity,
           description: item.description,
@@ -84,6 +86,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
       (item) =>
         new OrderEntity({
           id: item.id,
+          sequenceId: item.sequenceId,
           productId: item.productId,
           quantity: item.quantity,
           description: item.description,
@@ -113,6 +116,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
 
       return new OrderEntity({
         id: item.id,
+        sequenceId: item.sequenceId,
         productId: item.productId,
         quantity: item.quantity,
         description: item.description,
@@ -155,6 +159,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
 
     return new OrderEntity({
       id: item.id,
+      sequenceId: item.sequenceId,
       productId: item.productId,
       quantity: item.quantity,
       description: item.description,
@@ -193,6 +198,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
 
     return new OrderEntity({
       id: item.id,
+      sequenceId: item.sequenceId,
       productId: item.productId,
       quantity: item.quantity,
       description: item.description,
@@ -214,6 +220,7 @@ export class OrdersRepository extends OrdersRepositoryPort {
 
     return new OrderEntity({
       id: item.id,
+      sequenceId: item.sequenceId,
       productId: item.productId,
       quantity: item.quantity,
       description: item.description,

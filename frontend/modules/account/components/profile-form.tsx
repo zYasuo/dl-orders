@@ -41,7 +41,7 @@ export function ProfileForm() {
     }
 
     if (isLoading) {
-        return <Skeleton className="h-40 w-full max-w-md" />;
+        return <Skeleton className="h-40 w-full" />;
     }
 
     if (isError || !user) {
@@ -50,14 +50,18 @@ export function ProfileForm() {
     }
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex max-w-md flex-col gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
             <Field label="Email" htmlFor="profile-email">
                 <Input id="profile-email" value={user.email} disabled readOnly className="bg-muted" />
             </Field>
             <Field label="Name" htmlFor="name" error={form.formState.errors.name?.message as string | undefined}>
                 <Input id="name" autoComplete="name" {...form.register('name')} />
             </Field>
-            <Button type="submit" loading={form.formState.isSubmitting || updateProfile.isPending}>
+            <Button
+                type="submit"
+                className="w-full"
+                loading={form.formState.isSubmitting || updateProfile.isPending}
+            >
                 Save
             </Button>
         </form>

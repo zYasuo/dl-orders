@@ -12,6 +12,7 @@ export function useCreateOrder() {
         onSuccess: (order) => {
             saveLastOrderId(order.id);
             void queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(order.id) });
+            void queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
         },
     });
 }

@@ -20,6 +20,7 @@ export class InMemoryOrdersRepository extends OrdersRepositoryPort {
     if (!order) return null;
     const updated = new OrderEntity({
       id: order.id,
+      sequenceId: order.sequenceId,
       description: order.description,
       productId: order.productId,
       quantity: order.quantity,

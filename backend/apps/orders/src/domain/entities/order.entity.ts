@@ -8,6 +8,7 @@ export enum OrderStatus {
 
 export type TOrderParams = {
   readonly id: string;
+  readonly sequenceId?: number;
   readonly productId: string;
   readonly quantity: number;
   readonly description: string;
@@ -88,6 +89,10 @@ export class OrderEntity {
 
   get id() {
     return this.params.id;
+  }
+
+  get sequenceId() {
+    return this.params.sequenceId;
   }
 
   get productId() {

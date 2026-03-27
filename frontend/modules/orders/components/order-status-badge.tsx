@@ -1,10 +1,16 @@
 import { Badge } from '@/components/ui/badge';
 import type { OrderStatus } from '@/types/order';
 
-const labels: Record<OrderStatus, string> = {
+const labelsEn: Record<OrderStatus, string> = {
     PENDING: 'Pending',
     CONFIRMED: 'Confirmed',
     CANCELLED: 'Cancelled',
+};
+
+const labelsPt: Record<OrderStatus, string> = {
+    PENDING: 'Pendente',
+    CONFIRMED: 'Confirmado',
+    CANCELLED: 'Cancelado',
 };
 
 const variants: Record<OrderStatus, 'pending' | 'confirmed' | 'cancelled' | 'default'> = {
@@ -13,6 +19,7 @@ const variants: Record<OrderStatus, 'pending' | 'confirmed' | 'cancelled' | 'def
     CANCELLED: 'cancelled',
 };
 
-export function OrderStatusBadge({ status }: { status: OrderStatus }) {
+export function OrderStatusBadge({ status, locale = 'en' }: { status: OrderStatus; locale?: 'en' | 'pt' }) {
+    const labels = locale === 'pt' ? labelsPt : labelsEn;
     return <Badge variant={variants[status]}>{labels[status]}</Badge>;
 }
